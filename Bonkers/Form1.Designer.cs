@@ -39,6 +39,7 @@
             contextMenuStrip2 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
             saveToolStripMenuItem = new ToolStripMenuItem();
+            appendAllToolStripMenuItem = new ToolStripMenuItem();
             saveAllToolStripMenuItem = new ToolStripMenuItem();
             editAllToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
@@ -111,36 +112,50 @@
             // 
             // contextMenuStrip2
             // 
-            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem });
+            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(115, 92);
+            contextMenuStrip2.Size = new Size(181, 136);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(114, 22);
+            openToolStripMenuItem.Size = new Size(180, 22);
             openToolStripMenuItem.Text = "open";
+            openToolStripMenuItem.ToolTipText = "will open the text file of the currently selected image";
+            openToolStripMenuItem.Visible = false;
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(114, 22);
+            saveToolStripMenuItem.Size = new Size(180, 22);
             saveToolStripMenuItem.Text = "save";
+            saveToolStripMenuItem.ToolTipText = "will save the current text file only";
+            saveToolStripMenuItem.Visible = false;
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
+            // 
+            // appendAllToolStripMenuItem
+            // 
+            appendAllToolStripMenuItem.Name = "appendAllToolStripMenuItem";
+            appendAllToolStripMenuItem.Size = new Size(180, 22);
+            appendAllToolStripMenuItem.Text = "append all";
+            appendAllToolStripMenuItem.ToolTipText = "will append the current text in the editor to all the text files in the directory";
+            appendAllToolStripMenuItem.Click += appendAllToolStripMenuItem_Click;
             // 
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(114, 22);
-            saveAllToolStripMenuItem.Text = "save all";
+            saveAllToolStripMenuItem.Size = new Size(180, 22);
+            saveAllToolStripMenuItem.Text = "overwrite all";
+            saveAllToolStripMenuItem.ToolTipText = "will overwrite all textfiles in the directory with the current text in the editor";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
             // 
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(114, 22);
+            editAllToolStripMenuItem.Size = new Size(180, 22);
             editAllToolStripMenuItem.Text = "clear all";
+            editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
             // 
             // statusStrip1
@@ -210,5 +225,6 @@
         private ToolStripStatusLabel toolStripStatusLabel1;
         private ToolStripStatusLabel toolStripStatusLabel2;
         private ToolStripStatusLabel toolStripStatusLabel3;
+        private ToolStripMenuItem appendAllToolStripMenuItem;
     }
 }

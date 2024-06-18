@@ -208,12 +208,16 @@ namespace Bonkers
 
                 foreach (string txtFile in imageFiles)
                 {
-                    string textContent = File.ReadAllText(txtFile);
-                    textContent += richTextBox1.Text; // Append text from richTextBox1
+                    //string textContent = File.ReadAllText(txtFile);
+                    String textContent = richTextBox1.Text; // Append text from richTextBox1
 
                     File.WriteAllText(txtFile, textContent);
                 }
-
+                richTextBox1.SelectAll();
+                richTextBox1.SelectionColor = Color.Green;
+                richTextBox1.DeselectAll();
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -285,7 +289,7 @@ namespace Bonkers
             {
                 string selectedImage = listView1.SelectedItems[0].Text;
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
-                
+
 
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
@@ -305,7 +309,7 @@ namespace Bonkers
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
                 toolStripStatusLabel1.Text = imagePath.ToString();
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
-                
+
                 if (File.Exists(txtFilePath))
                 {
                     string textContent = File.ReadAllText(txtFilePath);
@@ -341,6 +345,29 @@ namespace Bonkers
         private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
+        }
+
+        private void appendAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count > 0)
+            {
+                string selectedPath = treeView1.SelectedNode.Tag.ToString();
+                string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+
+                foreach (string txtFile in imageFiles)
+                {
+                    string textContent = File.ReadAllText(txtFile);
+                    textContent += richTextBox1.Text; // Append text from richTextBox1
+
+                    File.WriteAllText(txtFile, textContent);
+                }
+                richTextBox1.SelectAll();
+                richTextBox1.SelectionColor = Color.Green;
+                richTextBox1.DeselectAll();
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }
