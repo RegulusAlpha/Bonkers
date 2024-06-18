@@ -13,7 +13,7 @@ Bonkers is a simple manual image captioning program designed to streamline the p
 ### Prerequisites
 
 - Windows operating system
-- .NET Framework 4.8 or later
+- .NET Framework 8 LTS or later
 - Visual Studio 2019 or later
 
 ### Installation
