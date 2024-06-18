@@ -101,13 +101,39 @@ namespace Bonkers
             listView1.Items.Clear();
             listView1.LargeImageList = imageList1;
 
+            //foreach (string file in imageFiles)
+            //{
+            //    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
+            //    item.ImageIndex = imageList1.Images.Count;
+            //
+            //    // Load image into ImageList
+            //    imageList1.Images.Add(System.Drawing.Image.FromFile(file));
+            //    listView1.Items.Add(item);
+            //}
             foreach (string file in imageFiles)
             {
                 ListViewItem item = new ListViewItem(new FileInfo(file).Name);
                 item.ImageIndex = imageList1.Images.Count;
 
-                // Load image into ImageList
-                imageList1.Images.Add(System.Drawing.Image.FromFile(file));
+                // Load image and resize it
+                using (Image originalImage = Image.FromFile(file))
+                {
+                    int originalWidth = originalImage.Width;
+                    int originalHeight = originalImage.Height;
+                    float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+
+                    int newWidth = (int)(originalWidth * ratio);
+                    int newHeight = (int)(originalHeight * ratio);
+
+                    Bitmap resizedImage = new Bitmap(newWidth, newHeight);
+                    using (Graphics g = Graphics.FromImage(resizedImage))
+                    {
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                    }
+
+                    imageList1.Images.Add(resizedImage);
+                }
                 listView1.Items.Add(item);
             }
         }
@@ -201,8 +227,8 @@ namespace Bonkers
 
         private void saveAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems.Count > 0)
-            {
+            //if (listView1.SelectedItems.Count > 0)
+            //{
                 string selectedPath = treeView1.SelectedNode.Tag.ToString();
                 string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
@@ -219,13 +245,13 @@ namespace Bonkers
                 richTextBox1.SelectionStart = richTextBox1.Text.Length;
                 richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            //}
         }
 
         private void editAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems.Count > 0)
-            {
+            //if (listView1.SelectedItems.Count > 0)
+            //{
                 string selectedPath = treeView1.SelectedNode.Tag.ToString();
                 string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
 
@@ -235,7 +261,7 @@ namespace Bonkers
                 }
 
                 MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            //}
         }
 
         private void listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e)
@@ -256,12 +282,28 @@ namespace Bonkers
             if (e.Control && e.KeyCode == Keys.S)
             {
                 // Save the content of richTextBox1
+                //SaveRichTextBoxContent();
+                //richTextBox1.SelectAll();
+                //richTextBox1.SelectionColor = Color.Green;
+                //richTextBox1.DeselectAll();
+                //richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                //richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+                // Save the current cursor position
+                int currentCursorPosition = richTextBox1.SelectionStart;
+
+                // Save the content of the RichTextBox (assuming SaveRichTextBoxContent is a method that does this)
                 SaveRichTextBoxContent();
+
+                // Select all text and change its color
                 richTextBox1.SelectAll();
                 richTextBox1.SelectionColor = Color.Green;
                 richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+
+                // Restore the cursor position
+                richTextBox1.SelectionStart = currentCursorPosition;
+                richTextBox1.SelectionLength = 0; // Ensure nothing is selected
+                richTextBox1.ScrollToCaret(); // Scroll to the caret position
+
             }
             else if (e.Control)
             {
@@ -274,13 +316,25 @@ namespace Bonkers
             else if (e.KeyCode == Keys.Enter) { }
             else if (e.KeyCode == Keys.Back) { }
             else if (e.KeyCode == Keys.Shift) { }
+            else if (e.KeyCode == Keys.Space) { }
             else
             {
+                //richTextBox1.SelectAll();
+                //richTextBox1.SelectionColor = Color.Red;
+                //richTextBox1.DeselectAll();
+                //richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                //richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+                int currentCursorPosition = richTextBox1.SelectionStart;
+
+                // Select all text and change its color
                 richTextBox1.SelectAll();
                 richTextBox1.SelectionColor = Color.Red;
                 richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+
+                // Restore the cursor position
+                richTextBox1.SelectionStart = currentCursorPosition;
+                richTextBox1.SelectionLength = 0; // Ensure nothing is selected
+                richTextBox1.ScrollToCaret(); // Scroll to the caret position
             }
         }
         private void SaveRichTextBoxContent()
@@ -349,8 +403,8 @@ namespace Bonkers
 
         private void appendAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems.Count > 0)
-            {
+            //if (listView1.SelectedItems.Count > 0)
+           // {
                 string selectedPath = treeView1.SelectedNode.Tag.ToString();
                 string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
@@ -367,7 +421,7 @@ namespace Bonkers
                 richTextBox1.SelectionStart = richTextBox1.Text.Length;
                 richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            //}
         }
 
         private void copyConvertToolStripMenuItem_Click(object sender, EventArgs e)
@@ -428,5 +482,9 @@ namespace Bonkers
             }
         }
 
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -120,6 +120,7 @@
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
+            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             // 
             // contextMenuStrip2
             // 
