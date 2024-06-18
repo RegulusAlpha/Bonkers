@@ -13,6 +13,7 @@ Its called Bonkers because its Bonkers I had to make this.
 
 ### Prerequisites
 
+## running on visual studio
 - Windows operating system
 - .NET Framework 8 LTS or later
 - Visual Studio 2019 or later
@@ -35,6 +36,9 @@ Its called Bonkers because its Bonkers I had to make this.
     Run the application:
 
     Start the application by pressing F5 or selecting Debug > Start Debugging.
+
+2. **download from releases**
+    
 
 ### Usage
 
