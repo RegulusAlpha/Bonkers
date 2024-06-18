@@ -369,5 +369,64 @@ namespace Bonkers
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
+        private void copyConvertToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TreeNode selectedNode = treeView1.SelectedNode;
+            if (selectedNode != null)
+            {
+                string rootDir = @"C:\Your\Root\Directory"; // Update this with your actual root directory
+                string selectedFolderPath = Path.Combine(rootDir, selectedNode.FullPath);
+
+                if (Directory.Exists(selectedFolderPath))
+                {
+                    string destDir = Path.Combine(Path.GetDirectoryName(selectedFolderPath),
+                        Path.GetFileNameWithoutExtension(selectedFolderPath) + "-conv");
+                    Directory.CreateDirectory(destDir);
+
+                    // Copy files from selectedFolderPath to destDir
+                    foreach (string file in Directory.GetFiles(selectedFolderPath))
+                    {
+                        File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
+                    }
+
+                    // Convert images to PNG
+                    ConvertImagesToPng(selectedFolderPath, destDir);
+                    DeleteNonPngFiles(destDir);
+
+                    MessageBox.Show("Copy and conversion completed.");
+                }
+            }
+        }
+
+        private void ConvertImagesToPng(string sourceDir, string destDir)
+        {
+            string[] imageFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+            foreach (string imageFile in imageFiles)
+            {
+                string ext = Path.GetExtension(imageFile).ToLower();
+                if (ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".webp")
+                {
+                    using (Image image = Image.FromFile(imageFile))
+                    {
+                        string destFile = Path.Combine(destDir, Path.GetFileNameWithoutExtension(imageFile) + ".png");
+                        image.Save(destFile, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+        }
+
+        private void DeleteNonPngFiles(string folderPath)
+        {
+            string[] files = Directory.GetFiles(folderPath);
+            foreach (string file in files)
+            {
+                if (Path.GetExtension(file).ToLower() != ".png")
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+
     }
 }
