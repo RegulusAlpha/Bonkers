@@ -1,5 +1,6 @@
 # Bonkers
 Bonkers is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a user-friendly interface for organizing and captioning images effectively.
+Its called Bonkers because its Bonkers I had to make this.
 
 ## Features
 
