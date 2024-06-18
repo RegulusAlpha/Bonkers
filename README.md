@@ -18,7 +18,7 @@ Its called Bonkers because its Bonkers I had to make this.
 - .NET Framework 8 LTS or later
 - Visual Studio 2019 or later
 
-### Installation
+### Installation Options
 
 1. **Clone the repository:**
 
@@ -38,7 +38,7 @@ Its called Bonkers because its Bonkers I had to make this.
     Start the application by pressing F5 or selecting Debug > Start Debugging.
 
 2. **download from releases**
-    
+3. **run on linux with wine**    
 
 ### Usage
 
