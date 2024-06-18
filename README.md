@@ -3,7 +3,7 @@ Bonkers is a simple manual image captioning program designed to streamline the p
 <br>Its called Bonkers because its Bonkers I had to make this.
 
 <video width="320" height="240" controls>
-  <source src="https://raw.githubusercontent.com/RegulusAlpha/Bonkers/master/Bonkers/assets/video.webm" type="video/webm">
+  <source src="https://files.catbox.moe/44btc6.webm" type="video/webm">
   Your browser does not support the video tag.
 </video>
 
