@@ -20,38 +20,70 @@ namespace Bonkers
         }
         private void LoadDirectories()
         {
-            // Get the current user's profile folder
-            string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            // Clear existing nodes
+            treeView1.Nodes.Clear();
 
-            // Create the root node
-            TreeNode rootNode = new TreeNode(new DirectoryInfo(userFolder).Name);
-            rootNode.Tag = userFolder;
-            rootNode.Nodes.Add("Loading...");
-            treeView1.Nodes.Add(rootNode);
+            // Get all drives on the system
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo drive in allDrives)
+            {
+                // Create the root node for each drive
+                TreeNode driveNode = new TreeNode(drive.Name);
+                driveNode.Tag = drive.RootDirectory.FullName;
+
+                // Add a placeholder node to indicate that the drive can be expanded
+                if (drive.IsReady)
+                {
+                    driveNode.Nodes.Add("Loading...");
+                }
+
+                // Add the drive node to the tree view
+                treeView1.Nodes.Add(driveNode);
+            }
 
             // Attach event handlers
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
-
-            // Expand the root node initially to show subdirectories
-            rootNode.Expand();
         }
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
-            // Load subdirectories when a node is expanded
-            if (e.Node.Nodes[0].Text == "Loading...")
+            try
             {
-                e.Node.Nodes.Clear();
-                string[] subDirectories = Directory.GetDirectories(e.Node.Tag.ToString());
-
-                foreach (string subDir in subDirectories)
+                // Remove the placeholder node
+                if (e.Node.Nodes[0].Text == "Loading...")
                 {
-                    TreeNode node = new TreeNode(new DirectoryInfo(subDir).Name);
-                    node.Tag = subDir;
-                    node.Nodes.Add("Loading...");
-                    e.Node.Nodes.Add(node);
+                    e.Node.Nodes.Clear();
+
+                    // Load directories for the expanded node
+                    LoadDirectories(e.Node);
                 }
+            }
+            catch { }
+        }
+
+        private void LoadDirectories(TreeNode node)
+        {
+            string path = (string)node.Tag;
+
+            try
+            {
+                string[] directories = Directory.GetDirectories(path);
+                foreach (string directory in directories)
+                {
+                    DirectoryInfo dirInfo = new DirectoryInfo(directory);
+                    TreeNode dirNode = new TreeNode(dirInfo.Name);
+                    dirNode.Tag = dirInfo.FullName;
+
+                    // Add a placeholder node to indicate that the directory can be expanded
+                    dirNode.Nodes.Add("Loading...");
+                    node.Nodes.Add(dirNode);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Handle access exceptions if needed
             }
         }
 
@@ -235,9 +267,9 @@ namespace Bonkers
             else if (e.KeyCode == Keys.Right) { }
             else if (e.KeyCode == Keys.Up) { }
             else if (e.KeyCode == Keys.Down) { }
-            else if (e.KeyCode== Keys.Enter) { }
-            else if (e.KeyCode == Keys.Back) { }    
-            else if (e.KeyCode == Keys.Shift)  { }
+            else if (e.KeyCode == Keys.Enter) { }
+            else if (e.KeyCode == Keys.Back) { }
+            else if (e.KeyCode == Keys.Shift) { }
             else
             {
                 richTextBox1.SelectAll();
@@ -253,6 +285,8 @@ namespace Bonkers
             {
                 string selectedImage = listView1.SelectedItems[0].Text;
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
+                
+
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
                 if (File.Exists(txtFilePath))
@@ -269,19 +303,44 @@ namespace Bonkers
             {
                 string selectedImage = listView1.SelectedItems[0].Text;
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
+                toolStripStatusLabel1.Text = imagePath.ToString();
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
-
+                
                 if (File.Exists(txtFilePath))
                 {
                     string textContent = File.ReadAllText(txtFilePath);
                     richTextBox1.Text = textContent;
+                    toolStripStatusLabel2.Text = txtFilePath.ToString();
+                    toolStripStatusLabel3.Text = "TXT File Exists";
                 }
                 else
                 {
+                    toolStripStatusLabel2.Text = "";
+                    toolStripStatusLabel3.Text = "No TXT File Loaded";
                     richTextBox1.Clear();
                 }
             }
         }
-        
+
+        private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshTreeView();
+        }
+
+        private void RefreshTreeView()
+        {
+            treeView1.Nodes.Clear();
+            LoadDirectories();
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
     }
 }

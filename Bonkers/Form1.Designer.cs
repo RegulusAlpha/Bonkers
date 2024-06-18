@@ -34,20 +34,26 @@
             treeView1 = new TreeView();
             contextMenuStrip1 = new ContextMenuStrip(components);
             generateTxtFilesToolStripMenuItem = new ToolStripMenuItem();
+            refreshToolStripMenuItem = new ToolStripMenuItem();
             listView1 = new ListView();
             contextMenuStrip2 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
             saveToolStripMenuItem = new ToolStripMenuItem();
             saveAllToolStripMenuItem = new ToolStripMenuItem();
             editAllToolStripMenuItem = new ToolStripMenuItem();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
+            toolStripStatusLabel2 = new ToolStripStatusLabel();
+            toolStripStatusLabel3 = new ToolStripStatusLabel();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // imageList1
             // 
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
-            imageList1.ImageSize = new Size(255, 255);
+            imageList1.ImageSize = new Size(192, 255);
             imageList1.TransparentColor = Color.Transparent;
             // 
             // richTextBox1
@@ -72,9 +78,10 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(163, 26);
+            contextMenuStrip1.Size = new Size(163, 48);
+            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // generateTxtFilesToolStripMenuItem
             // 
@@ -82,6 +89,13 @@
             generateTxtFilesToolStripMenuItem.Size = new Size(162, 22);
             generateTxtFilesToolStripMenuItem.Text = "Generate txt files";
             generateTxtFilesToolStripMenuItem.Click += generateTxtFilesToolStripMenuItem_Click;
+            // 
+            // refreshToolStripMenuItem
+            // 
+            refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            refreshToolStripMenuItem.Size = new Size(162, 22);
+            refreshToolStripMenuItem.Text = "Refresh";
+            refreshToolStripMenuItem.Click += refreshToolStripMenuItem_Click;
             // 
             // listView1
             // 
@@ -99,49 +113,78 @@
             // 
             contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(181, 114);
+            contextMenuStrip2.Size = new Size(115, 92);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(114, 22);
             openToolStripMenuItem.Text = "open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(114, 22);
             saveToolStripMenuItem.Text = "save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(180, 22);
+            saveAllToolStripMenuItem.Size = new Size(114, 22);
             saveAllToolStripMenuItem.Text = "save all";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
             // 
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(180, 22);
+            editAllToolStripMenuItem.Size = new Size(114, 22);
             editAllToolStripMenuItem.Text = "clear all";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3 });
+            statusStrip1.Location = new Point(156, 484);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(1112, 22);
+            statusStrip1.TabIndex = 5;
+            statusStrip1.Text = "statusStrip1";
+            statusStrip1.ItemClicked += statusStrip1_ItemClicked;
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(0, 17);
+            // 
+            // toolStripStatusLabel2
+            // 
+            toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            toolStripStatusLabel2.Size = new Size(0, 17);
+            // 
+            // toolStripStatusLabel3
+            // 
+            toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            toolStripStatusLabel3.Size = new Size(0, 17);
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
+            Controls.Add(statusStrip1);
             Controls.Add(listView1);
             Controls.Add(treeView1);
             Controls.Add(richTextBox1);
             Name = "Form1";
-            Text = "Form1";
+            Text = "Bonkers";
             contextMenuStrip1.ResumeLayout(false);
             contextMenuStrip2.ResumeLayout(false);
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         private void RichTextBox1_KeyDown1(object sender, KeyEventArgs e)
@@ -162,5 +205,10 @@
         private ToolStripMenuItem saveToolStripMenuItem;
         private ToolStripMenuItem saveAllToolStripMenuItem;
         private ToolStripMenuItem editAllToolStripMenuItem;
+        private ToolStripMenuItem refreshToolStripMenuItem;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabel1;
+        private ToolStripStatusLabel toolStripStatusLabel2;
+        private ToolStripStatusLabel toolStripStatusLabel3;
     }
 }
