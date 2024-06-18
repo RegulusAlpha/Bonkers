@@ -1,5 +1,7 @@
 # Bonkers
-Bonkers is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a user-friendly interface for organizing and captioning images effectively.
+Bonkers is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
+<br>Its called Bonkers because its Bonkers I had to make this.
+
 
 ## Features
 
@@ -12,11 +14,12 @@ Bonkers is a simple manual image captioning program designed to streamline the p
 
 ### Prerequisites
 
+## running on visual studio
 - Windows operating system
 - .NET Framework 8 LTS or later
 - Visual Studio 2019 or later
 
-### Installation
+### Installation Options
 
 1. **Clone the repository:**
 
@@ -34,6 +37,9 @@ Bonkers is a simple manual image captioning program designed to streamline the p
     Run the application:
 
     Start the application by pressing F5 or selecting Debug > Start Debugging.
+
+2. **download from releases**
+3. **run on linux with wine**    
 
 ### Usage
 
@@ -64,4 +70,4 @@ Bonkers is a simple manual image captioning program designed to streamline the p
 
 ### License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License https://en.wikipedia.org/wiki/MIT_License
