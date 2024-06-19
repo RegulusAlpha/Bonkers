@@ -3,7 +3,12 @@ using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Text.Json;
 
 namespace Bonkers
 {
@@ -101,15 +106,6 @@ namespace Bonkers
             listView1.Items.Clear();
             listView1.LargeImageList = imageList1;
 
-            //foreach (string file in imageFiles)
-            //{
-            //    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
-            //    item.ImageIndex = imageList1.Images.Count;
-            //
-            //    // Load image into ImageList
-            //    imageList1.Images.Add(System.Drawing.Image.FromFile(file));
-            //    listView1.Items.Add(item);
-            //}
             foreach (string file in imageFiles)
             {
                 ListViewItem item = new ListViewItem(new FileInfo(file).Name);
@@ -229,22 +225,22 @@ namespace Bonkers
         {
             //if (listView1.SelectedItems.Count > 0)
             //{
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in imageFiles)
-                {
-                    //string textContent = File.ReadAllText(txtFile);
-                    String textContent = richTextBox1.Text; // Append text from richTextBox1
+            foreach (string txtFile in imageFiles)
+            {
+                //string textContent = File.ReadAllText(txtFile);
+                String textContent = richTextBox1.Text; // Append text from richTextBox1
 
-                    File.WriteAllText(txtFile, textContent);
-                }
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Green;
-                richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(txtFile, textContent);
+            }
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionColor = Color.Green;
+            richTextBox1.DeselectAll();
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -252,15 +248,15 @@ namespace Bonkers
         {
             //if (listView1.SelectedItems.Count > 0)
             //{
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in txtFiles)
-                {
-                    File.WriteAllText(txtFile, ""); // Clear the content of the text file
-                }
+            foreach (string txtFile in txtFiles)
+            {
+                File.WriteAllText(txtFile, ""); // Clear the content of the text file
+            }
 
-                MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -404,23 +400,23 @@ namespace Bonkers
         private void appendAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //if (listView1.SelectedItems.Count > 0)
-           // {
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            // {
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in imageFiles)
-                {
-                    string textContent = File.ReadAllText(txtFile);
-                    textContent += richTextBox1.Text; // Append text from richTextBox1
+            foreach (string txtFile in imageFiles)
+            {
+                string textContent = File.ReadAllText(txtFile);
+                textContent += richTextBox1.Text; // Append text from richTextBox1
 
-                    File.WriteAllText(txtFile, textContent);
-                }
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Green;
-                richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(txtFile, textContent);
+            }
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionColor = Color.Green;
+            richTextBox1.DeselectAll();
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -486,5 +482,124 @@ namespace Bonkers
         {
 
         }
+
+        private async void deepboruToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripStatusLabel5.Text = "";
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                string filePath = toolStripStatusLabel1.Text;
+                
+                // Load image from file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    //toolStripStatusLabel5.Text = "working";
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    //richTextBox1.Text = base64String.ToString();
+
+                    // Send the API request
+                    await SendApiRequest(base64String);
+                }
+            }
+            else
+            {
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
+
+
+
+
+        private string ImageToBase64(Image image, System.Drawing.Imaging.ImageFormat format)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                // Convert Image to byte[]
+                image.Save(ms, format);
+                byte[] imageBytes = ms.ToArray();
+
+                // Convert byte[] to Base64 String
+                return Convert.ToBase64String(imageBytes);
+            }
+        }
+
+        private async Task SendApiRequest(string base64Image)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+
+                var content = new StringContent($"{{\n    \"model\": \"deepdanbooru\",\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                request.Content = content;
+
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseContent);
+
+                // Parse the JSON response and extract the caption
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
+
+                // Update richTextBox1 with the caption
+                richTextBox1.Text = caption;
+
+                // Update status label with success message
+               // toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
+
+        private async Task SendApiRequestNormal(string base64Image)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+
+                var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                request.Content = content;
+
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseContent);
+
+                // Parse the JSON response and extract the caption
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
+
+                // Update richTextBox1 with the caption
+                richTextBox1.Text = caption;
+
+                // Update status label with success message
+                //toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
+
+        private async void blipToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripStatusLabel5.Text = "";
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                string filePath = toolStripStatusLabel1.Text;
+               
+                // Load image from file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    //toolStripStatusLabel5.Text = "working";
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    //richTextBox1.Text = base64String.ToString();
+
+                    // Send the API request
+                    await SendApiRequestNormal(base64String);
+                }
+            }
+            else
+            {
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
     }
+
 }
