@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.Json;
+using System.Threading;
 
 namespace Bonkers
 {
@@ -18,6 +19,7 @@ namespace Bonkers
         private bool editingMultipleFiles = false;
         private string selectedImageTextFile;
         private int currentIndex = 0;
+        private CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
             InitializeComponent();
@@ -92,8 +94,11 @@ namespace Bonkers
             }
         }
 
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            // Cancel the previous task and clear the lists
+            CancelTaskAndClearLists();
+            await Task.Delay(1000);
             // Display images in the selected directory
             string selectedPath = e.Node.Tag.ToString();
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
@@ -106,31 +111,64 @@ namespace Bonkers
             listView1.Items.Clear();
             listView1.LargeImageList = imageList1;
 
-            foreach (string file in imageFiles)
+            // Show the progress bar and set its maximum value
+            toolStripProgressBar1.Visible = true;
+            toolStripProgressBar1.Maximum = imageFiles.Length;
+            toolStripProgressBar1.Value = 0;
+
+            // Create a CancellationTokenSource for canceling the task
+            cancellationTokenSource = new CancellationTokenSource();
+
+            try
             {
-                ListViewItem item = new ListViewItem(new FileInfo(file).Name);
-                item.ImageIndex = imageList1.Images.Count;
-
-                // Load image and resize it
-                using (Image originalImage = Image.FromFile(file))
+                foreach (string file in imageFiles)
                 {
-                    int originalWidth = originalImage.Width;
-                    int originalHeight = originalImage.Height;
-                    float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+                    // Check if cancellation is requested
+                    if (cancellationTokenSource.Token.IsCancellationRequested)
+                        break;
 
-                    int newWidth = (int)(originalWidth * ratio);
-                    int newHeight = (int)(originalHeight * ratio);
+                    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
+                    item.ImageIndex = imageList1.Images.Count;
 
-                    Bitmap resizedImage = new Bitmap(newWidth, newHeight);
-                    using (Graphics g = Graphics.FromImage(resizedImage))
+                    // Load image asynchronously and resize it
+                    Bitmap resizedImage = await Task.Run(() =>
                     {
-                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
-                    }
+                        using (Image originalImage = Image.FromFile(file))
+                        {
+                            int originalWidth = originalImage.Width;
+                            int originalHeight = originalImage.Height;
+                            float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+
+                            int newWidth = (int)(originalWidth * ratio);
+                            int newHeight = (int)(originalHeight * ratio);
+
+                            Bitmap resized = new Bitmap(newWidth, newHeight);
+                            using (Graphics g = Graphics.FromImage(resized))
+                            {
+                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                            }
+
+                            return resized;
+                        }
+                    }, cancellationTokenSource.Token);
 
                     imageList1.Images.Add(resizedImage);
+                    listView1.Items.Add(item);
+
+                    // Update the progress bar value
+                    toolStripProgressBar1.Value++;
                 }
-                listView1.Items.Add(item);
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled
+                MessageBox.Show("Task canceled.");
+            }
+            finally
+            {
+                // Hide the progress bar after the task is done or canceled
+                toolStripProgressBar1.Visible = false;
             }
         }
 
@@ -138,6 +176,7 @@ namespace Bonkers
         {
             if (e.Button == MouseButtons.Right)
             {
+                CancelTaskAndClearLists();
                 treeView1.SelectedNode = e.Node;
                 contextMenuStrip1.Show(treeView1, e.Location);
             }
@@ -489,7 +528,7 @@ namespace Bonkers
             if (File.Exists(toolStripStatusLabel1.Text))
             {
                 string filePath = toolStripStatusLabel1.Text;
-                
+
                 // Load image from file path
                 using (Image image = Image.FromFile(filePath))
                 {
@@ -546,7 +585,7 @@ namespace Bonkers
                 richTextBox1.Text = caption;
 
                 // Update status label with success message
-               // toolStripStatusLabel4.Text = "Request successful";
+                // toolStripStatusLabel4.Text = "Request successful";
             }
         }
 
@@ -583,7 +622,7 @@ namespace Bonkers
             if (File.Exists(toolStripStatusLabel1.Text))
             {
                 string filePath = toolStripStatusLabel1.Text;
-               
+
                 // Load image from file path
                 using (Image image = Image.FromFile(filePath))
                 {
@@ -599,6 +638,41 @@ namespace Bonkers
             {
                 toolStripStatusLabel5.Text = "Invalid file path";
             }
+        }
+
+        private void deselectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listView1.SelectedItems.Clear();
+            listView1.Focus();
+        }
+
+        private void toolStripProgressBar1_Click(object sender, EventArgs e)
+        {
+            // Cancel the task if it's running
+            if (cancellationTokenSource != null && !cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                cancellationTokenSource.Cancel();
+                //MessageBox.Show("Task cancellation requested.");
+            }
+        }
+
+        private async void CancelTaskAndClearLists()
+        {
+            // Cancel the task if it's running
+            if (cancellationTokenSource != null && !cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                cancellationTokenSource.Cancel();
+                //MessageBox.Show("Task canceled.");
+            }
+
+            // Clear imageList1 and listView1
+            imageList1.Images.Clear();
+            listView1.Items.Clear();
+            listView1.Clear();
+            listView1.Update();
+            toolStripProgressBar1.Visible = false;
+            toolStripProgressBar1.Value = 0;
+            await Task.Delay(2000);
         }
     }
 
