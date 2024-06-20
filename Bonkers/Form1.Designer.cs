@@ -43,11 +43,16 @@
             appendAllToolStripMenuItem = new ToolStripMenuItem();
             saveAllToolStripMenuItem = new ToolStripMenuItem();
             editAllToolStripMenuItem = new ToolStripMenuItem();
+            deepboruToolStripMenuItem = new ToolStripMenuItem();
+            blipToolStripMenuItem = new ToolStripMenuItem();
+            deselectToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             toolStripStatusLabel2 = new ToolStripStatusLabel();
             toolStripStatusLabel3 = new ToolStripStatusLabel();
             toolStripStatusLabel4 = new ToolStripStatusLabel();
+            toolStripStatusLabel5 = new ToolStripStatusLabel();
+            toolStripProgressBar1 = new ToolStripProgressBar();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
@@ -61,6 +66,7 @@
             // 
             // richTextBox1
             // 
+            richTextBox1.BackColor = SystemColors.ScrollBar;
             richTextBox1.Dock = DockStyle.Bottom;
             richTextBox1.Location = new Point(0, 506);
             richTextBox1.Name = "richTextBox1";
@@ -71,20 +77,19 @@
             // 
             // treeView1
             // 
+            treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
             treeView1.Dock = DockStyle.Left;
             treeView1.Location = new Point(0, 0);
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(156, 506);
             treeView1.TabIndex = 3;
-            treeView1.AfterSelect += treeView1_AfterSelect_1;
             // 
             // contextMenuStrip1
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
             contextMenuStrip1.Size = new Size(163, 70);
-            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // generateTxtFilesToolStripMenuItem
             // 
@@ -111,6 +116,7 @@
             // 
             // listView1
             // 
+            listView1.BackColor = SystemColors.ScrollBar;
             listView1.ContextMenuStrip = contextMenuStrip2;
             listView1.Dock = DockStyle.Fill;
             listView1.Location = new Point(156, 0);
@@ -120,13 +126,12 @@
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
-            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             // 
             // contextMenuStrip2
             // 
-            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem });
+            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(139, 114);
+            contextMenuStrip2.Size = new Size(139, 180);
             // 
             // openToolStripMenuItem
             // 
@@ -170,15 +175,36 @@
             editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
             // 
+            // deepboruToolStripMenuItem
+            // 
+            deepboruToolStripMenuItem.Name = "deepboruToolStripMenuItem";
+            deepboruToolStripMenuItem.Size = new Size(138, 22);
+            deepboruToolStripMenuItem.Text = "deepboru";
+            deepboruToolStripMenuItem.Click += deepboruToolStripMenuItem_Click;
+            // 
+            // blipToolStripMenuItem
+            // 
+            blipToolStripMenuItem.Name = "blipToolStripMenuItem";
+            blipToolStripMenuItem.Size = new Size(138, 22);
+            blipToolStripMenuItem.Text = "blip";
+            blipToolStripMenuItem.Click += blipToolStripMenuItem_Click;
+            // 
+            // deselectToolStripMenuItem
+            // 
+            deselectToolStripMenuItem.Name = "deselectToolStripMenuItem";
+            deselectToolStripMenuItem.Size = new Size(138, 22);
+            deselectToolStripMenuItem.Text = "deselect";
+            deselectToolStripMenuItem.Click += deselectToolStripMenuItem_Click;
+            // 
             // statusStrip1
             // 
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4 });
+            statusStrip1.BackColor = SystemColors.Control;
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5, toolStripProgressBar1 });
             statusStrip1.Location = new Point(156, 484);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1112, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
-            statusStrip1.ItemClicked += statusStrip1_ItemClicked;
             // 
             // toolStripStatusLabel1
             // 
@@ -199,6 +225,19 @@
             // 
             toolStripStatusLabel4.Name = "toolStripStatusLabel4";
             toolStripStatusLabel4.Size = new Size(0, 17);
+            // 
+            // toolStripStatusLabel5
+            // 
+            toolStripStatusLabel5.Name = "toolStripStatusLabel5";
+            toolStripStatusLabel5.Size = new Size(0, 17);
+            // 
+            // toolStripProgressBar1
+            // 
+            toolStripProgressBar1.Name = "toolStripProgressBar1";
+            toolStripProgressBar1.Size = new Size(100, 16);
+            toolStripProgressBar1.ToolTipText = "Click to Cancel Task";
+            toolStripProgressBar1.Visible = false;
+            toolStripProgressBar1.Click += toolStripProgressBar1_Click;
             // 
             // Form1
             // 
@@ -245,5 +284,10 @@
         private ToolStripMenuItem appendAllToolStripMenuItem;
         private ToolStripMenuItem copyConvertToolStripMenuItem;
         private ToolStripStatusLabel toolStripStatusLabel4;
+        private ToolStripMenuItem deepboruToolStripMenuItem;
+        private ToolStripStatusLabel toolStripStatusLabel5;
+        private ToolStripMenuItem blipToolStripMenuItem;
+        private ToolStripMenuItem deselectToolStripMenuItem;
+        private ToolStripProgressBar toolStripProgressBar1;
     }
 }

@@ -69,6 +69,74 @@ Bonkers is a simple manual image captioning program designed to streamline the p
     Push to the branch: git push origin feature/YourFeature
     Submit a pull request
 
+### Documentation
+
+Bonkers Namespace
+=================
+
+Classes:
+--------
+- Form1: Main form class for the application.
+
+Namespaces Used:
+----------------
+- System: Basic .NET system functionality.
+- System.Diagnostics.Eventing.Reader: Not used in the provided code.
+- System.Drawing: For working with images.
+- System.IO: For input-output operations.
+- System.Linq: For LINQ queries.
+- System.Text: For text-related operations.
+- System.Windows.Forms: For creating Windows Forms applications.
+- System.Net.Http: For HTTP client functionality.
+- System.Threading.Tasks: For asynchronous task handling.
+- System.Text.Json: For JSON parsing.
+
+Form1 Class
+-----------
+This class represents the main form of the application.
+
+Fields:
+- currentDirectory: Stores the current directory path.
+- editingMultipleFiles: Tracks if multiple files are being edited.
+- selectedImageTextFile: Stores the selected image text file.
+- currentIndex: Tracks the current index in the ListView.
+
+Constructor:
+- Form1(): Initializes the form and calls LoadDirectories() to populate the tree view with drive information.
+
+Methods:
+- LoadDirectories(): Populates the tree view with drive information and attaches event handlers for tree view actions.
+- treeView1_BeforeExpand(): Handles the tree view's BeforeExpand event to load directories when nodes are expanded.
+- LoadDirectories(TreeNode node): Loads directories for a specified tree node.
+- treeView1_AfterSelect(): Displays images in the selected directory in the ListView.
+- treeView1_NodeMouseClick(): Handles right-click on tree view nodes to show a context menu.
+- GenerateTxtFilesItem_Click(): Not implemented in the provided code.
+- generateTxtFilesToolStripMenuItem_Click(): Generates empty text files for selected images in the tree view.
+- openToolStripMenuItem_Click(): Opens the text file associated with the selected image in the ListView.
+- saveToolStripMenuItem_Click(): Saves changes made to the text file associated with the selected image.
+- saveAllToolStripMenuItem_Click(): Saves changes made to all text files in the selected directory.
+- editAllToolStripMenuItem_Click(): Clears the content of all text files in the selected directory.
+- listView1_ItemSelectionChanged(): Handles item selection changes in the ListView.
+- richTextBox1_KeyDown(): Handles keyboard input events in the RichTextBox.
+- SaveRichTextBoxContent(): Saves the content of the RichTextBox to the associated text file.
+- OpenTextFileOfSelectedPhoto(): Opens the text file associated with the selected photo.
+- refreshToolStripMenuItem_Click(): Refreshes the tree view.
+- RefreshTreeView(): Clears and reloads the tree view.
+- appendAllToolStripMenuItem_Click(): Appends content from the RichTextBox to all text files in the selected directory.
+- copyConvertToolStripMenuItem_Click(): Copies images from a selected directory, converts them to PNG, and saves them in a new directory.
+- ConvertImagesToPng(): Converts images to PNG format in a specified directory.
+- DeleteNonPngFiles(): Deletes non-PNG files from a specified directory.
+- listView1_SelectedIndexChanged(): Handles item selection changes in the ListView.
+- deepboruToolStripMenuItem_Click(): Sends an image to an API for captioning and displays the caption in the RichTextBox.
+- ImageToBase64(): Converts an image to a Base64 string.
+- SendApiRequest(): Sends an API request with an image and parses the response for caption information.
+- SendApiRequestNormal(): Sends an API request with an image (without specifying the model) and parses the response for caption information.
+- blipToolStripMenuItem_Click(): Sends an image to an API (without specifying the model) for captioning and displays the caption in the RichTextBox.
+
+Usage:
+- The Form1 class handles various functionalities related to managing directories, images, text files, and API interactions within the Windows Forms application.
+
+
 ### License
 
 This project is licensed under the MIT License https://en.wikipedia.org/wiki/MIT_License

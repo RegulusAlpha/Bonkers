@@ -3,7 +3,13 @@ using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Text.Json;
+using System.Threading;
 
 namespace Bonkers
 {
@@ -13,6 +19,7 @@ namespace Bonkers
         private bool editingMultipleFiles = false;
         private string selectedImageTextFile;
         private int currentIndex = 0;
+        private CancellationTokenSource cancellationTokenSource;
         public Form1()
         {
             InitializeComponent();
@@ -49,6 +56,7 @@ namespace Bonkers
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
+            e.Node.EnsureVisible();
             try
             {
                 // Remove the placeholder node
@@ -87,8 +95,12 @@ namespace Bonkers
             }
         }
 
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            e.Node.EnsureVisible();
+            // Cancel the previous task and clear the lists
+            CancelTaskAndClearLists();
+            await Task.Delay(1000);
             // Display images in the selected directory
             string selectedPath = e.Node.Tag.ToString();
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
@@ -101,40 +113,64 @@ namespace Bonkers
             listView1.Items.Clear();
             listView1.LargeImageList = imageList1;
 
-            //foreach (string file in imageFiles)
-            //{
-            //    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
-            //    item.ImageIndex = imageList1.Images.Count;
-            //
-            //    // Load image into ImageList
-            //    imageList1.Images.Add(System.Drawing.Image.FromFile(file));
-            //    listView1.Items.Add(item);
-            //}
-            foreach (string file in imageFiles)
+            // Show the progress bar and set its maximum value
+            toolStripProgressBar1.Visible = true;
+            toolStripProgressBar1.Maximum = imageFiles.Length;
+            toolStripProgressBar1.Value = 0;
+
+            // Create a CancellationTokenSource for canceling the task
+            cancellationTokenSource = new CancellationTokenSource();
+
+            try
             {
-                ListViewItem item = new ListViewItem(new FileInfo(file).Name);
-                item.ImageIndex = imageList1.Images.Count;
-
-                // Load image and resize it
-                using (Image originalImage = Image.FromFile(file))
+                foreach (string file in imageFiles)
                 {
-                    int originalWidth = originalImage.Width;
-                    int originalHeight = originalImage.Height;
-                    float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+                    // Check if cancellation is requested
+                    if (cancellationTokenSource.Token.IsCancellationRequested)
+                        break;
 
-                    int newWidth = (int)(originalWidth * ratio);
-                    int newHeight = (int)(originalHeight * ratio);
+                    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
+                    item.ImageIndex = imageList1.Images.Count;
 
-                    Bitmap resizedImage = new Bitmap(newWidth, newHeight);
-                    using (Graphics g = Graphics.FromImage(resizedImage))
+                    // Load image asynchronously and resize it
+                    Bitmap resizedImage = await Task.Run(() =>
                     {
-                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
-                    }
+                        using (Image originalImage = Image.FromFile(file))
+                        {
+                            int originalWidth = originalImage.Width;
+                            int originalHeight = originalImage.Height;
+                            float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+
+                            int newWidth = (int)(originalWidth * ratio);
+                            int newHeight = (int)(originalHeight * ratio);
+
+                            Bitmap resized = new Bitmap(newWidth, newHeight);
+                            using (Graphics g = Graphics.FromImage(resized))
+                            {
+                                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                            }
+
+                            return resized;
+                        }
+                    }, cancellationTokenSource.Token);
 
                     imageList1.Images.Add(resizedImage);
+                    listView1.Items.Add(item);
+
+                    // Update the progress bar value
+                    toolStripProgressBar1.Value++;
                 }
-                listView1.Items.Add(item);
+            }
+            catch (OperationCanceledException)
+            {
+                // Task was canceled
+                MessageBox.Show("Task canceled.");
+            }
+            finally
+            {
+                // Hide the progress bar after the task is done or canceled
+                toolStripProgressBar1.Visible = false;
             }
         }
 
@@ -142,18 +178,13 @@ namespace Bonkers
         {
             if (e.Button == MouseButtons.Right)
             {
+                CancelTaskAndClearLists();
                 treeView1.SelectedNode = e.Node;
                 contextMenuStrip1.Show(treeView1, e.Location);
             }
         }
-
-        private void GenerateTxtFilesItem_Click(object sender, EventArgs e)
-        {
-
-
-        }
-
-        private void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        
+        private async void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeView1.SelectedNode != null)
             {
@@ -165,23 +196,21 @@ namespace Bonkers
                                 s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
                     .ToArray();
 
-                foreach (string file in imageFiles)
+                await Task.Run(() =>
                 {
-                    string txtFileName = Path.Combine(selectedPath, Path.GetFileNameWithoutExtension(file) + ".txt");
-
-                    if (!File.Exists(txtFileName))
+                    foreach (string file in imageFiles)
                     {
-                        File.WriteAllText(txtFileName, ""); // Create an empty .txt file
+                        string txtFileName = Path.Combine(selectedPath, Path.GetFileNameWithoutExtension(file) + ".txt");
+
+                        if (!File.Exists(txtFileName))
+                        {
+                            File.WriteAllText(txtFileName, ""); // Create an empty .txt file
+                        }
                     }
-                }
+                });
 
                 MessageBox.Show("Text files generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-        }
-
-        private void treeView1_AfterSelect_1(object sender, TreeViewEventArgs e)
-        {
-
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -229,22 +258,22 @@ namespace Bonkers
         {
             //if (listView1.SelectedItems.Count > 0)
             //{
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in imageFiles)
-                {
-                    //string textContent = File.ReadAllText(txtFile);
-                    String textContent = richTextBox1.Text; // Append text from richTextBox1
+            foreach (string txtFile in imageFiles)
+            {
+                //string textContent = File.ReadAllText(txtFile);
+                String textContent = richTextBox1.Text; // Append text from richTextBox1
 
-                    File.WriteAllText(txtFile, textContent);
-                }
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Green;
-                richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(txtFile, textContent);
+            }
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionColor = Color.Green;
+            richTextBox1.DeselectAll();
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -252,15 +281,15 @@ namespace Bonkers
         {
             //if (listView1.SelectedItems.Count > 0)
             //{
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in txtFiles)
-                {
-                    File.WriteAllText(txtFile, ""); // Clear the content of the text file
-                }
+            foreach (string txtFile in txtFiles)
+            {
+                File.WriteAllText(txtFile, ""); // Clear the content of the text file
+            }
 
-                MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -391,36 +420,26 @@ namespace Bonkers
             LoadDirectories();
         }
 
-        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-
-        }
-
-        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
         private void appendAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //if (listView1.SelectedItems.Count > 0)
-           // {
-                string selectedPath = treeView1.SelectedNode.Tag.ToString();
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            // {
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-                foreach (string txtFile in imageFiles)
-                {
-                    string textContent = File.ReadAllText(txtFile);
-                    textContent += richTextBox1.Text; // Append text from richTextBox1
+            foreach (string txtFile in imageFiles)
+            {
+                string textContent = File.ReadAllText(txtFile);
+                textContent += richTextBox1.Text; // Append text from richTextBox1
 
-                    File.WriteAllText(txtFile, textContent);
-                }
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Green;
-                richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                File.WriteAllText(txtFile, textContent);
+            }
+            richTextBox1.SelectAll();
+            richTextBox1.SelectionColor = Color.Green;
+            richTextBox1.DeselectAll();
+            richTextBox1.SelectionStart = richTextBox1.Text.Length;
+            richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
+            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //}
         }
 
@@ -481,10 +500,164 @@ namespace Bonkers
                 }
             }
         }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+      
+        private async void deepboruToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            toolStripStatusLabel5.Text = "";
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                string filePath = toolStripStatusLabel1.Text;
 
+                // Load image from file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    //toolStripStatusLabel5.Text = "working";
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    //richTextBox1.Text = base64String.ToString();
+
+                    // Send the API request
+                    await SendApiRequest(base64String);
+                }
+            }
+            else
+            {
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
+
+
+
+
+        private string ImageToBase64(Image image, System.Drawing.Imaging.ImageFormat format)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                // Convert Image to byte[]
+                image.Save(ms, format);
+                byte[] imageBytes = ms.ToArray();
+
+                // Convert byte[] to Base64 String
+                return Convert.ToBase64String(imageBytes);
+            }
+        }
+
+        private async Task SendApiRequest(string base64Image)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+
+                var content = new StringContent($"{{\n    \"model\": \"deepdanbooru\",\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                request.Content = content;
+
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseContent);
+
+                // Parse the JSON response and extract the caption
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
+
+                // Update richTextBox1 with the caption
+                richTextBox1.Text = caption;
+
+                // Update status label with success message
+                // toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
+
+        private async Task SendApiRequestNormal(string base64Image)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+
+                var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                request.Content = content;
+
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseContent);
+
+                // Parse the JSON response and extract the caption
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
+
+                // Update richTextBox1 with the caption
+                richTextBox1.Text = caption;
+
+                // Update status label with success message
+                //toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
+
+        private async void blipToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            toolStripStatusLabel5.Text = "";
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                string filePath = toolStripStatusLabel1.Text;
+
+                // Load image from file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    //toolStripStatusLabel5.Text = "working";
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    //richTextBox1.Text = base64String.ToString();
+
+                    // Send the API request
+                    await SendApiRequestNormal(base64String);
+                }
+            }
+            else
+            {
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
+
+        private void deselectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listView1.SelectedItems.Clear();
+            listView1.Focus();
+            toolStripStatusLabel1.Text = "";
+            toolStripStatusLabel2.Text = "";
+            toolStripStatusLabel3.Text = "";
+            toolStripStatusLabel4.Text = "";
+            toolStripStatusLabel5.Text = "";
+        }
+
+        private void toolStripProgressBar1_Click(object sender, EventArgs e)
+        {
+            // Cancel the task if it's running
+            if (cancellationTokenSource != null && !cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                cancellationTokenSource.Cancel();
+                //MessageBox.Show("Task cancellation requested.");
+            }
+        }
+
+        private async void CancelTaskAndClearLists()
+        {
+            // Cancel the task if it's running
+            if (cancellationTokenSource != null && !cancellationTokenSource.Token.IsCancellationRequested)
+            {
+                cancellationTokenSource.Cancel();
+                //MessageBox.Show("Task canceled.");
+            }
+
+            // Clear imageList1 and listView1
+            imageList1.Images.Clear();
+            listView1.Items.Clear();
+            listView1.Clear();
+            listView1.Update();
+            toolStripProgressBar1.Visible = false;
+            toolStripProgressBar1.Value = 0;
+            await Task.Delay(2000);
         }
     }
+
 }
