@@ -53,9 +53,16 @@
             toolStripStatusLabel4 = new ToolStripStatusLabel();
             toolStripStatusLabel5 = new ToolStripStatusLabel();
             toolStripProgressBar1 = new ToolStripProgressBar();
+            menuStrip1 = new MenuStrip();
+            optionsToolStripMenuItem = new ToolStripMenuItem();
+            openConfigToolStripMenuItem = new ToolStripMenuItem();
+            openConfigToolStripMenuItem1 = new ToolStripMenuItem();
+            reloadConfigToolStripMenuItem = new ToolStripMenuItem();
+            reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // imageList1
@@ -239,21 +246,69 @@
             toolStripProgressBar1.Visible = false;
             toolStripProgressBar1.Click += toolStripProgressBar1_Click;
             // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem });
+            menuStrip1.Location = new Point(156, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1112, 24);
+            menuStrip1.TabIndex = 6;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // optionsToolStripMenuItem
+            // 
+            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openConfigToolStripMenuItem });
+            optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            optionsToolStripMenuItem.Size = new Size(61, 20);
+            optionsToolStripMenuItem.Text = "Options";
+            // 
+            // openConfigToolStripMenuItem
+            // 
+            openConfigToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openConfigToolStripMenuItem1, reloadConfigToolStripMenuItem, reloadConfigToolStripMenuItem1 });
+            openConfigToolStripMenuItem.Name = "openConfigToolStripMenuItem";
+            openConfigToolStripMenuItem.Size = new Size(180, 22);
+            openConfigToolStripMenuItem.Text = "Config";
+            // 
+            // openConfigToolStripMenuItem1
+            // 
+            openConfigToolStripMenuItem1.Name = "openConfigToolStripMenuItem1";
+            openConfigToolStripMenuItem1.Size = new Size(180, 22);
+            openConfigToolStripMenuItem1.Text = "Open Config";
+            openConfigToolStripMenuItem1.Click += openConfigToolStripMenuItem1_Click;
+            // 
+            // reloadConfigToolStripMenuItem
+            // 
+            reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
+            reloadConfigToolStripMenuItem.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem.Text = "Save Config";
+            //reloadConfigToolStripMenuItem.Click += reloadConfigToolStripMenuItem_Click;
+            // 
+            // reloadConfigToolStripMenuItem1
+            // 
+            reloadConfigToolStripMenuItem1.Name = "reloadConfigToolStripMenuItem1";
+            reloadConfigToolStripMenuItem1.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem1.Text = "Reload Config";
+            reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
             Controls.Add(statusStrip1);
+            Controls.Add(menuStrip1);
             Controls.Add(listView1);
             Controls.Add(treeView1);
             Controls.Add(richTextBox1);
+            MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Bonkers";
             contextMenuStrip1.ResumeLayout(false);
             contextMenuStrip2.ResumeLayout(false);
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -289,5 +344,11 @@
         private ToolStripMenuItem blipToolStripMenuItem;
         private ToolStripMenuItem deselectToolStripMenuItem;
         private ToolStripProgressBar toolStripProgressBar1;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem optionsToolStripMenuItem;
+        private ToolStripMenuItem openConfigToolStripMenuItem;
+        private ToolStripMenuItem openConfigToolStripMenuItem1;
+        private ToolStripMenuItem reloadConfigToolStripMenuItem;
+        private ToolStripMenuItem reloadConfigToolStripMenuItem1;
     }
 }

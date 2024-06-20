@@ -20,10 +20,43 @@ namespace Bonkers
         private string selectedImageTextFile;
         private int currentIndex = 0;
         private CancellationTokenSource cancellationTokenSource;
+        private string localAPI;
+        private string externalAPI;
+        private int configFlag = 0;
         public Form1()
         {
             InitializeComponent();
+            LoadConfig();
             LoadDirectories();
+        }
+        public class Config
+        {
+            public string LocalAPI { get; set; }
+            public string ExternalAPI { get; set; }
+        }
+        private void LoadConfig()
+        {
+            string configPath = "bonkers.cfg";
+
+            if (!File.Exists(configPath))
+            {
+                Config defaultConfig = new Config
+                {
+                    LocalAPI = "192.168.2.200",
+                    ExternalAPI = ""
+                };
+
+                string json = System.Text.Json.JsonSerializer.Serialize(defaultConfig);
+                File.WriteAllText(configPath, json);
+            }
+
+            string configContent = File.ReadAllText(configPath);
+            Config config = System.Text.Json.JsonSerializer.Deserialize<Config>(configContent);
+
+            localAPI = config.LocalAPI;
+            externalAPI = config.ExternalAPI;
+
+            // Use localAPI and externalAPI as needed
         }
         private void LoadDirectories()
         {
@@ -183,7 +216,7 @@ namespace Bonkers
                 contextMenuStrip1.Show(treeView1, e.Location);
             }
         }
-        
+
         private async void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeView1.SelectedNode != null)
@@ -368,19 +401,26 @@ namespace Bonkers
         }
         private void SaveRichTextBoxContent()
         {
-            if (listView1.SelectedItems.Count > 0)
-            {
-                string selectedImage = listView1.SelectedItems[0].Text;
-                string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
+            if (configFlag == 0) { 
+
+                if (listView1.SelectedItems.Count > 0)
+                 {
+                     string selectedImage = listView1.SelectedItems[0].Text;
+                     string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
 
 
-                string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
+                        string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
-                if (File.Exists(txtFilePath))
-                {
-                    string textContent = richTextBox1.Text;
-                    File.WriteAllText(txtFilePath, textContent);
+                     if (File.Exists(txtFilePath))
+                     {
+                            string textContent = richTextBox1.Text;
+                             File.WriteAllText(txtFilePath, textContent);
+                     }
                 }
+            }
+            else
+            {
+                saveConfig();
             }
         }
 
@@ -500,7 +540,7 @@ namespace Bonkers
                 }
             }
         }
-      
+
         private async void deepboruToolStripMenuItem_Click(object sender, EventArgs e)
         {
             toolStripStatusLabel5.Text = "";
@@ -525,9 +565,6 @@ namespace Bonkers
             }
         }
 
-
-
-
         private string ImageToBase64(Image image, System.Drawing.Imaging.ImageFormat format)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -545,7 +582,8 @@ namespace Bonkers
         {
             using (var client = new HttpClient())
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+                string ipAdd = localAPI;
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
 
                 var content = new StringContent($"{{\n    \"model\": \"deepdanbooru\",\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
                 request.Content = content;
@@ -572,7 +610,8 @@ namespace Bonkers
         {
             using (var client = new HttpClient())
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:7860/sdapi/v1/interrogate");
+                string ipAdd = localAPI;
+                var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
 
                 var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
                 request.Content = content;
@@ -657,6 +696,41 @@ namespace Bonkers
             toolStripProgressBar1.Visible = false;
             toolStripProgressBar1.Value = 0;
             await Task.Delay(2000);
+        }
+
+
+        private void openConfigToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            string configPath = "bonkers.cfg";
+
+            if (File.Exists(configPath))
+            {
+                string configContent = File.ReadAllText(configPath);
+                richTextBox1.Text = configContent;
+                configFlag = 1;
+            }
+            else
+            {
+                MessageBox.Show("Config file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void saveConfig()
+        {
+            string configPath = "bonkers.cfg";
+            if (File.Exists(configPath))
+            {
+                string textContent = richTextBox1.Text;
+                File.WriteAllText(configPath, textContent);
+            }
+            configFlag = 0;
+            LoadConfig();
+
+        }
+
+        private void reloadConfigToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            LoadConfig();
         }
     }
 
