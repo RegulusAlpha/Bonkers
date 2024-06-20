@@ -56,6 +56,7 @@ namespace Bonkers
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
+            e.Node.EnsureVisible();
             try
             {
                 // Remove the placeholder node
@@ -96,6 +97,7 @@ namespace Bonkers
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            e.Node.EnsureVisible();
             // Cancel the previous task and clear the lists
             CancelTaskAndClearLists();
             await Task.Delay(1000);
@@ -181,14 +183,8 @@ namespace Bonkers
                 contextMenuStrip1.Show(treeView1, e.Location);
             }
         }
-
-        private void GenerateTxtFilesItem_Click(object sender, EventArgs e)
-        {
-
-
-        }
-
-        private void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        
+        private async void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (treeView1.SelectedNode != null)
             {
@@ -200,23 +196,21 @@ namespace Bonkers
                                 s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
                     .ToArray();
 
-                foreach (string file in imageFiles)
+                await Task.Run(() =>
                 {
-                    string txtFileName = Path.Combine(selectedPath, Path.GetFileNameWithoutExtension(file) + ".txt");
-
-                    if (!File.Exists(txtFileName))
+                    foreach (string file in imageFiles)
                     {
-                        File.WriteAllText(txtFileName, ""); // Create an empty .txt file
+                        string txtFileName = Path.Combine(selectedPath, Path.GetFileNameWithoutExtension(file) + ".txt");
+
+                        if (!File.Exists(txtFileName))
+                        {
+                            File.WriteAllText(txtFileName, ""); // Create an empty .txt file
+                        }
                     }
-                }
+                });
 
                 MessageBox.Show("Text files generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-        }
-
-        private void treeView1_AfterSelect_1(object sender, TreeViewEventArgs e)
-        {
-
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -426,16 +420,6 @@ namespace Bonkers
             LoadDirectories();
         }
 
-        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-
-        }
-
-        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
         private void appendAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //if (listView1.SelectedItems.Count > 0)
@@ -516,12 +500,7 @@ namespace Bonkers
                 }
             }
         }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
+      
         private async void deepboruToolStripMenuItem_Click(object sender, EventArgs e)
         {
             toolStripStatusLabel5.Text = "";
@@ -644,6 +623,11 @@ namespace Bonkers
         {
             listView1.SelectedItems.Clear();
             listView1.Focus();
+            toolStripStatusLabel1.Text = "";
+            toolStripStatusLabel2.Text = "";
+            toolStripStatusLabel3.Text = "";
+            toolStripStatusLabel4.Text = "";
+            toolStripStatusLabel5.Text = "";
         }
 
         private void toolStripProgressBar1_Click(object sender, EventArgs e)
