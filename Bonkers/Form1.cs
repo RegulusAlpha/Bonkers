@@ -26,13 +26,14 @@ namespace Bonkers
         private int MaxPboxH;
         private int MaxPboxW;
         private int configFlag = 0;
-        private int fontSize = 24;
+        private int fontSize;
         private string fontName;
         private int newWidth, newHeight;
         private bool isDragging = false;
         private Point dragStartMousePosition;
         private Point dragStartPictureBoxPosition;
         private string pathCheck;
+        private string defaultPath;
         public Form1()
         {
             InitializeComponent();
@@ -51,6 +52,7 @@ namespace Bonkers
             public int maxPboxW { get; set; }
             public int fontSize { get; set; }
             public string fontName { get; set; }
+            public string defaultPath { get; set; }
         }
         private void LoadConfig()
         {
@@ -68,11 +70,17 @@ namespace Bonkers
                     maxPboxH = 420,
                     maxPboxW = 420,
                     fontSize = 24,
-                    fontName = "Arial"
+                    fontName = "Arial",
+                    defaultPath = ""
                 };
 
-                // Serialize the default configuration object to JSON
-                string json = System.Text.Json.JsonSerializer.Serialize(defaultConfig);
+                // Serialize the default configuration object to JSON with indentation
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                string json = JsonSerializer.Serialize(defaultConfig, options);
 
                 // Write the JSON string to the configuration file
                 File.WriteAllText(configPath, json);
@@ -91,6 +99,7 @@ namespace Bonkers
             MaxPboxW = config.maxPboxW;
             fontSize = config.fontSize;
             fontName = config.fontName;
+            defaultPath = config.defaultPath;
             // Use localAPI and externalAPI as needed
             richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
 
@@ -116,31 +125,46 @@ namespace Bonkers
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
-            // Iterate through each drive
-            foreach (DriveInfo drive in allDrives)
+            // Check if defaultPath is set and exists
+            if (defaultPath is not null && Directory.Exists(defaultPath))
             {
-                // Create the root node for each drive
-                TreeNode driveNode = new TreeNode(drive.Name)
+                // Create the root node for the defaultPath
+                TreeNode defaultNode = new TreeNode(defaultPath)
                 {
-                    Tag = drive.RootDirectory.FullName
+                    Tag = defaultPath
                 };
 
-                // Add a placeholder node to indicate that the drive can be expanded
-                if (drive.IsReady)
-                {
-                    driveNode.Nodes.Add("Loading...");
-                }
+                // Add the default node to the TreeView
+                treeView1.Nodes.Add(defaultNode);
 
-                // Add the drive node to the TreeView
-                treeView1.Nodes.Add(driveNode);
+                // Populate the default node with subdirectories and files
+                LoadDirectories(defaultNode);
+            }
+            else
+            {
+                foreach (DriveInfo drive in allDrives)
+                {
+                    // Create the root node for each drive
+                    TreeNode driveNode = new TreeNode(drive.Name)
+                    {
+                        Tag = drive.RootDirectory.FullName
+                    };
+
+                    // Add a placeholder node to indicate that the drive can be expanded
+                    if (drive.IsReady)
+                    {
+                        driveNode.Nodes.Add("Loading...");
+                    }
+
+                    // Add the drive node to the TreeView
+                    treeView1.Nodes.Add(driveNode);
+                }
             }
 
             // Attach event handlers for further interactions with the TreeView nodes
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
         }
-
-
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
@@ -161,8 +185,6 @@ namespace Bonkers
             }
             catch { }
         }
-
-
 
         private void LoadDirectories(TreeNode node)
         {
