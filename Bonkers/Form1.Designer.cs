@@ -59,10 +59,12 @@
             openConfigToolStripMenuItem1 = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
+            pictureBox1 = new PictureBox();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // imageList1
@@ -75,6 +77,7 @@
             // 
             richTextBox1.BackColor = SystemColors.ScrollBar;
             richTextBox1.Dock = DockStyle.Bottom;
+            richTextBox1.Font = new Font("Arial", 24F);
             richTextBox1.Location = new Point(0, 506);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(1268, 137);
@@ -133,6 +136,7 @@
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
+            listView1.DoubleClick += listView1_DoubleClick;
             // 
             // contextMenuStrip2
             // 
@@ -206,12 +210,13 @@
             // statusStrip1
             // 
             statusStrip1.BackColor = SystemColors.Control;
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5, toolStripProgressBar1 });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripProgressBar1, toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5 });
             statusStrip1.Location = new Point(156, 484);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1112, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
+            statusStrip1.ItemClicked += statusStrip1_ItemClicked;
             // 
             // toolStripStatusLabel1
             // 
@@ -289,11 +294,24 @@
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.Location = new Point(813, 47);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(420, 420);
+            pictureBox1.TabIndex = 7;
+            pictureBox1.TabStop = false;
+            pictureBox1.Visible = false;
+            pictureBox1.MouseDown += PictureBox_MouseDown;
+            pictureBox1.MouseMove += PictureBox_MouseMove;
+            pictureBox1.MouseUp += PictureBox_MouseUp;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
+            Controls.Add(pictureBox1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             Controls.Add(listView1);
@@ -308,8 +326,14 @@
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
+        }
+
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void RichTextBox1_KeyDown1(object sender, KeyEventArgs e)
@@ -349,5 +373,6 @@
         private ToolStripMenuItem openConfigToolStripMenuItem1;
         private ToolStripMenuItem reloadConfigToolStripMenuItem;
         private ToolStripMenuItem reloadConfigToolStripMenuItem1;
+        private PictureBox pictureBox1;
     }
 }
