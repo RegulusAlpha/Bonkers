@@ -71,70 +71,84 @@ Bonkers is a simple manual image captioning program designed to streamline the p
 
 ### Documentation
 
-Bonkers Namespace
-=================
+Class: Form1
+Fields
 
-Classes:
---------
-- Form1: Main form class for the application.
+    currentDirectory (string): Stores the current directory path.
+    editingMultipleFiles (bool): Indicates if multiple files are being edited.
+    selectedImageTextFile (string): Stores the path of the selected image text file.
+    currentIndex (int): Tracks the current index in the ListView.
+    cancellationTokenSource (CancellationTokenSource): Manages cancellation tokens for asynchronous tasks.
+    localAPI (string): Stores the local API endpoint.
+    externalAPI (string): Stores the external API endpoint.
+    configFlag (int): Configuration flag for determining specific actions.
+    newWidth (int): Stores the new width for image resizing.
+    newHeight (int): Stores the new height for image resizing.
 
-Namespaces Used:
-----------------
-- System: Basic .NET system functionality.
-- System.Diagnostics.Eventing.Reader: Not used in the provided code.
-- System.Drawing: For working with images.
-- System.IO: For input-output operations.
-- System.Linq: For LINQ queries.
-- System.Text: For text-related operations.
-- System.Windows.Forms: For creating Windows Forms applications.
-- System.Net.Http: For HTTP client functionality.
-- System.Threading.Tasks: For asynchronous task handling.
-- System.Text.Json: For JSON parsing.
+Constructor
 
-Form1 Class
------------
-This class represents the main form of the application.
+    Form1(): Initializes the form, loads the configuration, and loads the directories.
 
-Fields:
-- currentDirectory: Stores the current directory path.
-- editingMultipleFiles: Tracks if multiple files are being edited.
-- selectedImageTextFile: Stores the selected image text file.
-- currentIndex: Tracks the current index in the ListView.
+Nested Class: Config
 
-Constructor:
-- Form1(): Initializes the form and calls LoadDirectories() to populate the tree view with drive information.
+    Represents the configuration settings.
+    Properties:
+        LocalAPI (string): Local API endpoint.
+        ExternalAPI (string): External API endpoint.
 
-Methods:
-- LoadDirectories(): Populates the tree view with drive information and attaches event handlers for tree view actions.
-- treeView1_BeforeExpand(): Handles the tree view's BeforeExpand event to load directories when nodes are expanded.
-- LoadDirectories(TreeNode node): Loads directories for a specified tree node.
-- treeView1_AfterSelect(): Displays images in the selected directory in the ListView.
-- treeView1_NodeMouseClick(): Handles right-click on tree view nodes to show a context menu.
-- GenerateTxtFilesItem_Click(): Not implemented in the provided code.
-- generateTxtFilesToolStripMenuItem_Click(): Generates empty text files for selected images in the tree view.
-- openToolStripMenuItem_Click(): Opens the text file associated with the selected image in the ListView.
-- saveToolStripMenuItem_Click(): Saves changes made to the text file associated with the selected image.
-- saveAllToolStripMenuItem_Click(): Saves changes made to all text files in the selected directory.
-- editAllToolStripMenuItem_Click(): Clears the content of all text files in the selected directory.
-- listView1_ItemSelectionChanged(): Handles item selection changes in the ListView.
-- richTextBox1_KeyDown(): Handles keyboard input events in the RichTextBox.
-- SaveRichTextBoxContent(): Saves the content of the RichTextBox to the associated text file.
-- OpenTextFileOfSelectedPhoto(): Opens the text file associated with the selected photo.
-- refreshToolStripMenuItem_Click(): Refreshes the tree view.
-- RefreshTreeView(): Clears and reloads the tree view.
-- appendAllToolStripMenuItem_Click(): Appends content from the RichTextBox to all text files in the selected directory.
-- copyConvertToolStripMenuItem_Click(): Copies images from a selected directory, converts them to PNG, and saves them in a new directory.
-- ConvertImagesToPng(): Converts images to PNG format in a specified directory.
-- DeleteNonPngFiles(): Deletes non-PNG files from a specified directory.
-- listView1_SelectedIndexChanged(): Handles item selection changes in the ListView.
-- deepboruToolStripMenuItem_Click(): Sends an image to an API for captioning and displays the caption in the RichTextBox.
-- ImageToBase64(): Converts an image to a Base64 string.
-- SendApiRequest(): Sends an API request with an image and parses the response for caption information.
-- SendApiRequestNormal(): Sends an API request with an image (without specifying the model) and parses the response for caption information.
-- blipToolStripMenuItem_Click(): Sends an image to an API (without specifying the model) for captioning and displays the caption in the RichTextBox.
+Methods
+Configuration Methods
 
-Usage:
-- The Form1 class handles various functionalities related to managing directories, images, text files, and API interactions within the Windows Forms application.
+    LoadConfig(): Loads the configuration from a file (bonkers.cfg). If the file doesn't exist, it creates a default configuration.
+
+Directory Loading Methods
+
+    LoadDirectories(): Loads all drives on the system into the TreeView.
+    treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e): Handles the BeforeExpand event for the TreeView, loading directories as needed.
+    LoadDirectories(TreeNode node): Loads the directories for a given TreeNode.
+
+Event Handlers
+
+    treeView1_AfterSelect(object sender, TreeViewEventArgs e): Handles the AfterSelect event for the TreeView, displaying images in the selected directory.
+    treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e): Handles the NodeMouseClick event for the TreeView, showing the context menu.
+    listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e): Handles the ItemSelectionChanged event for the ListView, opening the text file of the selected photo.
+    richTextBox1_KeyDown(object sender, KeyEventArgs e): Handles the KeyDown event for the RichTextBox, managing shortcut keys for saving and formatting text.
+
+Context Menu Actions
+
+    generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e): Generates text files for images in the selected directory.
+    openToolStripMenuItem_Click(object sender, EventArgs e): Opens the text file associated with the selected image.
+    saveToolStripMenuItem_Click(object sender, EventArgs e): Saves the content of the RichTextBox to the associated text file.
+    saveAllToolStripMenuItem_Click(object sender, EventArgs e): Saves the RichTextBox content to all text files in the selected directory.
+    editAllToolStripMenuItem_Click(object sender, EventArgs e): Clears the content of all text files in the selected directory.
+    refreshToolStripMenuItem_Click(object sender, EventArgs e): Refreshes the TreeView.
+    appendAllToolStripMenuItem_Click(object sender, EventArgs e): Appends the RichTextBox content to all text files in the selected directory.
+    copyConvertToolStripMenuItem_Click(object sender, EventArgs e): Copies and converts images in the selected directory to PNG format.
+
+Image Handling Methods
+
+    ConvertImagesToPng(string sourceDir, string destDir): Converts images in the source directory to PNG format and saves them in the destination directory.
+    DeleteNonPngFiles(string folderPath): Deletes non-PNG files in the specified folder.
+    ImageToBase64(Image image, System.Drawing.Imaging.ImageFormat format): Converts an image to a Base64 string.
+
+API Methods
+
+    SendApiRequest(string base64Image): Sends an API request with the Base64 image to the specified endpoint.
+    SendApiRequestNormal(string base64Image): Sends a normal API request with the Base64 image.
+
+Helper Methods
+
+    SaveRichTextBoxContent(): Saves the content of the RichTextBox to the associated text file.
+    OpenTextFileOfSelectedPhoto(): Opens the text file of the selected photo and loads its content into the RichTextBox.
+    CancelTaskAndClearLists(): Cancels the current task and clears the lists (not fully implemented in the provided code).
+
+Usage
+
+    Initialize Application: On application start, the form is initialized, configuration is loaded, and directories are loaded into the TreeView.
+    Directory Navigation: Expand and select directories in the TreeView to display images in the ListView.
+    Context Menu: Right-click on directories or images to access various actions like generating text files, saving content, and converting images.
+    RichTextBox Editing: Use the RichTextBox for editing text files associated with images. Use Ctrl+S to save content.
+    API Integration: Convert images to Base64 and send API requests for image processing.
 
 
 ### License
