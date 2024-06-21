@@ -47,12 +47,12 @@
             blipToolStripMenuItem = new ToolStripMenuItem();
             deselectToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
+            toolStripProgressBar1 = new ToolStripProgressBar();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
             toolStripStatusLabel2 = new ToolStripStatusLabel();
             toolStripStatusLabel3 = new ToolStripStatusLabel();
             toolStripStatusLabel4 = new ToolStripStatusLabel();
             toolStripStatusLabel5 = new ToolStripStatusLabel();
-            toolStripProgressBar1 = new ToolStripProgressBar();
             menuStrip1 = new MenuStrip();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             openConfigToolStripMenuItem = new ToolStripMenuItem();
@@ -77,7 +77,6 @@
             // 
             richTextBox1.BackColor = SystemColors.ScrollBar;
             richTextBox1.Dock = DockStyle.Bottom;
-            richTextBox1.Font = new Font("Arial", 24F);
             richTextBox1.Location = new Point(0, 506);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(1268, 137);
@@ -218,6 +217,14 @@
             statusStrip1.Text = "statusStrip1";
             statusStrip1.ItemClicked += statusStrip1_ItemClicked;
             // 
+            // toolStripProgressBar1
+            // 
+            toolStripProgressBar1.Name = "toolStripProgressBar1";
+            toolStripProgressBar1.Size = new Size(100, 16);
+            toolStripProgressBar1.ToolTipText = "Click to Cancel Task";
+            toolStripProgressBar1.Visible = false;
+            toolStripProgressBar1.Click += toolStripProgressBar1_Click;
+            // 
             // toolStripStatusLabel1
             // 
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
@@ -242,14 +249,6 @@
             // 
             toolStripStatusLabel5.Name = "toolStripStatusLabel5";
             toolStripStatusLabel5.Size = new Size(0, 17);
-            // 
-            // toolStripProgressBar1
-            // 
-            toolStripProgressBar1.Name = "toolStripProgressBar1";
-            toolStripProgressBar1.Size = new Size(100, 16);
-            toolStripProgressBar1.ToolTipText = "Click to Cancel Task";
-            toolStripProgressBar1.Visible = false;
-            toolStripProgressBar1.Click += toolStripProgressBar1_Click;
             // 
             // menuStrip1
             // 
@@ -286,6 +285,7 @@
             reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
             reloadConfigToolStripMenuItem.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem.Text = "Save Config";
+            reloadConfigToolStripMenuItem.Visible = false;
             // 
             // reloadConfigToolStripMenuItem1
             // 
