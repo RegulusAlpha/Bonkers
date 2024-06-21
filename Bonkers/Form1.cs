@@ -1006,10 +1006,18 @@ namespace Bonkers
             }
 
             // Clear imageList1 and listView1
-            imageList1.Images.Clear();
+            Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+            Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+           
+            // Clear items and images
+            
             listView1.Items.Clear();
-            listView1.Clear();
-            listView1.Update();
+            imageList1.Images.Clear();
+
+            // After clearing
+            Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+            Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+                    
 
             // Hide the progress bar and reset its value
             toolStripProgressBar1.Visible = false;
