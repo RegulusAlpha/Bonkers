@@ -68,7 +68,7 @@
             // imageList1
             // 
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
-            imageList1.ImageSize = new Size(192, 255);
+            imageList1.ImageSize = new Size(255, 255);
             imageList1.TransparentColor = Color.Transparent;
             // 
             // richTextBox1
@@ -266,27 +266,26 @@
             // 
             openConfigToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openConfigToolStripMenuItem1, reloadConfigToolStripMenuItem, reloadConfigToolStripMenuItem1 });
             openConfigToolStripMenuItem.Name = "openConfigToolStripMenuItem";
-            openConfigToolStripMenuItem.Size = new Size(180, 22);
+            openConfigToolStripMenuItem.Size = new Size(110, 22);
             openConfigToolStripMenuItem.Text = "Config";
             // 
             // openConfigToolStripMenuItem1
             // 
             openConfigToolStripMenuItem1.Name = "openConfigToolStripMenuItem1";
-            openConfigToolStripMenuItem1.Size = new Size(180, 22);
+            openConfigToolStripMenuItem1.Size = new Size(149, 22);
             openConfigToolStripMenuItem1.Text = "Open Config";
             openConfigToolStripMenuItem1.Click += openConfigToolStripMenuItem1_Click;
             // 
             // reloadConfigToolStripMenuItem
             // 
             reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
-            reloadConfigToolStripMenuItem.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem.Text = "Save Config";
-            //reloadConfigToolStripMenuItem.Click += reloadConfigToolStripMenuItem_Click;
             // 
             // reloadConfigToolStripMenuItem1
             // 
             reloadConfigToolStripMenuItem1.Name = "reloadConfigToolStripMenuItem1";
-            reloadConfigToolStripMenuItem1.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem1.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 

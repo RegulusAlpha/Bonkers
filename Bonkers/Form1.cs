@@ -23,6 +23,7 @@ namespace Bonkers
         private string localAPI;
         private string externalAPI;
         private int configFlag = 0;
+        private int newWidth, newHeight;
         public Form1()
         {
             InitializeComponent();
@@ -206,7 +207,7 @@ namespace Bonkers
                 toolStripProgressBar1.Visible = false;
             }
         }
-
+        
         private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
