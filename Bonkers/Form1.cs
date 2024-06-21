@@ -36,7 +36,7 @@ namespace Bonkers
             InitializeComponent();
             LoadConfig();
             LoadDirectories();
-           
+
         }
         public class Config
         {
@@ -198,8 +198,13 @@ namespace Bonkers
                 // Handle the case where the tag is null (e.g., after a refresh)
                 return;
             }
-            
-           
+
+            toolStripStatusLabel1.Text = "";
+            toolStripStatusLabel2.Text = "";
+            toolStripStatusLabel3.Text = "";
+            toolStripStatusLabel4.Text = "";
+            toolStripStatusLabel5.Text = "";
+            richTextBox1.Text = "";
             // Ensure that the selected node in the TreeView is visible
             e.Node.EnsureVisible();
 
@@ -1008,16 +1013,21 @@ namespace Bonkers
             // Clear imageList1 and listView1
             Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
             Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
-           
+
             // Clear items and images
-            
+
             listView1.Items.Clear();
             imageList1.Images.Clear();
 
             // After clearing
             Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
             Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
-                    
+            toolStripStatusLabel1.Text = "";
+            toolStripStatusLabel2.Text = "";
+            toolStripStatusLabel3.Text = "";
+            toolStripStatusLabel4.Text = "";
+            toolStripStatusLabel5.Text = "";
+            richTextBox1.Text = "";
 
             // Hide the progress bar and reset its value
             toolStripProgressBar1.Visible = false;
@@ -1082,7 +1092,7 @@ namespace Bonkers
         private void listView1_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
-            
+
             if (!string.IsNullOrEmpty(imagePath))
             {
                 try
@@ -1229,14 +1239,10 @@ namespace Bonkers
             }
         }
 
+        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
 
-
-
-
-
-
-
-
+        }
     }
 
 }

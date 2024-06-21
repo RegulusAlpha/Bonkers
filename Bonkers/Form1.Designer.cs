@@ -66,7 +66,7 @@
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
-             // 
+            // 
             // imageList1
             // 
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
@@ -77,6 +77,7 @@
             // 
             richTextBox1.BackColor = SystemColors.ScrollBar;
             richTextBox1.Dock = DockStyle.Bottom;
+            richTextBox1.Font = new Font("Arial", 24F);
             richTextBox1.Location = new Point(0, 506);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(1268, 137);
@@ -209,12 +210,13 @@
             // statusStrip1
             // 
             statusStrip1.BackColor = SystemColors.Control;
-            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5, toolStripProgressBar1 });
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripProgressBar1, toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5 });
             statusStrip1.Location = new Point(156, 484);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1112, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
+            statusStrip1.ItemClicked += statusStrip1_ItemClicked;
             // 
             // toolStripStatusLabel1
             // 
@@ -300,7 +302,6 @@
             pictureBox1.TabIndex = 7;
             pictureBox1.TabStop = false;
             pictureBox1.Visible = false;
-            //pictureBox1.Click += pictureBox1_Click;
             pictureBox1.MouseDown += PictureBox_MouseDown;
             pictureBox1.MouseMove += PictureBox_MouseMove;
             pictureBox1.MouseUp += PictureBox_MouseUp;
