@@ -26,17 +26,19 @@ namespace Bonkers
         private int MaxPboxH;
         private int MaxPboxW;
         private int configFlag = 0;
+        private int fontSize;
+        private string fontName;
         private int newWidth, newHeight;
         private bool isDragging = false;
         private Point dragStartMousePosition;
         private Point dragStartPictureBoxPosition;
         private string pathCheck;
+        private string defaultPath;
         public Form1()
         {
             InitializeComponent();
             LoadConfig();
             LoadDirectories();
-
         }
         public class Config
         {
@@ -48,6 +50,9 @@ namespace Bonkers
 
             public int maxPboxH { get; set; }
             public int maxPboxW { get; set; }
+            public int fontSize { get; set; }
+            public string fontName { get; set; }
+            public string defaultPath { get; set; }
         }
         private void LoadConfig()
         {
@@ -63,11 +68,19 @@ namespace Bonkers
                     LocalAPI = "192.168.2.200",
                     ExternalAPI = "",
                     maxPboxH = 420,
-                    maxPboxW = 420
+                    maxPboxW = 420,
+                    fontSize = 24,
+                    fontName = "Arial",
+                    defaultPath = ""
                 };
 
-                // Serialize the default configuration object to JSON
-                string json = System.Text.Json.JsonSerializer.Serialize(defaultConfig);
+                // Serialize the default configuration object to JSON with indentation
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                string json = JsonSerializer.Serialize(defaultConfig, options);
 
                 // Write the JSON string to the configuration file
                 File.WriteAllText(configPath, json);
@@ -84,7 +97,12 @@ namespace Bonkers
             externalAPI = config.ExternalAPI;
             MaxPboxH = config.maxPboxH;
             MaxPboxW = config.maxPboxW;
+            fontSize = config.fontSize;
+            fontName = config.fontName;
+            defaultPath = config.defaultPath;
             // Use localAPI and externalAPI as needed
+            richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
+
         }
 
         private void LoadDirectories()
@@ -107,31 +125,46 @@ namespace Bonkers
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
-            // Iterate through each drive
-            foreach (DriveInfo drive in allDrives)
+            // Check if defaultPath is set and exists
+            if (defaultPath is not null && Directory.Exists(defaultPath))
             {
-                // Create the root node for each drive
-                TreeNode driveNode = new TreeNode(drive.Name)
+                // Create the root node for the defaultPath
+                TreeNode defaultNode = new TreeNode(defaultPath)
                 {
-                    Tag = drive.RootDirectory.FullName
+                    Tag = defaultPath
                 };
 
-                // Add a placeholder node to indicate that the drive can be expanded
-                if (drive.IsReady)
-                {
-                    driveNode.Nodes.Add("Loading...");
-                }
+                // Add the default node to the TreeView
+                treeView1.Nodes.Add(defaultNode);
 
-                // Add the drive node to the TreeView
-                treeView1.Nodes.Add(driveNode);
+                // Populate the default node with subdirectories and files
+                LoadDirectories(defaultNode);
+            }
+            else
+            {
+                foreach (DriveInfo drive in allDrives)
+                {
+                    // Create the root node for each drive
+                    TreeNode driveNode = new TreeNode(drive.Name)
+                    {
+                        Tag = drive.RootDirectory.FullName
+                    };
+
+                    // Add a placeholder node to indicate that the drive can be expanded
+                    if (drive.IsReady)
+                    {
+                        driveNode.Nodes.Add("Loading...");
+                    }
+
+                    // Add the drive node to the TreeView
+                    treeView1.Nodes.Add(driveNode);
+                }
             }
 
             // Attach event handlers for further interactions with the TreeView nodes
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
         }
-
-
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
@@ -152,8 +185,6 @@ namespace Bonkers
             }
             catch { }
         }
-
-
 
         private void LoadDirectories(TreeNode node)
         {
@@ -193,6 +224,7 @@ namespace Bonkers
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            configFlag = 0;
             if (e.Node.Tag == null)
             {
                 // Handle the case where the tag is null (e.g., after a refresh)
@@ -480,6 +512,7 @@ namespace Bonkers
 
         private void listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e)
         {
+            configFlag = 0;
             // Check if an item is selected
             if (listView1.SelectedItems.Count > 0)
             {
@@ -877,28 +910,33 @@ namespace Bonkers
 
                 // Create a new HttpRequestMessage for the API endpoint
                 var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
+                try
+                {
+                    // Set the request content to JSON format with the Base64 image string
+                    var content = new StringContent($"{{\n    \"model\": \"deepdanbooru\",\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                    request.Content = content;
 
-                // Set the request content to JSON format with the Base64 image string
-                var content = new StringContent($"{{\n    \"model\": \"deepdanbooru\",\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
-                request.Content = content;
+                    // Send the HTTP request asynchronously
+                    var response = await client.SendAsync(request);
 
-                // Send the HTTP request asynchronously
-                var response = await client.SendAsync(request);
+                    // Ensure the response is successful (status code 200-299)
+                    response.EnsureSuccessStatusCode();
 
-                // Ensure the response is successful (status code 200-299)
-                response.EnsureSuccessStatusCode();
+                    // Read the response content as a string
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(responseContent);
 
-                // Read the response content as a string
-                string responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseContent);
+                    // Parse the JSON response to extract the caption
+                    var jsonDocument = JsonDocument.Parse(responseContent);
+                    string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
 
-                // Parse the JSON response to extract the caption
-                var jsonDocument = JsonDocument.Parse(responseContent);
-                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
-
-                // Update the richTextBox1 with the extracted caption
-                richTextBox1.Text = caption;
-
+                    // Update the richTextBox1 with the extracted caption
+                    richTextBox1.Text = caption;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
                 // Optionally update a status label with a success message
                 // toolStripStatusLabel4.Text = "Request successful";
             }
@@ -912,31 +950,35 @@ namespace Bonkers
             {
                 // Get the local API address from the localAPI variable
                 string ipAdd = localAPI;
+                try
+                {
+                    // Create a new HttpRequestMessage for the API endpoint without specifying the model
+                    var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
 
-                // Create a new HttpRequestMessage for the API endpoint without specifying the model
-                var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
+                    // Set the request content to JSON format with the Base64 image string
+                    var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
+                    request.Content = content;
 
-                // Set the request content to JSON format with the Base64 image string
-                var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
-                request.Content = content;
+                    // Send the HTTP request asynchronously
+                    var response = await client.SendAsync(request);
 
-                // Send the HTTP request asynchronously
-                var response = await client.SendAsync(request);
+                    // Ensure the response is successful (status code 200-299)
+                    response.EnsureSuccessStatusCode();
 
-                // Ensure the response is successful (status code 200-299)
-                response.EnsureSuccessStatusCode();
+                    // Read the response content as a string
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(responseContent);
 
-                // Read the response content as a string
-                string responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseContent);
+                    // Parse the JSON response to extract the caption
+                    var jsonDocument = JsonDocument.Parse(responseContent);
+                    string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
 
-                // Parse the JSON response to extract the caption
-                var jsonDocument = JsonDocument.Parse(responseContent);
-                string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
-
-                // Update the richTextBox1 with the extracted caption
-                richTextBox1.Text = caption;
-
+                    // Update the richTextBox1 with the extracted caption
+                    richTextBox1.Text = caption;
+                }catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
                 // Optionally update a status label with a success message
                 //toolStripStatusLabel4.Text = "Request successful";
             }
@@ -1044,7 +1086,11 @@ namespace Bonkers
         {
             // Define the path to the config file
             string configPath = "bonkers.cfg";
-
+            toolStripStatusLabel1.Text = "";
+            toolStripStatusLabel2.Text = "";
+            toolStripStatusLabel3.Text = "";
+            toolStripStatusLabel4.Text = "";
+            toolStripStatusLabel5.Text = "";
             // Check if the config file exists
             if (File.Exists(configPath))
             {
@@ -1077,7 +1123,7 @@ namespace Bonkers
             }
 
             // Reset the configFlag to 0 and reload the config
-            configFlag = 0;
+            //configFlag = 0;
             LoadConfig();
         }
 
