@@ -31,11 +31,17 @@ jobs:
     - name: Publish artifacts
       run: dotnet publish --configuration Release --output ./output
 
+    - name: List Contents of Output Directory
+      run: ls -l ./output
+
     - name: Create release directory
       run: mkdir -p release
 
     - name: Copy build output to release directory
       run: xcopy /E /I /Y .\output\* release\
+
+    - name: List Contents of Release Directory
+      run: ls -l ./release
 
     - name: Archive release directory
       uses: actions/upload-artifact@v3
@@ -60,6 +66,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release
+        asset_path: ./release/release.zip
         asset_name: release.zip
         asset_content_type: application/zip
