@@ -24,11 +24,15 @@ namespace Bonkers
         private string externalAPI;
         private int configFlag = 0;
         private int newWidth, newHeight;
+        private bool isDragging = false;
+        private Point dragStartMousePosition;
+        private Point dragStartPictureBoxPosition;
         public Form1()
         {
             InitializeComponent();
             LoadConfig();
             LoadDirectories();
+           
         }
         public class Config
         {
@@ -972,6 +976,165 @@ namespace Bonkers
             // Reload the config
             LoadConfig();
         }
+
+
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
+
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                try
+                {
+                    // Load the original image from the file path
+                    Image originalImage = Image.FromFile(imagePath);
+
+                    // Calculate the aspect ratio
+                    float aspectRatio = (float)originalImage.Width / (float)originalImage.Height;
+
+                    // Set the maximum width and height for the resized image
+                    int maxWidth = 420;
+                    int maxHeight = 420;
+
+                    // Calculate the new dimensions while maintaining aspect ratio
+                    int newWidth = Math.Min(originalImage.Width, maxWidth);
+                    int newHeight = (int)(newWidth / aspectRatio);
+
+                    // Check if the height exceeds maxHeight, then adjust dimensions
+                    if (newHeight > maxHeight)
+                    {
+                        newHeight = maxHeight;
+                        newWidth = (int)(newHeight * aspectRatio);
+                    }
+
+                    // Create a new Bitmap with the resized dimensions
+                    Bitmap resizedImage = new Bitmap(originalImage, newWidth, newHeight);
+
+                    // Set the size of the PictureBox to match the resized image
+                    pictureBox1.Size = new Size(newWidth, newHeight);
+
+                    // Calculate the initial location for PictureBox placement
+                    int edgeOffset = (int)(0.1 * this.ClientSize.Width); // 10% from the edge
+                    int pictureBoxX = (this.ClientSize.Width - pictureBox1.Width) / 2; // Center horizontally initially
+                    int pictureBoxY = (this.ClientSize.Height - pictureBox1.Height) / 2; // Center vertically initially
+
+                    // Determine the mouse position relative to the form
+                    Point mousePos = this.PointToClient(Control.MousePosition);
+
+                    // Determine if the click was on the left or right side of the form
+                    bool clickedFromRight = mousePos.X > this.ClientSize.Width / 2;
+
+                    // Adjust initial PictureBox placement based on click position
+                    if (clickedFromRight)
+                    {
+                        pictureBoxX = edgeOffset; // Place on the left
+                    }
+                    else
+                    {
+                        pictureBoxX = this.ClientSize.Width - pictureBox1.Width - edgeOffset; // Place on the right
+                    }
+
+                    // Set the location of the PictureBox
+                    pictureBox1.Location = new Point(pictureBoxX, pictureBoxY);
+
+                    // Display the resized image in the PictureBox
+                    pictureBox1.Image = resizedImage;
+                    pictureBox1.BackColor = Color.Transparent;
+                    pictureBox1.Visible = true;
+
+                    // Attach event handlers for drag-and-drop
+                    pictureBox1.MouseDown += PictureBox_MouseDown;
+                    pictureBox1.MouseMove += PictureBox_MouseMove;
+                    pictureBox1.MouseUp += PictureBox_MouseUp;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading/resizing image: {ex.Message}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Image file path is empty.");
+            }
+        }
+
+        private void PictureBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                pictureBox1.Visible = false;
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                isDragging = true;
+                dragStartMousePosition = this.PointToClient(Control.MousePosition); // Mouse position relative to the form
+                dragStartPictureBoxPosition = pictureBox1.Location;
+            }
+        }
+
+        private void PictureBox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                Point currentMousePosition = this.PointToClient(Control.MousePosition);
+
+                int offsetX = currentMousePosition.X - dragStartMousePosition.X;
+                int offsetY = currentMousePosition.Y - dragStartMousePosition.Y;
+
+                Point newLocation = new Point(
+                    dragStartPictureBoxPosition.X + offsetX,
+                    dragStartPictureBoxPosition.Y + offsetY);
+
+                // Ensure the PictureBox stays within the form's client area
+                newLocation.X = Math.Max(0, Math.Min(this.ClientSize.Width - pictureBox1.Width, newLocation.X));
+                newLocation.Y = Math.Max(0, Math.Min(this.ClientSize.Height - pictureBox1.Height, newLocation.Y));
+
+                // Only update the location if it has changed
+                if (newLocation != pictureBox1.Location)
+                {
+                    pictureBox1.Location = newLocation;
+                }
+            }
+        }
+
+        private void PictureBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                isDragging = false;
+            }
+        }
+
+
+        //EXPERIMENTAL
+
+        public class TransparentPictureBox : PictureBox
+        {
+            public TransparentPictureBox()
+            {
+                SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+                BackColor = Color.Transparent;
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                base.OnPaint(e);
+
+                // Fill the control's background with a transparent color
+                using (SolidBrush brush = new SolidBrush(Color.Transparent))
+                {
+                    e.Graphics.FillRectangle(brush, ClientRectangle);
+                }
+            }
+        }
+
+
+
+
+
+
+
+
 
     }
 
