@@ -30,6 +30,7 @@ namespace Bonkers
         private bool isDragging = false;
         private Point dragStartMousePosition;
         private Point dragStartPictureBoxPosition;
+        private string pathCheck;
         public Form1()
         {
             InitializeComponent();
@@ -89,7 +90,19 @@ namespace Bonkers
         private void LoadDirectories()
         {
             // Clear existing nodes in the TreeView
+            // Before clearing
+            Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+            Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+            Console.WriteLine("Nodes count before clearing: " + treeView1.Nodes.Count);
+            // Clear items and images
             treeView1.Nodes.Clear();
+            listView1.Items.Clear();
+            imageList1.Images.Clear();
+
+            // After clearing
+            Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+            Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+            Console.WriteLine("Nodes count after clearing: " + treeView1.Nodes.Count);
 
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -98,8 +111,10 @@ namespace Bonkers
             foreach (DriveInfo drive in allDrives)
             {
                 // Create the root node for each drive
-                TreeNode driveNode = new TreeNode(drive.Name);
-                driveNode.Tag = drive.RootDirectory.FullName;
+                TreeNode driveNode = new TreeNode(drive.Name)
+                {
+                    Tag = drive.RootDirectory.FullName
+                };
 
                 // Add a placeholder node to indicate that the drive can be expanded
                 if (drive.IsReady)
@@ -115,6 +130,7 @@ namespace Bonkers
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
         }
+
 
 
         private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
@@ -138,6 +154,7 @@ namespace Bonkers
         }
 
 
+
         private void LoadDirectories(TreeNode node)
         {
             // Get the path from the node's tag
@@ -155,8 +172,10 @@ namespace Bonkers
                     DirectoryInfo dirInfo = new DirectoryInfo(directory);
 
                     // Create a new TreeNode for the directory
-                    TreeNode dirNode = new TreeNode(dirInfo.Name);
-                    dirNode.Tag = dirInfo.FullName;
+                    TreeNode dirNode = new TreeNode(dirInfo.Name)
+                    {
+                        Tag = dirInfo.FullName
+                    };
 
                     // Add a placeholder node to indicate that the directory can be expanded
                     dirNode.Nodes.Add("Loading...");
@@ -174,6 +193,13 @@ namespace Bonkers
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            if (e.Node.Tag == null)
+            {
+                // Handle the case where the tag is null (e.g., after a refresh)
+                return;
+            }
+            
+           
             // Ensure that the selected node in the TreeView is visible
             e.Node.EnsureVisible();
 
@@ -184,8 +210,12 @@ namespace Bonkers
             await Task.Delay(1000);
 
             // Get the path of the selected node in the TreeView
-            string selectedPath = e.Node.Tag.ToString();
 
+            string selectedPath = e.Node.Tag.ToString();
+            if (pathCheck == selectedPath) { return; } // this fixed a bug where after reloading tree, it would attempt to load the directory images twice
+            pathCheck = selectedPath;
+            Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
+            Console.Out.WriteLine("selected path " + selectedPath);
             // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
                 .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -596,11 +626,65 @@ namespace Bonkers
         // Define the RefreshTreeView method to clear nodes in the TreeView and reload directories
         private void RefreshTreeView()
         {
+            CancelTaskAndClearLists();
+            // Store the state of each node
+            var nodeInfos = new Dictionary<string, TreeNodeInfo>();
+            StoreNodesState(treeView1.Nodes, nodeInfos);
+
             // Clear all nodes in the TreeView
             treeView1.Nodes.Clear();
 
             // Load directories to populate the TreeView
             LoadDirectories();
+
+            // Restore the state of each node
+            RestoreNodesState(treeView1.Nodes, nodeInfos);
+        }
+        private class TreeNodeInfo
+        {
+            public string Path { get; set; }
+            public object Tag { get; set; }
+            public bool IsExpanded { get; set; }
+
+            public TreeNodeInfo(string path, object tag, bool isExpanded)
+            {
+                Path = path;
+                Tag = tag;
+                IsExpanded = isExpanded;
+            }
+        }
+
+        // Method to store the state of each node
+        private void StoreNodesState(TreeNodeCollection nodes, Dictionary<string, TreeNodeInfo> nodeInfos)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                var nodeInfo = new TreeNodeInfo(node.FullPath, node.Tag, node.IsExpanded);
+                nodeInfos[node.FullPath] = nodeInfo;
+
+                // Recursive call for child nodes
+                StoreNodesState(node.Nodes, nodeInfos);
+            }
+        }
+
+        // Method to restore the state of each node
+        private void RestoreNodesState(TreeNodeCollection nodes, Dictionary<string, TreeNodeInfo> nodeInfos)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (nodeInfos.TryGetValue(node.FullPath, out var nodeInfo))
+                {
+                    node.Tag = nodeInfo.Tag;
+
+                    if (nodeInfo.IsExpanded)
+                    {
+                        node.Expand();
+                    }
+                }
+
+                // Recursive call for child nodes
+                RestoreNodesState(node.Nodes, nodeInfos);
+            }
         }
 
         // Define an event handler for the appendAllToolStripMenuItem click event
