@@ -345,12 +345,6 @@ namespace Bonkers
             if (e.Control && e.KeyCode == Keys.S)
             {
                 // Save the content of richTextBox1
-                //SaveRichTextBoxContent();
-                //richTextBox1.SelectAll();
-                //richTextBox1.SelectionColor = Color.Green;
-                //richTextBox1.DeselectAll();
-                //richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                //richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
                 // Save the current cursor position
                 int currentCursorPosition = richTextBox1.SelectionStart;
 
@@ -366,35 +360,30 @@ namespace Bonkers
                 richTextBox1.SelectionStart = currentCursorPosition;
                 richTextBox1.SelectionLength = 0; // Ensure nothing is selected
                 richTextBox1.ScrollToCaret(); // Scroll to the caret position
-
             }
-            else if (e.Control)
+            else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down ||
+                     e.KeyCode == Keys.Enter || e.KeyCode == Keys.Back || e.KeyCode == Keys.Shift || e.KeyCode == Keys.Space)
             {
-
+                // Handle other keys if necessary
             }
-            else if (e.KeyCode == Keys.Left) { }
-            else if (e.KeyCode == Keys.Right) { }
-            else if (e.KeyCode == Keys.Up) { }
-            else if (e.KeyCode == Keys.Down) { }
-            else if (e.KeyCode == Keys.Enter) { }
-            else if (e.KeyCode == Keys.Back) { }
-            else if (e.KeyCode == Keys.Shift) { }
-            else if (e.KeyCode == Keys.Space) { }
             else
             {
-                //richTextBox1.SelectAll();
-                //richTextBox1.SelectionColor = Color.Red;
-                //richTextBox1.DeselectAll();
-                //richTextBox1.SelectionStart = richTextBox1.Text.Length;
-                //richTextBox1.ScrollToCaret(); // Scroll to the caret position (end of text)
-                int currentCursorPosition = richTextBox1.SelectionStart;
+                // Get the current selection
+                int selectionStart = richTextBox1.SelectionStart;
+                int selectionLength = richTextBox1.SelectionLength;
 
-                // Select all text and change its color
+                // Delete the selected text
+                if (selectionLength > 0)
+                {
+                    richTextBox1.Text = richTextBox1.Text.Remove(selectionStart, selectionLength);
+                    richTextBox1.SelectionStart = selectionStart;
+                }
+
+                // Change the color of the text
+                int currentCursorPosition = richTextBox1.SelectionStart;
                 richTextBox1.SelectAll();
                 richTextBox1.SelectionColor = Color.Red;
                 richTextBox1.DeselectAll();
-
-                // Restore the cursor position
                 richTextBox1.SelectionStart = currentCursorPosition;
                 richTextBox1.SelectionLength = 0; // Ensure nothing is selected
                 richTextBox1.ScrollToCaret(); // Scroll to the caret position
