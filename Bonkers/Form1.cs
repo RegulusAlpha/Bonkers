@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.Json;
 using System.Threading;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace Bonkers
 {
@@ -22,6 +23,8 @@ namespace Bonkers
         private CancellationTokenSource cancellationTokenSource;
         private string localAPI;
         private string externalAPI;
+        private int MaxPboxH;
+        private int MaxPboxW;
         private int configFlag = 0;
         private int newWidth, newHeight;
         private bool isDragging = false;
@@ -41,6 +44,9 @@ namespace Bonkers
 
             // Define a public property named ExternalAPI of type string
             public string ExternalAPI { get; set; }
+
+            public int maxPboxH { get; set; }
+            public int maxPboxW { get; set; }
         }
         private void LoadConfig()
         {
@@ -54,7 +60,9 @@ namespace Bonkers
                 Config defaultConfig = new Config
                 {
                     LocalAPI = "192.168.2.200",
-                    ExternalAPI = ""
+                    ExternalAPI = "",
+                    maxPboxH = 420,
+                    maxPboxW = 420
                 };
 
                 // Serialize the default configuration object to JSON
@@ -73,7 +81,8 @@ namespace Bonkers
             // Assign values from the deserialized configuration object to variables
             localAPI = config.LocalAPI;
             externalAPI = config.ExternalAPI;
-
+            MaxPboxH = config.maxPboxH;
+            MaxPboxW = config.maxPboxW;
             // Use localAPI and externalAPI as needed
         }
 
@@ -981,7 +990,7 @@ namespace Bonkers
         private void listView1_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
-
+            
             if (!string.IsNullOrEmpty(imagePath))
             {
                 try
@@ -993,8 +1002,8 @@ namespace Bonkers
                     float aspectRatio = (float)originalImage.Width / (float)originalImage.Height;
 
                     // Set the maximum width and height for the resized image
-                    int maxWidth = 420;
-                    int maxHeight = 420;
+                    int maxWidth = MaxPboxW;
+                    int maxHeight = MaxPboxH;
 
                     // Calculate the new dimensions while maintaining aspect ratio
                     int newWidth = Math.Min(originalImage.Width, maxWidth);
