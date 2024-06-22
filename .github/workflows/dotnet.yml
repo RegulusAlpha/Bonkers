@@ -33,7 +33,10 @@ jobs:
 
     - name: Create release directory
       run: mkdir -p release  # Create release directory if it doesn't exist
-
+      
+    - name: Copy build output to release directory
+      run: xcopy /E /I /Y .\output\* release\
+      
     - name: List Contents of Release Directory
       run: ls -l ./release  # Verify contents of the release directory
 
