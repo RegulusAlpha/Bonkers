@@ -12,7 +12,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace Bonkers
+namespace StableCompanion
 {
     public partial class Form1 : Form
     {

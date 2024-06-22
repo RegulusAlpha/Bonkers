@@ -1,8 +1,5 @@
-# Bonkers
-Bonkers is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
-<br>Its called Bonkers because its Bonkers I had to make this.
-
-[Watch the video](https://files.catbox.moe/44btc6.webm)
+# StableCompanion
+SC is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
 
 ## Features
 

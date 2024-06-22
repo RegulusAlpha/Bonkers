@@ -1,4 +1,4 @@
-﻿namespace Bonkers
+﻿namespace StableCompanion
 {
     partial class Form1
     {
@@ -319,7 +319,7 @@
             Controls.Add(richTextBox1);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
-            Text = "Bonkers";
+            Text = "StableCompanion";
             contextMenuStrip1.ResumeLayout(false);
             contextMenuStrip2.ResumeLayout(false);
             statusStrip1.ResumeLayout(false);
