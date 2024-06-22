@@ -55,3 +55,55 @@ jobs:
         prerelease: false
 
     # Upload release assets as needed...
+    - name: Upload Bonkers.deps.json
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/Bonkers.deps.json
+        asset_name: Bonkers.deps.json
+        asset_content_type: application/json
+
+    - name: Upload Bonkers.dll
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/Bonkers.dll
+        asset_name: Bonkers.dll
+        asset_content_type: application/octet-stream
+
+    # Repeat the upload steps for other files (Bonkers.exe, Bonkers.pdb, Bonkers.runtimeconfig.json)
+
+    - name: Upload Bonkers.exe
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/Bonkers.exe
+        asset_name: Bonkers.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload Bonkers.pdb
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/Bonkers.pdb
+        asset_name: Bonkers.pdb
+        asset_content_type: application/octet-stream
+
+    - name: Upload Bonkers.runtimeconfig.json
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release/Bonkers.runtimeconfig.json
+        asset_name: Bonkers.runtimeconfig.json
+        asset_content_type: application/json
+
