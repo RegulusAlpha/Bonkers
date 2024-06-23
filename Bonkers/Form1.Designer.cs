@@ -35,8 +35,8 @@
             cutToolStripMenuItem = new ToolStripMenuItem();
             copyToolStripMenuItem = new ToolStripMenuItem();
             pasteToolStripMenuItem = new ToolStripMenuItem();
-            clearToolStripMenuItem = new ToolStripMenuItem();
             selectAllToolStripMenuItem = new ToolStripMenuItem();
+            clearToolStripMenuItem = new ToolStripMenuItem();
             treeView1 = new TreeView();
             contextMenuStrip1 = new ContextMenuStrip(components);
             generateTxtFilesToolStripMenuItem = new ToolStripMenuItem();
@@ -97,43 +97,43 @@
             // 
             contextMenuStrip3.Items.AddRange(new ToolStripItem[] { cutToolStripMenuItem, copyToolStripMenuItem, pasteToolStripMenuItem, selectAllToolStripMenuItem, clearToolStripMenuItem });
             contextMenuStrip3.Name = "contextMenuStrip3";
-            contextMenuStrip3.Size = new Size(181, 136);
+            contextMenuStrip3.Size = new Size(123, 114);
             contextMenuStrip3.Opening += contextMenuStrip3_Opening;
             // 
             // cutToolStripMenuItem
             // 
             cutToolStripMenuItem.Name = "cutToolStripMenuItem";
-            cutToolStripMenuItem.Size = new Size(180, 22);
+            cutToolStripMenuItem.Size = new Size(122, 22);
             cutToolStripMenuItem.Text = "Cut";
             cutToolStripMenuItem.Click += cutToolStripMenuItem_Click;
             // 
             // copyToolStripMenuItem
             // 
             copyToolStripMenuItem.Name = "copyToolStripMenuItem";
-            copyToolStripMenuItem.Size = new Size(180, 22);
+            copyToolStripMenuItem.Size = new Size(122, 22);
             copyToolStripMenuItem.Text = "Copy";
             copyToolStripMenuItem.Click += copyToolStripMenuItem_Click;
             // 
             // pasteToolStripMenuItem
             // 
             pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
-            pasteToolStripMenuItem.Size = new Size(180, 22);
+            pasteToolStripMenuItem.Size = new Size(122, 22);
             pasteToolStripMenuItem.Text = "Paste";
             pasteToolStripMenuItem.Click += pasteToolStripMenuItem_Click;
-            // 
-            // clearToolStripMenuItem
-            // 
-            clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            clearToolStripMenuItem.Size = new Size(180, 22);
-            clearToolStripMenuItem.Text = "Clear All";
-            clearToolStripMenuItem.Click += clearToolStripMenuItem_Click;
             // 
             // selectAllToolStripMenuItem
             // 
             selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-            selectAllToolStripMenuItem.Size = new Size(180, 22);
+            selectAllToolStripMenuItem.Size = new Size(122, 22);
             selectAllToolStripMenuItem.Text = "Select All";
             selectAllToolStripMenuItem.Click += selectAllToolStripMenuItem_Click;
+            // 
+            // clearToolStripMenuItem
+            // 
+            clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            clearToolStripMenuItem.Size = new Size(122, 22);
+            clearToolStripMenuItem.Text = "Clear All";
+            clearToolStripMenuItem.Click += clearToolStripMenuItem_Click;
             // 
             // treeView1
             // 
@@ -149,13 +149,13 @@
             // 
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(163, 70);
+            contextMenuStrip1.Size = new Size(170, 70);
             // 
             // generateTxtFilesToolStripMenuItem
             // 
             generateTxtFilesToolStripMenuItem.Name = "generateTxtFilesToolStripMenuItem";
-            generateTxtFilesToolStripMenuItem.Size = new Size(162, 22);
-            generateTxtFilesToolStripMenuItem.Text = "Generate txt files";
+            generateTxtFilesToolStripMenuItem.Size = new Size(169, 22);
+            generateTxtFilesToolStripMenuItem.Text = "Generate TXT Files";
             generateTxtFilesToolStripMenuItem.ToolTipText = "This will generate txt files for all the images if they do not already exist";
             generateTxtFilesToolStripMenuItem.Click += generateTxtFilesToolStripMenuItem_Click;
             // 
@@ -170,8 +170,8 @@
             // copyConvertToolStripMenuItem
             // 
             copyConvertToolStripMenuItem.Name = "copyConvertToolStripMenuItem";
-            copyConvertToolStripMenuItem.Size = new Size(162, 22);
-            copyConvertToolStripMenuItem.Text = "copy convert";
+            copyConvertToolStripMenuItem.Size = new Size(169, 22);
+            copyConvertToolStripMenuItem.Text = "Copy Convert";
             copyConvertToolStripMenuItem.Click += copyConvertToolStripMenuItem_Click;
             // 
             // listView1
@@ -192,13 +192,13 @@
             // 
             contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(139, 202);
+            contextMenuStrip2.Size = new Size(159, 202);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(138, 22);
-            openToolStripMenuItem.Text = "open";
+            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.ToolTipText = "will open the text file of the currently selected image";
             openToolStripMenuItem.Visible = false;
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
@@ -206,8 +206,8 @@
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(138, 22);
-            saveToolStripMenuItem.Text = "save";
+            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.ToolTipText = "will save the current text file only";
             saveToolStripMenuItem.Visible = false;
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
@@ -215,53 +215,53 @@
             // appendAllToolStripMenuItem
             // 
             appendAllToolStripMenuItem.Name = "appendAllToolStripMenuItem";
-            appendAllToolStripMenuItem.Size = new Size(138, 22);
-            appendAllToolStripMenuItem.Text = "append all";
+            appendAllToolStripMenuItem.Size = new Size(180, 22);
+            appendAllToolStripMenuItem.Text = "Append All";
             appendAllToolStripMenuItem.ToolTipText = "will append the current text in the editor to all the text files in the directory";
             appendAllToolStripMenuItem.Click += appendAllToolStripMenuItem_Click;
             // 
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(138, 22);
-            saveAllToolStripMenuItem.Text = "overwrite all";
+            saveAllToolStripMenuItem.Size = new Size(180, 22);
+            saveAllToolStripMenuItem.Text = "Overwrite All";
             saveAllToolStripMenuItem.ToolTipText = "will overwrite all textfiles in the directory with the current text in the editor";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
             // 
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(138, 22);
-            editAllToolStripMenuItem.Text = "clear all";
+            editAllToolStripMenuItem.Size = new Size(180, 22);
+            editAllToolStripMenuItem.Text = "Clear All";
             editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
             // 
             // deepboruToolStripMenuItem
             // 
             deepboruToolStripMenuItem.Name = "deepboruToolStripMenuItem";
-            deepboruToolStripMenuItem.Size = new Size(138, 22);
-            deepboruToolStripMenuItem.Text = "deepboru";
+            deepboruToolStripMenuItem.Size = new Size(180, 22);
+            deepboruToolStripMenuItem.Text = "Deepboru  - API";
             deepboruToolStripMenuItem.Click += deepboruToolStripMenuItem_Click;
             // 
             // blipToolStripMenuItem
             // 
             blipToolStripMenuItem.Name = "blipToolStripMenuItem";
-            blipToolStripMenuItem.Size = new Size(138, 22);
-            blipToolStripMenuItem.Text = "blip";
+            blipToolStripMenuItem.Size = new Size(180, 22);
+            blipToolStripMenuItem.Text = "Blip - API";
             blipToolStripMenuItem.Click += blipToolStripMenuItem_Click;
             // 
             // deselectToolStripMenuItem
             // 
             deselectToolStripMenuItem.Name = "deselectToolStripMenuItem";
-            deselectToolStripMenuItem.Size = new Size(138, 22);
-            deselectToolStripMenuItem.Text = "deselect";
+            deselectToolStripMenuItem.Size = new Size(180, 22);
+            deselectToolStripMenuItem.Text = "Deselect";
             deselectToolStripMenuItem.Click += deselectToolStripMenuItem_Click;
             // 
             // cogVLMToolStripMenuItem
             // 
             cogVLMToolStripMenuItem.Name = "cogVLMToolStripMenuItem";
-            cogVLMToolStripMenuItem.Size = new Size(138, 22);
-            cogVLMToolStripMenuItem.Text = "CogVLM";
+            cogVLMToolStripMenuItem.Size = new Size(180, 22);
+            cogVLMToolStripMenuItem.Text = "CogVLM - API";
             cogVLMToolStripMenuItem.Click += cogVLMToolStripMenuItem_Click;
             // 
             // statusStrip1
