@@ -12,7 +12,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Runtime.InteropServices.Marshalling;
 
-namespace Bonkers
+namespace StableCompanion
 {
     public partial class Form1 : Form
     {
@@ -34,6 +34,15 @@ namespace Bonkers
         private Point dragStartPictureBoxPosition;
         private string pathCheck;
         private string defaultPath;
+        private bool blip = true;
+        private bool deepboru = true;
+        private bool CogVLM = true;
+        private string CogVLMprompt = "whats in this image? give a description?";
+        private bool deselect = false;
+        private int CogVLMmax_tokens = 2048;
+        private double CogVLMtemperature = 0.8;
+        private double CogVLMtop_p = 0.8;
+        private int consoleTrack = 0;
         public Form1()
         {
             InitializeComponent();
@@ -53,6 +62,14 @@ namespace Bonkers
             public int fontSize { get; set; }
             public string fontName { get; set; }
             public string defaultPath { get; set; }
+            public string CogVLMprompt { get; set; }  
+            public bool CogVLM { get; set; }   
+            public bool blip { get; set; }  
+            public bool deepboru { get; set; }  
+            public bool deselect {  get; set; }
+            public double CogVLMtemperature { get; set; }
+            public double CogVLMtop_p { get; set; }
+            public int CogVLMmax_tokens { get; set; }
         }
         private void LoadConfig()
         {
@@ -71,7 +88,16 @@ namespace Bonkers
                     maxPboxW = 420,
                     fontSize = 24,
                     fontName = "Arial",
-                    defaultPath = ""
+                    defaultPath = "",
+                    CogVLM = true,
+                    CogVLMprompt = "whats in this image? give a description?",
+                    blip = true,
+                    deepboru = true,
+                    deselect = false,
+                    CogVLMtemperature = 0.8,
+                    CogVLMtop_p = 0.8,
+                    CogVLMmax_tokens = 2048
+
                 };
 
                 // Serialize the default configuration object to JSON with indentation
@@ -100,27 +126,67 @@ namespace Bonkers
             fontSize = config.fontSize;
             fontName = config.fontName;
             defaultPath = config.defaultPath;
+            CogVLM = config.CogVLM;
+            CogVLMprompt = config.CogVLMprompt;
+            blip = config.blip;
+            deepboru = config.deepboru;
+            deselect = config.deselect;
             // Use localAPI and externalAPI as needed
             richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
-
+            deselectToolStripMenuItem.Visible = deselect;
+            blipToolStripMenuItem.Visible = blip;
+            deepboruToolStripMenuItem.Visible = deepboru;
+            cogVLMToolStripMenuItem.Visible = CogVLM;
+            CogVLMmax_tokens = config.CogVLMmax_tokens;
+            CogVLMtop_p = config.CogVLMtop_p;
+            CogVLMtemperature = config.CogVLMtemperature;
         }
 
         private void LoadDirectories()
         {
             // Clear existing nodes in the TreeView
             // Before clearing
-            Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
-            Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
-            Console.WriteLine("Nodes count before clearing: " + treeView1.Nodes.Count);
+
+            if (consoleTrack % 2 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+                Console.WriteLine("Nodes count before clearing: " + treeView1.Nodes.Count);
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White; // Default color
+                Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+                Console.WriteLine("Nodes count before clearing: " + treeView1.Nodes.Count);
+            }
+            
+            consoleTrack++;
             // Clear items and images
             treeView1.Nodes.Clear();
             listView1.Items.Clear();
             imageList1.Images.Clear();
 
             // After clearing
-            Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
-            Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
-            Console.WriteLine("Nodes count after clearing: " + treeView1.Nodes.Count);
+            if (consoleTrack % 2 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+                Console.WriteLine("Nodes count after clearing: " + treeView1.Nodes.Count);
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White; // Default color
+                Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+                Console.WriteLine("Nodes count after clearing: " + treeView1.Nodes.Count);
+            }
+
+            consoleTrack++;
 
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -251,8 +317,22 @@ namespace Bonkers
             string selectedPath = e.Node.Tag.ToString();
             if (pathCheck == selectedPath) { return; } // this fixed a bug where after reloading tree, it would attempt to load the directory images twice
             pathCheck = selectedPath;
-            Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
-            Console.Out.WriteLine("selected path " + selectedPath);
+            if (consoleTrack % 2 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
+                Console.Out.WriteLine("selected path " + selectedPath);
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White; // Default color
+                Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
+                Console.Out.WriteLine("selected path " + selectedPath);
+            }
+
+            consoleTrack++;
+            
             // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
                 .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -320,7 +400,27 @@ namespace Bonkers
                     listView1.Items.Add(item);
 
                     // Update the progress bar value
-                    toolStripProgressBar1.Value++;
+                    try
+                    {
+                        toolStripProgressBar1.Value++;
+                    }
+                    catch (Exception c)
+                    {
+                        if (consoleTrack % 2 == 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine(c.Message);
+
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.White; // Default color
+                            Console.WriteLine(c.Message);
+                        }
+
+                        consoleTrack++;
+                        
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -924,7 +1024,20 @@ namespace Bonkers
 
                     // Read the response content as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseContent);
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(responseContent);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine(responseContent);
+                    }
+
+                    consoleTrack++;
+                    
 
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
@@ -935,7 +1048,20 @@ namespace Bonkers
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(e.Message);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine(e.Message);
+                    }
+
+                    consoleTrack++;
+                    
                 }
                 // Optionally update a status label with a success message
                 // toolStripStatusLabel4.Text = "Request successful";
@@ -967,7 +1093,20 @@ namespace Bonkers
 
                     // Read the response content as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseContent);
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(responseContent);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine(responseContent);
+                    }
+
+                    consoleTrack++;
+                   
 
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
@@ -975,15 +1114,135 @@ namespace Bonkers
 
                     // Update the richTextBox1 with the extracted caption
                     richTextBox1.Text = caption;
-                }catch (Exception e)
+                }
+                catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(e.Message);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine(e.Message);
+                    }
+
+                    consoleTrack++;
+
+                    
                 }
                 // Optionally update a status label with a success message
                 //toolStripStatusLabel4.Text = "Request successful";
             }
         }
+        private async Task SendApiRequestChatCompletions(string base64Image)
+        {
+            string thinkTags = richTextBox1.Text; 
+            
+            // Create a new HttpClient for making HTTP requests
+            using (var client = new HttpClient())
+            {
+                // Get the local API address for chat completions from the localAPIChat variable
+                string ipAdd = localAPI;
+                try
+                {
+                    // Create a new HttpRequestMessage for the chat completions API endpoint
+                    var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":8000/v1/chat/completions");
 
+                    // Set the request content to JSON format with the specified JSON payload
+                    var jsonPayload = $@"
+            {{
+              ""model"": ""cogvlm-grounding-generalist"",
+              ""messages"": [
+                {{
+                  ""role"": ""user"",
+                  ""content"": [
+                    {{
+                      ""type"": ""text"",
+                      ""text"": ""{CogVLMprompt}, hint:{thinkTags}""
+                    }},
+                    {{
+                      ""type"": ""image_url"",
+                      ""image_url"": {{
+                        ""url"": ""data:image/jpeg;base64,{base64Image}""
+                      }}
+                    }}
+                  ]
+                }}
+              ],
+              ""stream"": false,
+              ""max_tokens"": {CogVLMmax_tokens},
+              ""temperature"": {CogVLMtemperature},
+              ""top_p"": {CogVLMtop_p}
+            }}";
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    request.Content = content;
+
+                    // Send the HTTP request asynchronously
+                    var response = await client.SendAsync(request);
+
+                    // Ensure the response is successful (status code 200-299)
+                    response.EnsureSuccessStatusCode();
+
+                    // Read the response content as a stream
+                    using (var responseStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        // Parse the JSON response using JsonDocument
+                        using (var jsonDocument = await JsonDocument.ParseAsync(responseStream))
+                        {
+                            var root = jsonDocument.RootElement;
+
+                            // Extract the content string
+                            var choices = root.GetProperty("choices");
+                            if (choices.GetArrayLength() > 0)
+                            {
+                                var firstChoice = choices[0];
+                                var message = firstChoice.GetProperty("message");
+                                string chatContent = message.GetProperty("content").GetString();
+
+                                // Update richTextBox1 with the extracted content
+                                richTextBox1.Text = chatContent;
+                                if (consoleTrack % 2 == 0)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.WriteLine(chatContent);
+
+                                }
+                                else
+                                {
+                                    Console.ForegroundColor = ConsoleColor.White; // Default color
+                                    Console.WriteLine(chatContent);
+                                }
+
+                                consoleTrack++;
+                                
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine(e.Message);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine(e.Message);
+                    }
+
+                    consoleTrack++;
+                   
+                }
+                // Optionally update a status label with a success message
+                //toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
         // Define an asynchronous event handler for the blipToolStripMenuItem click event
         private async void blipToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1053,8 +1312,22 @@ namespace Bonkers
             }
 
             // Clear imageList1 and listView1
-            Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
-            Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+            if (consoleTrack % 2 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White; // Default color
+                Console.WriteLine("Items count before clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
+            }
+
+            consoleTrack++;
+            
 
             // Clear items and images
 
@@ -1062,8 +1335,22 @@ namespace Bonkers
             imageList1.Images.Clear();
 
             // After clearing
-            Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
-            Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+            if (consoleTrack % 2 == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White; // Default color
+                Console.WriteLine("Items count after clearing: " + listView1.Items.Count);
+                Console.WriteLine("Images count after clearing: " + imageList1.Images.Count);
+            }
+
+            consoleTrack++;
+           
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
@@ -1285,9 +1572,32 @@ namespace Bonkers
             }
         }
 
-        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private async void cogVLMToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Clear toolStripStatusLabel5 text
+            toolStripStatusLabel5.Text = "";
 
+            // Check if the file path in toolStripStatusLabel1 exists
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                // Get the file path
+                string filePath = toolStripStatusLabel1.Text;
+
+                // Load the image from the file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    // Convert the image to base64 string (PNG format)
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                    // Send the API request (without specifying the model)
+                    await SendApiRequestChatCompletions(base64String);
+                }
+            }
+            else
+            {
+                // Update toolStripStatusLabel5 with an error message
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
         }
     }
 
