@@ -68,45 +68,48 @@ jobs:
         asset_name: Bonkers.deps.json
         asset_content_type: application/json
 
-    - name: Upload Bonkers.dll
+    - name: Upload StableCompanion.dll
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/Bonkers.dll
-        asset_name: Bonkers.dll
+        asset_path: ./release/StableCompanion.dll
+        asset_name: StableCompanion.dll
         asset_content_type: application/octet-stream
 
     # Repeat the upload steps for other files (Bonkers.exe, Bonkers.pdb, Bonkers.runtimeconfig.json)
-
-    - name: Upload Bonkers.exe
+#-a---           6/23/2024  3:24 AM          47104 StableCompanion.dll
+#-a---           6/23/2024  3:24 AM         142848 StableCompanion.exe
+#-a---           6/23/2024  3:24 AM          24020 StableCompanion.pdb
+#-a---           6/23/2024  3:24 AM            458 StableCompanion.runtimeconfig.json
+    - name: Upload StableCompanion.exe
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/Bonkers.exe
-        asset_name: Bonkers.exe
+        asset_path: ./release/StableCompanion.exe
+        asset_name: StableCompanion.exe
         asset_content_type: application/octet-stream
 
-    - name: Upload Bonkers.pdb
+    - name: Upload StableCompanion.pdb
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/Bonkers.pdb
-        asset_name: Bonkers.pdb
+        asset_path: ./release/StableCompanion.pdb
+        asset_name: StableCompanion.pdb
         asset_content_type: application/octet-stream
 
-    - name: Upload Bonkers.runtimeconfig.json
+    - name: Upload StableCompanion.runtimeconfig.json
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/Bonkers.runtimeconfig.json
-        asset_name: Bonkers.runtimeconfig.json
+        asset_path: ./release/StableCompanion.runtimeconfig.json
+        asset_name: StableCompanion.runtimeconfig.json
         asset_content_type: application/json
 
