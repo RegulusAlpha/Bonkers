@@ -58,14 +58,14 @@ jobs:
         prerelease: false
 
     # Upload release assets as needed...
-    - name: Upload Bonkers.deps.json
+    - name: Upload StableCompanion.deps.json
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/Bonkers.deps.json
-        asset_name: Bonkers.deps.json
+        asset_path: ./release/StableCompanion.deps.json
+        asset_name: StableCompanion.deps.json
         asset_content_type: application/json
 
     - name: Upload StableCompanion.dll
