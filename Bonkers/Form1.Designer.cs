@@ -136,7 +136,7 @@
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
-            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
+            //listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             listView1.DoubleClick += listView1_DoubleClick;
             // 
             // contextMenuStrip2
@@ -217,7 +217,7 @@
             statusStrip1.Size = new Size(1112, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
-            statusStrip1.ItemClicked += statusStrip1_ItemClicked;
+            //statusStrip1.ItemClicked += statusStrip1_ItemClicked;
             // 
             // toolStripProgressBar1
             // 

@@ -1572,16 +1572,6 @@ namespace StableCompanion
             }
         }
 
-        private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private async void cogVLMToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Clear toolStripStatusLabel5 text
