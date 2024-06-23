@@ -58,6 +58,104 @@ SC is a simple manual image captioning program designed to streamline the proces
 
 ## Documentation
 
+# Configuration File Documentation
+
+This document explains the configuration settings for the application. The settings related to the CogVLM API are also detailed below.
+
+## Configuration Items
+
+### LocalAPI
+- **Description**: Specifies the IP address of the local API server.
+- **Type**: String
+- **Default**: `"192.168.2.200"`
+
+### ExternalAPI
+- **Description**: Specifies the URL of the external API server. Leave empty if not used.
+- **Type**: String
+- **Default**: `""`
+
+### maxPboxH
+- **Description**: Maximum height for the picture box in pixels.
+- **Type**: Integer
+- **Default**: `420`
+
+### maxPboxW
+- **Description**: Maximum width for the picture box in pixels.
+- **Type**: Integer
+- **Default**: `420`
+
+### fontSize
+- **Description**: Default font size for text.
+- **Type**: Integer
+- **Default**: `24`
+
+### fontName
+- **Description**: Default font name for text.
+- **Type**: String
+- **Default**: `"Arial"`
+
+### defaultPath
+- **Description**: Default file path for saving or loading files. Leave empty if not used.
+- **Type**: String
+- **Default**: `""`
+
+### CogVLM
+- **Description**: Enables or disables the CogVLM API integration.
+- **Type**: Boolean
+- **Default**: `true`
+
+### CogVLMprompt
+- **Description**: The default prompt to be sent to the CogVLM API for image description.
+- **Type**: String
+- **Default**: `"whats in this image? give a description?"`
+
+### blip
+- **Description**: Enables or disables the BLIP API integration.
+- **Type**: Boolean
+- **Default**: `true`
+
+### deepboru
+- **Description**: Enables or disables the DeepBoru API integration.
+- **Type**: Boolean
+- **Default**: `true`
+
+### deselect
+- **Description**: Enables or disables automatic deselection of items.
+- **Type**: Boolean
+- **Default**: `false`
+
+### CogVLMtemperature
+- **Description**: The temperature setting for the CogVLM API, controlling the randomness of responses.
+- **Type**: Float
+- **Default**: `0.8`
+
+### CogVLMtop_p
+- **Description**: The top_p setting for the CogVLM API, controlling the diversity of responses.
+- **Type**: Float
+- **Default**: `0.8`
+
+### CogVLMmax_tokens
+- **Description**: The maximum number of tokens in the response from the CogVLM API.
+- **Type**: Integer
+- **Default**: `2048`
+
+## CogVLM Settings Explanation
+
+### CogVLM
+This boolean setting enables (`true`) or disables (`false`) the use of the CogVLM API for image processing and description.
+
+### CogVLMprompt
+This string sets the default prompt that is sent to the CogVLM API to request an image description.
+
+### CogVLMtemperature
+This float setting controls the randomness of the CogVLM API responses. A higher value results in more random responses, while a lower value makes the responses more deterministic.
+
+### CogVLMtop_p
+This float setting controls the diversity of the CogVLM API responses by setting a threshold for cumulative probability. It helps in generating more varied responses.
+
+### CogVLMmax_tokens
+This integer sets the maximum number of tokens (words or pieces of words) that the CogVLM API can return in a single response.
+
 ### Class: Form1
 Fields
 
