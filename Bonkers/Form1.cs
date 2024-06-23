@@ -975,7 +975,8 @@ namespace StableCompanion
 
                     // Update the richTextBox1 with the extracted caption
                     richTextBox1.Text = caption;
-                }catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
@@ -983,7 +984,83 @@ namespace StableCompanion
                 //toolStripStatusLabel4.Text = "Request successful";
             }
         }
+        private async Task SendApiRequestChatCompletions(string base64Image)
+        {
+            // Create a new HttpClient for making HTTP requests
+            using (var client = new HttpClient())
+            {
+                // Get the local API address for chat completions from the localAPIChat variable
+                string ipAdd = localAPI;
+                try
+                {
+                    // Create a new HttpRequestMessage for the chat completions API endpoint
+                    var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":8000/v1/chat/completions");
 
+                    // Set the request content to JSON format with the specified JSON payload
+                    var jsonPayload = $@"
+            {{
+              ""model"": ""cogvlm-chat-17b"",
+              ""messages"": [
+                {{
+                  ""role"": ""user"",
+                  ""content"": [
+                    {{
+                      ""type"": ""text"",
+                      ""text"": ""What’s in this image? give a detailed description.""
+                    }},
+                    {{
+                      ""type"": ""image_url"",
+                      ""image_url"": {{
+                        ""url"": ""data:image/jpeg;base64,{base64Image}""
+                      }}
+                    }}
+                  ]
+                }}
+              ],
+              ""stream"": false,
+              ""max_tokens"": 2048,
+              ""temperature"": 0.8,
+              ""top_p"": 0.8
+            }}";
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    request.Content = content;
+
+                    // Send the HTTP request asynchronously
+                    var response = await client.SendAsync(request);
+
+                    // Ensure the response is successful (status code 200-299)
+                    response.EnsureSuccessStatusCode();
+
+                    // Read the response content as a stream
+                    using (var responseStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        // Parse the JSON response using JsonDocument
+                        using (var jsonDocument = await JsonDocument.ParseAsync(responseStream))
+                        {
+                            var root = jsonDocument.RootElement;
+
+                            // Extract the content string
+                            var choices = root.GetProperty("choices");
+                            if (choices.GetArrayLength() > 0)
+                            {
+                                var firstChoice = choices[0];
+                                var message = firstChoice.GetProperty("message");
+                                string chatContent = message.GetProperty("content").GetString();
+
+                                // Update richTextBox1 with the extracted content
+                                richTextBox1.Text = chatContent;
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                // Optionally update a status label with a success message
+                //toolStripStatusLabel4.Text = "Request successful";
+            }
+        }
         // Define an asynchronous event handler for the blipToolStripMenuItem click event
         private async void blipToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1288,6 +1365,39 @@ namespace StableCompanion
         private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private async void cogVLMToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Clear toolStripStatusLabel5 text
+            toolStripStatusLabel5.Text = "";
+
+            // Check if the file path in toolStripStatusLabel1 exists
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                // Get the file path
+                string filePath = toolStripStatusLabel1.Text;
+
+                // Load the image from the file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    // Convert the image to base64 string (PNG format)
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                    // Send the API request (without specifying the model)
+                    await SendApiRequestChatCompletions(base64String);
+                }
+            }
+            else
+            {
+                // Update toolStripStatusLabel5 with an error message
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
         }
     }
 
