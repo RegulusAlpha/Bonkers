@@ -375,6 +375,8 @@
             pictureBox1.MouseDown += PictureBox_MouseDown;
             pictureBox1.MouseMove += PictureBox_MouseMove;
             pictureBox1.MouseUp += PictureBox_MouseUp;
+            pictureBox1.MouseWheel += PictureBox1_MouseWheel;
+            pictureBox1.MouseEnter += PictureBox1_MouseEnter;
             // 
             // Form1
             // 
@@ -402,20 +404,6 @@
             PerformLayout();
         }
 
-        private void ListView1_MouseDown(object sender, MouseEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void RichTextBox1_KeyDown1(object sender, KeyEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
         #endregion
 

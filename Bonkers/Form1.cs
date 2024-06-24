@@ -48,6 +48,7 @@ namespace StableCompanion
         private string ollamaModel;
         private string ollamaSystem;
         private string OllamaPrompt;
+        private string ollamaAddress = "localhost";
 
         public Form1()
         {
@@ -81,6 +82,7 @@ namespace StableCompanion
             public string ollamaModel { get; set; }
             public string ollamaSystem { get; set; }
             public string ollamaPrompt { get; set; }
+            public string ollamaAddress { get; set; }
         }
         private void LoadConfig()
         {
@@ -111,7 +113,8 @@ namespace StableCompanion
                     CogVLMmax_tokens = 2048,
                     ollamaModel = "llava",
                     ollamaPrompt = "What's in this photo",
-                    ollamaSystem = "The user will send an image, make short descriptive image tags"
+                    ollamaSystem = "The user will send an image, make short descriptive image tags",
+                    ollamaAddress = "localhost"
 
                 };
 
@@ -159,6 +162,7 @@ namespace StableCompanion
             ollamaSystem = config.ollamaSystem;
             ollamaModel = config.ollamaModel;
             OllamaPrompt = config.ollamaPrompt;
+            ollamaAddress = config.ollamaAddress;
         }
 
         private void LoadDirectories()
@@ -1609,8 +1613,40 @@ namespace StableCompanion
                 isDragging = false;
             }
         }
+        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            const double scaleFactor = 1.1;
+            int newWidth, newHeight;
 
+            if (e.Delta > 0)
+            {
+                // Mouse wheel scrolled up (Zoom in)
+                newWidth = (int)(pictureBox1.Width * scaleFactor);
+                newHeight = (int)(pictureBox1.Height * scaleFactor);
+            }
+            else
+            {
+                // Mouse wheel scrolled down (Zoom out)
+                newWidth = (int)(pictureBox1.Width / scaleFactor);
+                newHeight = (int)(pictureBox1.Height / scaleFactor);
+            }
 
+            // Ensure the new size fits within the form's client area
+            if (newWidth <= this.ClientSize.Width && newHeight <= this.ClientSize.Height)
+            {
+                pictureBox1.Width = newWidth;
+                pictureBox1.Height = newHeight;
+                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            }
+        }
+        private void PictureBox1_MouseEnter(object sender, EventArgs e)
+        {
+            if (pictureBox1.Visible == true)
+            {
+                pictureBox1.Focus();
+            }
+           
+        }
         //EXPERIMENTAL
 
         public class TransparentPictureBox : PictureBox
@@ -1835,7 +1871,7 @@ namespace StableCompanion
         }
 
         private static readonly HttpClient client = new HttpClient();
-        private const string url = "http://localhost:11434/api/generate";
+        //private const string url = "http://" + ollamaAddress + ":11434/api/generate";
 
         public async Task OllamaApiCall(string base64Image)
         {
@@ -1849,10 +1885,10 @@ namespace StableCompanion
         }}";
 
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
+            string apiURL = "http://" + ollamaAddress + ":11434/api/generate";
             try
             {
-                var response = await client.PostAsync(url, jsonContent);
+                var response = await client.PostAsync(apiURL, jsonContent);
                 response.EnsureSuccessStatusCode();
 
                 var responseBody = await response.Content.ReadAsStringAsync();
