@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Text.Json;
 using System.Threading;
 using System.Runtime.InteropServices.Marshalling;
+using System.Runtime.InteropServices;
 
 namespace StableCompanion
 {
@@ -43,18 +44,25 @@ namespace StableCompanion
         private double CogVLMtemperature = 0.8;
         private double CogVLMtop_p = 0.8;
         private int consoleTrack = 0;
+        private string hint;
+        private string ollamaModel;
+        private string ollamaSystem;
+        private string OllamaPrompt;
+        private string ollamaAddress = "localhost";
+
         public Form1()
         {
             InitializeComponent();
             LoadConfig();
             LoadDirectories();
+            Clipboard.Clear();
         }
         public class Config
         {
             // Define a public property named LocalAPI of type string
             public string LocalAPI { get; set; }
 
-            // Define a public property named ExternalAPI of type string
+            // Define a public property for all the remaning config items:
             public string ExternalAPI { get; set; }
 
             public int maxPboxH { get; set; }
@@ -62,19 +70,24 @@ namespace StableCompanion
             public int fontSize { get; set; }
             public string fontName { get; set; }
             public string defaultPath { get; set; }
-            public string CogVLMprompt { get; set; }  
-            public bool CogVLM { get; set; }   
-            public bool blip { get; set; }  
-            public bool deepboru { get; set; }  
-            public bool deselect {  get; set; }
+            public string CogVLMprompt { get; set; }
+            public bool CogVLM { get; set; }
+            public bool blip { get; set; }
+            public bool deepboru { get; set; }
+            public bool deselect { get; set; }
             public double CogVLMtemperature { get; set; }
             public double CogVLMtop_p { get; set; }
             public int CogVLMmax_tokens { get; set; }
+            public string hint { get; set; }
+            public string ollamaModel { get; set; }
+            public string ollamaSystem { get; set; }
+            public string ollamaPrompt { get; set; }
+            public string ollamaAddress { get; set; }
         }
         private void LoadConfig()
         {
             // Specify the path to the configuration file
-            string configPath = "bonkers.cfg";
+            string configPath = "StableCompanion.cfg";
 
             // Check if the configuration file exists
             if (!File.Exists(configPath))
@@ -91,12 +104,17 @@ namespace StableCompanion
                     defaultPath = "",
                     CogVLM = true,
                     CogVLMprompt = "whats in this image? give a description?",
+                    hint = " current tags: ",
                     blip = true,
                     deepboru = true,
                     deselect = false,
                     CogVLMtemperature = 0.8,
                     CogVLMtop_p = 0.8,
-                    CogVLMmax_tokens = 2048
+                    CogVLMmax_tokens = 2048,
+                    ollamaModel = "llava",
+                    ollamaPrompt = "What's in this photo",
+                    ollamaSystem = "The user will send an image, make short descriptive image tags",
+                    ollamaAddress = "localhost"
 
                 };
 
@@ -140,6 +158,11 @@ namespace StableCompanion
             CogVLMmax_tokens = config.CogVLMmax_tokens;
             CogVLMtop_p = config.CogVLMtop_p;
             CogVLMtemperature = config.CogVLMtemperature;
+            hint = config.hint;
+            ollamaSystem = config.ollamaSystem;
+            ollamaModel = config.ollamaModel;
+            OllamaPrompt = config.ollamaPrompt;
+            ollamaAddress = config.ollamaAddress;
         }
 
         private void LoadDirectories()
@@ -162,7 +185,7 @@ namespace StableCompanion
                 Console.WriteLine("Images count before clearing: " + imageList1.Images.Count);
                 Console.WriteLine("Nodes count before clearing: " + treeView1.Nodes.Count);
             }
-            
+
             consoleTrack++;
             // Clear items and images
             treeView1.Nodes.Clear();
@@ -332,7 +355,7 @@ namespace StableCompanion
             }
 
             consoleTrack++;
-            
+
             // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
                 .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -419,7 +442,7 @@ namespace StableCompanion
                         }
 
                         consoleTrack++;
-                        
+
                     }
                 }
             }
@@ -609,7 +632,28 @@ namespace StableCompanion
             // Display a message box to inform the user that the text files have been cleared successfully
             MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        private void listView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (richTextBox1.Focused == false)
+                {
+                    richTextBox1.Size = new System.Drawing.Size(1268, 137);
 
+                }
+            }
+        }
+        private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (richTextBox1.Focused == true)
+                {
+                    richTextBox1.Size = new System.Drawing.Size(1268, 300);
+
+                }
+            }
+        }
         private void listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e)
         {
             configFlag = 0;
@@ -622,7 +666,14 @@ namespace StableCompanion
 
             }
         }
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (richTextBox1.Focused == false)
+            {
+                richTextBox1.Size = new System.Drawing.Size(1268, 137);
 
+            }
+        }
         private void richTextBox1_KeyDown(object sender, KeyEventArgs e)
         {
             // Check if Ctrl+S is pressed
@@ -646,10 +697,12 @@ namespace StableCompanion
                 richTextBox1.ScrollToCaret(); // Scroll to the caret position
             }
             else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down ||
-                     e.KeyCode == Keys.Enter || e.KeyCode == Keys.Back || e.KeyCode == Keys.Shift || e.KeyCode == Keys.Space)
+                     e.KeyCode == Keys.Enter || e.KeyCode == Keys.Back || e.KeyCode == Keys.Shift || e.KeyCode == Keys.Space || e.Control)
             {
                 // Handle other keys if necessary
             }
+
+
             else
             {
                 // Get the current selection
@@ -657,7 +710,7 @@ namespace StableCompanion
                 int selectionLength = richTextBox1.SelectionLength;
 
                 // Delete the selected text
-                if (selectionLength > 0)
+                if (selectionLength > 0 && e.Control is not true)
                 {
                     richTextBox1.Text = richTextBox1.Text.Remove(selectionStart, selectionLength);
                     richTextBox1.SelectionStart = selectionStart;
@@ -1037,7 +1090,7 @@ namespace StableCompanion
                     }
 
                     consoleTrack++;
-                    
+
 
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
@@ -1061,7 +1114,7 @@ namespace StableCompanion
                     }
 
                     consoleTrack++;
-                    
+
                 }
                 // Optionally update a status label with a success message
                 // toolStripStatusLabel4.Text = "Request successful";
@@ -1106,7 +1159,7 @@ namespace StableCompanion
                     }
 
                     consoleTrack++;
-                   
+
 
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
@@ -1131,7 +1184,7 @@ namespace StableCompanion
 
                     consoleTrack++;
 
-                    
+
                 }
                 // Optionally update a status label with a success message
                 //toolStripStatusLabel4.Text = "Request successful";
@@ -1139,8 +1192,20 @@ namespace StableCompanion
         }
         private async Task SendApiRequestChatCompletions(string base64Image)
         {
-            string thinkTags = richTextBox1.Text; 
-            
+            string thinkTags = "";
+            string hintTag = hint;
+            if (hintTag is not "" && richTextBox1.Text is not "")
+            {
+                thinkTags = richTextBox1.Text;
+            }
+            else
+            {
+                thinkTags = "";
+                hintTag = "";
+            }
+
+
+
             // Create a new HttpClient for making HTTP requests
             using (var client = new HttpClient())
             {
@@ -1161,7 +1226,7 @@ namespace StableCompanion
                   ""content"": [
                     {{
                       ""type"": ""text"",
-                      ""text"": ""{CogVLMprompt}, hint:{thinkTags}""
+                      ""text"": ""{CogVLMprompt}{hintTag}{thinkTags}""
                     }},
                     {{
                       ""type"": ""image_url"",
@@ -1217,7 +1282,7 @@ namespace StableCompanion
                                 }
 
                                 consoleTrack++;
-                                
+
                             }
                         }
                     }
@@ -1237,7 +1302,7 @@ namespace StableCompanion
                     }
 
                     consoleTrack++;
-                   
+
                 }
                 // Optionally update a status label with a success message
                 //toolStripStatusLabel4.Text = "Request successful";
@@ -1327,7 +1392,7 @@ namespace StableCompanion
             }
 
             consoleTrack++;
-            
+
 
             // Clear items and images
 
@@ -1350,7 +1415,7 @@ namespace StableCompanion
             }
 
             consoleTrack++;
-           
+
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
@@ -1372,7 +1437,7 @@ namespace StableCompanion
         private void openConfigToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             // Define the path to the config file
-            string configPath = "bonkers.cfg";
+            string configPath = "StableCompanion.cfg";
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
@@ -1399,7 +1464,7 @@ namespace StableCompanion
         private void saveConfig()
         {
             // Define the path to the config file
-            string configPath = "bonkers.cfg";
+            string configPath = "StableCompanion.cfg";
 
             // Check if the config file exists
             if (File.Exists(configPath))
@@ -1548,8 +1613,40 @@ namespace StableCompanion
                 isDragging = false;
             }
         }
+        private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            const double scaleFactor = 1.1;
+            int newWidth, newHeight;
 
+            if (e.Delta > 0)
+            {
+                // Mouse wheel scrolled up (Zoom in)
+                newWidth = (int)(pictureBox1.Width * scaleFactor);
+                newHeight = (int)(pictureBox1.Height * scaleFactor);
+            }
+            else
+            {
+                // Mouse wheel scrolled down (Zoom out)
+                newWidth = (int)(pictureBox1.Width / scaleFactor);
+                newHeight = (int)(pictureBox1.Height / scaleFactor);
+            }
 
+            // Ensure the new size fits within the form's client area
+            if (newWidth <= this.ClientSize.Width && newHeight <= this.ClientSize.Height)
+            {
+                pictureBox1.Width = newWidth;
+                pictureBox1.Height = newHeight;
+                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            }
+        }
+        private void PictureBox1_MouseEnter(object sender, EventArgs e)
+        {
+            if (pictureBox1.Visible == true)
+            {
+                pictureBox1.Focus();
+            }
+           
+        }
         //EXPERIMENTAL
 
         public class TransparentPictureBox : PictureBox
@@ -1599,6 +1696,271 @@ namespace StableCompanion
                 toolStripStatusLabel5.Text = "Invalid file path";
             }
         }
-    }
 
+        private void contextMenuStrip3_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            richTextBox1.Text = "";
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(richTextBox1.SelectedText))
+                {
+                    Clipboard.Clear();
+                    string clip = richTextBox1.SelectedText.ToString();
+
+
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Out.WriteLine("copied text: " + clip);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.Out.WriteLine("copied text: " + clip);
+                    }
+                    consoleTrack++;
+                    System.Threading.Thread.Sleep(50);
+                    Clipboard.SetText(clip);
+                }
+                else
+                {
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Out.WriteLine("No text selected to copy.");
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.Out.WriteLine("No text selected to copy.");
+                    }
+                    consoleTrack++;
+                }
+            }
+            catch (ExternalException ex)
+            {
+
+            }
+        }
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Clipboard.ContainsText())
+            {
+                // If there is selected text, replace it
+                if (richTextBox1.SelectedText != string.Empty)
+                {
+                    richTextBox1.SelectedText = Clipboard.GetText();
+                }
+                // If no text is selected, insert at the current position
+                else
+                {
+                    int selectionStart = richTextBox1.SelectionStart;
+                    richTextBox1.Text = richTextBox1.Text.Insert(selectionStart, Clipboard.GetText());
+                    richTextBox1.SelectionStart = selectionStart + Clipboard.GetText().Length;
+                }
+                if (consoleTrack % 2 == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Out.WriteLine("pasted text: " + Clipboard.GetText());
+
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // Default color
+                    Console.Out.WriteLine("pasted text: " + Clipboard.GetText());
+                }
+                consoleTrack++;
+            }
+        }
+
+        private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (richTextBox1.SelectedText != string.Empty)
+                {
+                    Clipboard.Clear();
+                    string cut = richTextBox1.SelectedText.ToString();
+                    System.Threading.Thread.Sleep(50);
+                    richTextBox1.SelectedText = "";
+
+
+
+
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Out.WriteLine("cut text: " + cut);
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.Out.WriteLine("cut text: " + cut);
+                    }
+                    consoleTrack++;
+                    Clipboard.SetText(cut);
+                }
+                else
+                {
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Out.WriteLine("No text selected to copy.");
+
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.Out.WriteLine("No text selected to copy.");
+                    }
+                    consoleTrack++;
+                }
+            }
+            catch (ExternalException ex)
+            {
+
+            }
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            richTextBox1.Focus();
+            richTextBox1.SelectAll();
+
+        }
+
+        private async void ollamaAPIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Clear toolStripStatusLabel5 text
+            toolStripStatusLabel5.Text = "";
+
+            // Check if the file path in toolStripStatusLabel1 exists
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                // Get the file path
+                string filePath = toolStripStatusLabel1.Text;
+
+                // Load the image from the file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    // Convert the image to base64 string (PNG format)
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                    // Send the API request (without specifying the model)
+                    await OllamaApiCall(base64String);
+                }
+            }
+            else
+            {
+                // Update toolStripStatusLabel5 with an error message
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
+
+        private static readonly HttpClient client = new HttpClient();
+        //private const string url = "http://" + ollamaAddress + ":11434/api/generate";
+
+        public async Task OllamaApiCall(string base64Image)
+        {
+            string jsonPayload = $@"
+        {{
+            ""model"": ""{ollamaModel}"",
+            ""system"": ""{ollamaSystem}"",
+            ""prompt"": ""{OllamaPrompt}"",
+            ""images"": [""{base64Image}""],
+            ""stream"": false
+        }}";
+
+            var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            string apiURL = "http://" + ollamaAddress + ":11434/api/generate";
+            try
+            {
+                var response = await client.PostAsync(apiURL, jsonContent);
+                response.EnsureSuccessStatusCode();
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                //Console.WriteLine(responseBody);
+                HandleResponse(responseBody);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request error: {e.Message}");
+            }
+        }
+
+        private void HandleResponse(string responseBody)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(responseBody))
+            {
+                JsonElement root = doc.RootElement;
+
+                //string model = root.GetProperty("model").GetString();
+                //string createdAt = root.GetProperty("created_at").GetString();
+                string responseText = root.GetProperty("response").GetString();
+                //bool done = root.GetProperty("done").GetBoolean();
+                //string doneReason = root.GetProperty("done_reason").GetString();
+                //JsonElement context = root.GetProperty("context");
+                //long totalDuration = root.GetProperty("total_duration").GetInt64();
+                //long loadDuration = root.GetProperty("load_duration").GetInt64();
+                //int promptEvalCount = root.GetProperty("prompt_eval_count").GetInt32();
+                //long promptEvalDuration = root.GetProperty("prompt_eval_duration").GetInt64();
+                //int evalCount = root.GetProperty("eval_count").GetInt32();
+                //long evalDuration = root.GetProperty("eval_duration").GetInt64();
+
+                //Console.WriteLine("Model: " + model);
+                //Console.WriteLine("Created At: " + createdAt);
+                if (consoleTrack % 2 == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Response: " + responseText);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // Default color
+                    Console.WriteLine("Response: " + responseText);
+                }
+                consoleTrack++;
+                
+                //Console.WriteLine("Done: " + done);
+                //Console.WriteLine("Done Reason: " + doneReason);
+                //Console.WriteLine("Context: " + context);
+                //Console.WriteLine("Total Duration: " + totalDuration);
+                //Console.WriteLine("Load Duration: " + loadDuration);
+                //Console.WriteLine("Prompt Eval Count: " + promptEvalCount);
+                //Console.WriteLine("Prompt Eval Duration: " + promptEvalDuration);
+                //Console.WriteLine("Eval Count: " + evalCount);
+                //Console.WriteLine("Eval Duration: " + evalDuration);
+                richTextBox1.Text = responseText;
+            }
+        }
+
+        private void reloadConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (richTextBox1.Focused == true)
+            {
+                richTextBox1.Size = new System.Drawing.Size(1268, 300);
+
+            }
+        }
+
+       
+    }
 }
