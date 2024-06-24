@@ -156,6 +156,9 @@ namespace StableCompanion
             CogVLMtop_p = config.CogVLMtop_p;
             CogVLMtemperature = config.CogVLMtemperature;
             hint = config.hint;
+            ollamaSystem = config.ollamaSystem;
+            ollamaModel = config.ollamaModel;
+            OllamaPrompt = config.ollamaPrompt;
         }
 
         private void LoadDirectories()
@@ -1836,16 +1839,16 @@ namespace StableCompanion
 
         public async Task OllamaApiCall(string base64Image)
         {
-            var requestData = new
-            {
-                model = ollamaModel,
-                system = ollamaSystem,
-                prompt = OllamaPrompt,
-                images = new string[] { base64Image },
-                stream = false
-            };
+            string jsonPayload = $@"
+        {{
+            ""model"": ""{ollamaModel}"",
+            ""system"": ""{ollamaSystem}"",
+            ""prompt"": ""{OllamaPrompt}"",
+            ""images"": [""{base64Image}""],
+            ""stream"": false
+        }}";
 
-            var jsonContent = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+            var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
             try
             {
@@ -1853,6 +1856,7 @@ namespace StableCompanion
                 response.EnsureSuccessStatusCode();
 
                 var responseBody = await response.Content.ReadAsStringAsync();
+                //Console.WriteLine(responseBody);
                 HandleResponse(responseBody);
             }
             catch (HttpRequestException e)
@@ -1882,7 +1886,18 @@ namespace StableCompanion
 
                 //Console.WriteLine("Model: " + model);
                 //Console.WriteLine("Created At: " + createdAt);
-                Console.WriteLine("Response: " + responseText);
+                if (consoleTrack % 2 == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Response: " + responseText);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // Default color
+                    Console.WriteLine("Response: " + responseText);
+                }
+                consoleTrack++;
+                
                 //Console.WriteLine("Done: " + done);
                 //Console.WriteLine("Done Reason: " + doneReason);
                 //Console.WriteLine("Context: " + context);
