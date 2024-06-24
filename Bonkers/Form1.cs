@@ -45,6 +45,10 @@ namespace StableCompanion
         private double CogVLMtop_p = 0.8;
         private int consoleTrack = 0;
         private string hint;
+        private string ollamaModel;
+        private string ollamaSystem;
+        private string OllamaPrompt;
+
         public Form1()
         {
             InitializeComponent();
@@ -74,6 +78,9 @@ namespace StableCompanion
             public double CogVLMtop_p { get; set; }
             public int CogVLMmax_tokens { get; set; }
             public string hint { get; set; }
+            public string ollamaModel { get; set; }
+            public string ollamaSystem { get; set; }
+            public string ollamaPrompt { get; set; }
         }
         private void LoadConfig()
         {
@@ -101,7 +108,10 @@ namespace StableCompanion
                     deselect = false,
                     CogVLMtemperature = 0.8,
                     CogVLMtop_p = 0.8,
-                    CogVLMmax_tokens = 2048
+                    CogVLMmax_tokens = 2048,
+                    ollamaModel = "llava",
+                    ollamaPrompt = "What's in this photo",
+                    ollamaSystem = "The user will send an image, make short descriptive image tags"
 
                 };
 
@@ -615,7 +625,28 @@ namespace StableCompanion
             // Display a message box to inform the user that the text files have been cleared successfully
             MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
+        private void listView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (richTextBox1.Focused == false)
+                {
+                    richTextBox1.Size = new System.Drawing.Size(1268, 137);
 
+                }
+            }
+        }
+        private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (richTextBox1.Focused == true)
+                {
+                    richTextBox1.Size = new System.Drawing.Size(1268, 300);
+
+                }
+            }
+        }
         private void listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e)
         {
             configFlag = 0;
@@ -628,7 +659,14 @@ namespace StableCompanion
 
             }
         }
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (richTextBox1.Focused == false)
+            {
+                richTextBox1.Size = new System.Drawing.Size(1268, 137);
 
+            }
+        }
         private void richTextBox1_KeyDown(object sender, KeyEventArgs e)
         {
             // Check if Ctrl+S is pressed
@@ -1800,9 +1838,9 @@ namespace StableCompanion
         {
             var requestData = new
             {
-                model = "llava",
-                system = "The user will send an image, make short descriptive image tags",
-                prompt = "What's in this photo",
+                model = ollamaModel,
+                system = ollamaSystem,
+                prompt = OllamaPrompt,
                 images = new string[] { base64Image },
                 stream = false
             };
@@ -1862,5 +1900,16 @@ namespace StableCompanion
         {
 
         }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (richTextBox1.Focused == true)
+            {
+                richTextBox1.Size = new System.Drawing.Size(1268, 300);
+
+            }
+        }
+
+       
     }
 }

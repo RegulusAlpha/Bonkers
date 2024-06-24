@@ -92,7 +92,9 @@
             richTextBox1.Size = new Size(1268, 137);
             richTextBox1.TabIndex = 0;
             richTextBox1.Text = "";
+            richTextBox1.TextChanged += richTextBox1_TextChanged;
             richTextBox1.KeyDown += richTextBox1_KeyDown;
+            richTextBox1.MouseDown += richTextBox1_MouseDown;
             // 
             // contextMenuStrip3
             // 
@@ -187,7 +189,9 @@
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
+            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             listView1.DoubleClick += listView1_DoubleClick;
+            listView1.MouseDown += listView1_MouseDown;
             // 
             // contextMenuStrip2
             // 
@@ -335,20 +339,20 @@
             // 
             openConfigToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openConfigToolStripMenuItem1, reloadConfigToolStripMenuItem, reloadConfigToolStripMenuItem1 });
             openConfigToolStripMenuItem.Name = "openConfigToolStripMenuItem";
-            openConfigToolStripMenuItem.Size = new Size(180, 22);
+            openConfigToolStripMenuItem.Size = new Size(110, 22);
             openConfigToolStripMenuItem.Text = "Config";
             // 
             // openConfigToolStripMenuItem1
             // 
             openConfigToolStripMenuItem1.Name = "openConfigToolStripMenuItem1";
-            openConfigToolStripMenuItem1.Size = new Size(180, 22);
+            openConfigToolStripMenuItem1.Size = new Size(149, 22);
             openConfigToolStripMenuItem1.Text = "Open Config";
             openConfigToolStripMenuItem1.Click += openConfigToolStripMenuItem1_Click;
             // 
             // reloadConfigToolStripMenuItem
             // 
             reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
-            reloadConfigToolStripMenuItem.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem.Text = "Save Config";
             reloadConfigToolStripMenuItem.Visible = false;
             reloadConfigToolStripMenuItem.Click += reloadConfigToolStripMenuItem_Click;
@@ -356,7 +360,7 @@
             // reloadConfigToolStripMenuItem1
             // 
             reloadConfigToolStripMenuItem1.Name = "reloadConfigToolStripMenuItem1";
-            reloadConfigToolStripMenuItem1.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem1.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 
@@ -396,6 +400,11 @@
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
+        }
+
+        private void ListView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
