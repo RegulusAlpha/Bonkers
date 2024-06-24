@@ -1392,7 +1392,7 @@ namespace StableCompanion
         private void openConfigToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             // Define the path to the config file
-            string configPath = "bonkers.cfg";
+            string configPath = "StableCompanion.cfg";
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
@@ -1419,7 +1419,7 @@ namespace StableCompanion
         private void saveConfig()
         {
             // Define the path to the config file
-            string configPath = "bonkers.cfg";
+            string configPath = "StableCompanion.cfg";
 
             // Check if the config file exists
             if (File.Exists(configPath))
@@ -1762,8 +1762,105 @@ namespace StableCompanion
         {
             richTextBox1.Focus();
             richTextBox1.SelectAll();
-            
+
+        }
+
+        private async void ollamaAPIToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Clear toolStripStatusLabel5 text
+            toolStripStatusLabel5.Text = "";
+
+            // Check if the file path in toolStripStatusLabel1 exists
+            if (File.Exists(toolStripStatusLabel1.Text))
+            {
+                // Get the file path
+                string filePath = toolStripStatusLabel1.Text;
+
+                // Load the image from the file path
+                using (Image image = Image.FromFile(filePath))
+                {
+                    // Convert the image to base64 string (PNG format)
+                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                    // Send the API request (without specifying the model)
+                    await OllamaApiCall(base64String);
+                }
+            }
+            else
+            {
+                // Update toolStripStatusLabel5 with an error message
+                toolStripStatusLabel5.Text = "Invalid file path";
+            }
+        }
+
+        private static readonly HttpClient client = new HttpClient();
+        private const string url = "http://localhost:11434/api/generate";
+
+        public async Task OllamaApiCall(string base64Image)
+        {
+            var requestData = new
+            {
+                model = "llava",
+                system = "The user will send an image, make short descriptive image tags",
+                prompt = "What's in this photo",
+                images = new string[] { base64Image },
+                stream = false
+            };
+
+            var jsonContent = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+
+            try
+            {
+                var response = await client.PostAsync(url, jsonContent);
+                response.EnsureSuccessStatusCode();
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                HandleResponse(responseBody);
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request error: {e.Message}");
+            }
+        }
+
+        private void HandleResponse(string responseBody)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(responseBody))
+            {
+                JsonElement root = doc.RootElement;
+
+                //string model = root.GetProperty("model").GetString();
+                //string createdAt = root.GetProperty("created_at").GetString();
+                string responseText = root.GetProperty("response").GetString();
+                //bool done = root.GetProperty("done").GetBoolean();
+                //string doneReason = root.GetProperty("done_reason").GetString();
+                //JsonElement context = root.GetProperty("context");
+                //long totalDuration = root.GetProperty("total_duration").GetInt64();
+                //long loadDuration = root.GetProperty("load_duration").GetInt64();
+                //int promptEvalCount = root.GetProperty("prompt_eval_count").GetInt32();
+                //long promptEvalDuration = root.GetProperty("prompt_eval_duration").GetInt64();
+                //int evalCount = root.GetProperty("eval_count").GetInt32();
+                //long evalDuration = root.GetProperty("eval_duration").GetInt64();
+
+                //Console.WriteLine("Model: " + model);
+                //Console.WriteLine("Created At: " + createdAt);
+                Console.WriteLine("Response: " + responseText);
+                //Console.WriteLine("Done: " + done);
+                //Console.WriteLine("Done Reason: " + doneReason);
+                //Console.WriteLine("Context: " + context);
+                //Console.WriteLine("Total Duration: " + totalDuration);
+                //Console.WriteLine("Load Duration: " + loadDuration);
+                //Console.WriteLine("Prompt Eval Count: " + promptEvalCount);
+                //Console.WriteLine("Prompt Eval Duration: " + promptEvalDuration);
+                //Console.WriteLine("Eval Count: " + evalCount);
+                //Console.WriteLine("Eval Duration: " + evalDuration);
+                richTextBox1.Text = responseText;
+            }
+        }
+
+        private void reloadConfigToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
-
 }
