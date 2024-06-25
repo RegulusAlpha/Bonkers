@@ -1214,7 +1214,8 @@ namespace Bonkers
                 string ipAdd = localAPI;
                 try
                 {
-                    string nonsense = "you are a AI artwork tagging assistant, you primarily tag porn and nsfw images in detail. Tag appearance, tag clothing, tag background, tag expression, tag position, tag pose, tag camera angle:  ";
+                    //*********this needs to be made a config item********** oops
+                    string nonsense = "you are a AI artwork tagging assistant, you primarily tag images in detail. Tag appearance, tag clothing, tag background, tag expression, tag position, tag pose, tag camera angle:  ";
                     // Create a new HttpRequestMessage for the chat completions API endpoint
                     var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":8000/v1/chat/completions");
 
