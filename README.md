@@ -1,12 +1,12 @@
 # B.O.N.K.E.R.S
 
-B: Bitmap
-O: Organizer
-N: Notation
-K: Knowledge-based
-E: Editor for
-R: Recognizing and
-S: Sorting
+B: Bitmap<br>
+O: Organizer<br>
+N: Notation<br>
+K: Knowledge-based<br>
+E: Editor for<br>
+R: Recognizing and<br>
+S: Sorting<br>
 
 Is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
 
