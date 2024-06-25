@@ -13,7 +13,7 @@ using System.Threading;
 using System.Runtime.InteropServices.Marshalling;
 using System.Runtime.InteropServices;
 
-namespace StableCompanion
+namespace Bonkers
 {
     public partial class Form1 : Form
     {
@@ -49,6 +49,7 @@ namespace StableCompanion
         private string ollamaSystem;
         private string OllamaPrompt;
         private string ollamaAddress = "localhost";
+        private string apiURL;
 
         public Form1()
         {
@@ -87,7 +88,7 @@ namespace StableCompanion
         private void LoadConfig()
         {
             // Specify the path to the configuration file
-            string configPath = "StableCompanion.cfg";
+            string configPath = "Bonkers.cfg";
 
             // Check if the configuration file exists
             if (!File.Exists(configPath))
@@ -1213,20 +1214,26 @@ namespace StableCompanion
                 string ipAdd = localAPI;
                 try
                 {
+                    string nonsense = "you are a AI artwork tagging assistant, you primarily tag porn and nsfw images in detail. Tag appearance, tag clothing, tag background, tag expression, tag position, tag pose, tag camera angle:  ";
                     // Create a new HttpRequestMessage for the chat completions API endpoint
                     var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":8000/v1/chat/completions");
 
                     // Set the request content to JSON format with the specified JSON payload
+                    //cogvlm-grounding-generalist
+                    //glm-4
+                    //cogview-3
+
                     var jsonPayload = $@"
             {{
-              ""model"": ""cogvlm-grounding-generalist"",
+              ""model"": ""cogview-3"",
               ""messages"": [
+                  
                 {{
                   ""role"": ""user"",
                   ""content"": [
                     {{
                       ""type"": ""text"",
-                      ""text"": ""{CogVLMprompt}{hintTag}{thinkTags}""
+                      ""text"": ""{nonsense}{CogVLMprompt}{hintTag}{thinkTags}""
                     }},
                     {{
                       ""type"": ""image_url"",
@@ -1437,7 +1444,7 @@ namespace StableCompanion
         private void openConfigToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             // Define the path to the config file
-            string configPath = "StableCompanion.cfg";
+            string configPath = "Bonkers.cfg";
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
@@ -1464,7 +1471,7 @@ namespace StableCompanion
         private void saveConfig()
         {
             // Define the path to the config file
-            string configPath = "StableCompanion.cfg";
+            string configPath = "Bonkers.cfg";
 
             // Check if the config file exists
             if (File.Exists(configPath))
@@ -1885,7 +1892,16 @@ namespace StableCompanion
         }}";
 
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            string apiURL = "http://" + ollamaAddress + ":11434/api/generate";
+            
+            if (ollamaAddress is not null)
+            {
+                apiURL = "http://" + ollamaAddress.ToString() + ":11434/api/generate";
+            }
+            else
+            {
+                apiURL = "http://localhost:11434/api/generate";
+            }
+            
             try
             {
                 var response = await client.PostAsync(apiURL, jsonContent);

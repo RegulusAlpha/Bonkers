@@ -1,5 +1,14 @@
-# StableCompanion (for now)
-"needs a new name" is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
+# B.O.N.K.E.R.S
+
+B: Bitmap
+O: Organizer
+N: Notation
+K: Knowledge-based
+E: Editor for
+R: Recognizing and
+S: Sorting
+
+Is a simple manual image captioning program designed to streamline the process of adding captions to your images. This application is built using C# and offers a mostly user-friendly interface for organizing and captioning images effectively.
 
 ## Features
 

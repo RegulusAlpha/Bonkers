@@ -68,58 +68,58 @@ jobs:
         prerelease: false
 
     # Upload release assets as needed...
-    - name: Upload StableCompanion.deps.json
+    - name: Upload Bonkers.deps.json
       if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/StableCompanion.deps.json
-        asset_name: StableCompanion.deps.json
+        asset_path: ./release/Bonkers.deps.json
+        asset_name: Bonkers.deps.json
         asset_content_type: application/json
 
-    - name: Upload StableCompanion.dll
+    - name: Upload Bonkers.dll
       if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/StableCompanion.dll
-        asset_name: StableCompanion.dll
+        asset_path: ./release/Bonkers.dll
+        asset_name: Bonkers.dll
         asset_content_type: application/octet-stream
 
     # Repeat the upload steps for other files (Bonkers.exe, Bonkers.pdb, Bonkers.runtimeconfig.json)
-    - name: Upload StableCompanion.exe
+    - name: Upload Bonkers.exe
       if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/StableCompanion.exe
-        asset_name: StableCompanion.exe
+        asset_path: ./release/Bonkers.exe
+        asset_name: Bonkers.exe
         asset_content_type: application/octet-stream
 
-    - name: Upload StableCompanion.pdb
+    - name: Upload Bonkers.pdb
       if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/StableCompanion.pdb
-        asset_name: StableCompanion.pdb
+        asset_path: ./release/Bonkers.pdb
+        asset_name: Bonkers.pdb
         asset_content_type: application/octet-stream
 
-    - name: Upload StableCompanion.runtimeconfig.json
+    - name: Upload Bonkers.runtimeconfig.json
       if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./release/StableCompanion.runtimeconfig.json
-        asset_name: StableCompanion.runtimeconfig.json
+        asset_path: ./release/Bonkers.runtimeconfig.json
+        asset_name: Bonkers.runtimeconfig.json
         asset_content_type: application/json
