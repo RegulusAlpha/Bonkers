@@ -10,8 +10,8 @@ on:
 
 jobs:
   verify-build:
-    if: github.event_name == 'pull_request'
     runs-on: windows-latest
+    if: github.event_name == 'pull_request'
 
     steps:
     - uses: actions/checkout@v4
@@ -31,10 +31,9 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   create-release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: windows-latest
-    needs: verify-build
-
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
     steps:
     - uses: actions/checkout@v4
 
