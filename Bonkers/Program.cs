@@ -1,4 +1,4 @@
-namespace StableCompanion
+namespace Bonkers
 {
     internal static class Program
     {

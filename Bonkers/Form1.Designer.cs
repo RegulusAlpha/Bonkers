@@ -1,4 +1,4 @@
-﻿namespace StableCompanion
+﻿namespace Bonkers
 {
     partial class Form1
     {
@@ -373,10 +373,10 @@
             pictureBox1.TabStop = false;
             pictureBox1.Visible = false;
             pictureBox1.MouseDown += PictureBox_MouseDown;
+            pictureBox1.MouseEnter += PictureBox1_MouseEnter;
             pictureBox1.MouseMove += PictureBox_MouseMove;
             pictureBox1.MouseUp += PictureBox_MouseUp;
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
-            pictureBox1.MouseEnter += PictureBox1_MouseEnter;
             // 
             // Form1
             // 
@@ -391,7 +391,7 @@
             Controls.Add(richTextBox1);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
-            Text = "StableCompanion";
+            Text = "Bonkers";
             contextMenuStrip3.ResumeLayout(false);
             contextMenuStrip1.ResumeLayout(false);
             contextMenuStrip2.ResumeLayout(false);
