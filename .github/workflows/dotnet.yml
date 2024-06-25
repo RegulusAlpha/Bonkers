@@ -1,15 +1,16 @@
 name: .NET
 
 on:
-  push:
+  pull_request:
     branches:
       - master
-  pull_request:
+  push:
     branches:
       - master
 
 jobs:
-  build:
+  verify-build:
+    if: github.event_name == 'pull_request'
     runs-on: windows-latest
 
     steps:
@@ -21,42 +22,55 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore dependencies
-      if: github.ref != 'refs/heads/DEV'
       run: dotnet restore
 
     - name: Build
-      if: github.ref != 'refs/heads/DEV'
       run: dotnet build --configuration Release --no-restore
 
     - name: Test
-      if: github.ref != 'refs/heads/DEV'
+      run: dotnet test --no-build --verbosity normal
+
+  create-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: windows-latest
+    needs: verify-build
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
       run: dotnet test --no-build --verbosity normal
 
     - name: Publish artifacts
-      if: github.ref != 'refs/heads/DEV'
       run: dotnet publish --configuration Release --output ./output
 
     - name: Create release directory
-      if: github.ref != 'refs/heads/DEV'
       run: mkdir -p release  # Create release directory if it doesn't exist
       
     - name: Copy build output to release directory
-      if: github.ref != 'refs/heads/DEV'
       run: xcopy /E /I /Y .\output\* release\
       
     - name: List Contents of Release Directory
-      if: github.ref != 'refs/heads/DEV'
       run: ls -l ./release  # Verify contents of the release directory
 
     - name: Archive release directory
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-artifact@v3
       with:
         name: release
         path: release
 
     - name: Create GitHub Release
-      if: github.ref != 'refs/heads/DEV'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -69,7 +83,6 @@ jobs:
 
     # Upload release assets as needed...
     - name: Upload Bonkers.deps.json
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
@@ -80,7 +93,6 @@ jobs:
         asset_content_type: application/json
 
     - name: Upload Bonkers.dll
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
@@ -92,7 +104,6 @@ jobs:
 
     # Repeat the upload steps for other files (Bonkers.exe, Bonkers.pdb, Bonkers.runtimeconfig.json)
     - name: Upload Bonkers.exe
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
@@ -103,7 +114,6 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload Bonkers.pdb
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
@@ -114,7 +124,6 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload Bonkers.runtimeconfig.json
-      if: github.ref != 'refs/heads/DEV'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUBACCESSTOKEN }}
