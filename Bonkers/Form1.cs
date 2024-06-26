@@ -525,7 +525,7 @@ namespace Bonkers
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
                 // Find the RichTextBox with the corresponding tag
-                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
                 if (selectedRichTextBox != null)
                 {
@@ -566,7 +566,7 @@ namespace Bonkers
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
                 // Find the RichTextBox with the corresponding tag
-                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
                 if (selectedRichTextBox != null)
                 {
@@ -600,7 +600,7 @@ namespace Bonkers
             string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
 
             // Find the RichTextBox with the corresponding tag
-            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
             if (selectedRichTextBox != null)
             {
@@ -847,7 +847,7 @@ namespace Bonkers
                 if (tabControl1.SelectedTab != null)
                 {
                     // Find the RichTextBox with the corresponding tag
-                    RichTextBox selectedRichTextBox = FindRichTextBoxByTag(tabControl1.SelectedTab.Tag as int?);
+                    RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
                     if (selectedRichTextBox != null)
                     {
@@ -971,7 +971,7 @@ namespace Bonkers
             string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
 
             // Find the RichTextBox with the corresponding tag
-            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
             if (selectedRichTextBox != null)
             {
@@ -1858,7 +1858,7 @@ namespace Bonkers
             try
             {
                 // Get the currently selected RichTextBox based on the active TabPage
-                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
                 if (selectedRichTextBox != null && !string.IsNullOrEmpty(selectedRichTextBox.SelectedText))
                 {
@@ -1896,7 +1896,7 @@ namespace Bonkers
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Get the currently selected RichTextBox based on the active TabPage
-            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
             if (selectedRichTextBox != null && Clipboard.ContainsText())
             {
@@ -1923,7 +1923,7 @@ namespace Bonkers
             try
             {
                 // Get the currently selected RichTextBox based on the active TabPage
-                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
                 if (selectedRichTextBox != null && !string.IsNullOrEmpty(selectedRichTextBox.SelectedText))
                 {
@@ -1953,7 +1953,7 @@ namespace Bonkers
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Get the currently selected RichTextBox based on the active TabPage
-            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
             if (selectedRichTextBox != null)
             {
@@ -2034,7 +2034,7 @@ namespace Bonkers
         private void HandleResponse(string responseBody)
         {
             // Find the RichTextBox associated with the current TabPage
-            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
             if (selectedRichTextBox != null)
             {
@@ -2146,7 +2146,7 @@ namespace Bonkers
         private RichTextBox GetSelectedRichTextBox()
         {
             // Assuming each tab contains a RichTextBox and tabTag holds the tag integer
-            int selectedTabTag = (int)tabControl1.SelectedTab.Tag;
+            int selectedTabTag = currentTextboxTag;
 
             // Assuming each RichTextBox's Tag property is set to an integer corresponding to tabTag
             // Example: RichTextBox tag setup during creation:
@@ -2215,20 +2215,16 @@ namespace Bonkers
                 }
             }
         }
-        private RichTextBox FindRichTextBoxByTag(int? tag)
+        private RichTextBox FindRichTextBoxByTag(int tag)
         {
-            if (tag == null)
-            {
-                return null;
-            }
-
             foreach (TabPage tabPage in tabControl1.TabPages)
             {
-                RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>()
-                                                         .FirstOrDefault(rtb => rtb.Tag != null && (int)rtb.Tag == tag);
-                if (richTextBox != null)
+                foreach (Control control in tabPage.Controls)
                 {
-                    return richTextBox;
+                    if (control is RichTextBox richTextBox && richTextBox.Tag is string rtbTagString && int.TryParse(rtbTagString, out int rtbTag) && rtbTag == tag)
+                    {
+                        return richTextBox;
+                    }
                 }
             }
             return null;
@@ -2291,6 +2287,19 @@ namespace Bonkers
                         break; // Assuming there's only one RichTextBox per tab, break after finding it
                     }
                 }
+            }
+        }
+
+        private void testToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RichTextBox targetRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
+            if (targetRichTextBox != null)
+            {
+                targetRichTextBox.AppendText("this is a test");
+            }
+            else
+            {
+                MessageBox.Show("RichTextBox not found for the current tag.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

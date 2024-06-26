@@ -53,6 +53,7 @@
             deselectToolStripMenuItem = new ToolStripMenuItem();
             cogVLMToolStripMenuItem = new ToolStripMenuItem();
             ollamaAPIToolStripMenuItem = new ToolStripMenuItem();
+            testToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripProgressBar1 = new ToolStripProgressBar();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
@@ -129,11 +130,12 @@
             // 
             // treeView1
             // 
+            treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
-            treeView1.Location = new Point(0, 0);
+            treeView1.Location = new Point(0, 27);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(156, 506);
+            treeView1.Size = new Size(168, 449);
             treeView1.TabIndex = 3;
             // 
             // contextMenuStrip1
@@ -167,11 +169,12 @@
             // 
             // listView1
             // 
+            listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             listView1.BackColor = SystemColors.ScrollBar;
             listView1.ContextMenuStrip = contextMenuStrip2;
-            listView1.Location = new Point(152, -80);
+            listView1.Location = new Point(174, 27);
             listView1.Name = "listView1";
-            listView1.Size = new Size(1112, 506);
+            listView1.Size = new Size(1094, 449);
             listView1.TabIndex = 4;
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
@@ -182,9 +185,9 @@
             // 
             // contextMenuStrip2
             // 
-            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem });
+            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem, testToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(159, 224);
+            contextMenuStrip2.Size = new Size(159, 246);
             // 
             // openToolStripMenuItem
             // 
@@ -262,6 +265,13 @@
             ollamaAPIToolStripMenuItem.Size = new Size(158, 22);
             ollamaAPIToolStripMenuItem.Text = "Ollama - API";
             ollamaAPIToolStripMenuItem.Click += ollamaAPIToolStripMenuItem_Click;
+            // 
+            // testToolStripMenuItem
+            // 
+            testToolStripMenuItem.Name = "testToolStripMenuItem";
+            testToolStripMenuItem.Size = new Size(158, 22);
+            testToolStripMenuItem.Text = "test";
+            testToolStripMenuItem.Click += testToolStripMenuItem_Click;
             // 
             // statusStrip1
             // 
@@ -367,12 +377,12 @@
             // 
             // tabControl1
             // 
+            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             tabControl1.ContextMenuStrip = contextMenuStrip4;
-            tabControl1.Dock = DockStyle.Bottom;
-            tabControl1.Location = new Point(0, 482);
+            tabControl1.Location = new Point(0, 473);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(1268, 139);
+            tabControl1.Size = new Size(1268, 148);
             tabControl1.TabIndex = 8;
             tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
             // 
@@ -394,12 +404,12 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
-            Controls.Add(tabControl1);
             Controls.Add(pictureBox1);
+            Controls.Add(tabControl1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
-            Controls.Add(listView1);
             Controls.Add(treeView1);
+            Controls.Add(listView1);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Bonkers";
@@ -460,5 +470,6 @@
         private TabControl tabControl1;
         private ContextMenuStrip contextMenuStrip4;
         private ToolStripMenuItem newTabToolStripMenuItem;
+        private ToolStripMenuItem testToolStripMenuItem;
     }
 }
