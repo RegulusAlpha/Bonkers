@@ -12,6 +12,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Runtime.InteropServices.Marshalling;
 using System.Runtime.InteropServices;
+using System.Drawing.Text;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 
 namespace Bonkers
 {
@@ -50,11 +53,13 @@ namespace Bonkers
         private string OllamaPrompt;
         private string ollamaAddress = "localhost";
         private string apiURL;
-
+        private int tabTag = 1;
+        private int currentTextboxTag = 1;
         public Form1()
         {
             InitializeComponent();
             LoadConfig();
+            AddNewTab();
             LoadDirectories();
             Clipboard.Clear();
         }
@@ -151,7 +156,7 @@ namespace Bonkers
             deepboru = config.deepboru;
             deselect = config.deselect;
             // Use localAPI and externalAPI as needed
-            richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
+            //richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
             deselectToolStripMenuItem.Visible = deselect;
             blipToolStripMenuItem.Visible = blip;
             deepboruToolStripMenuItem.Visible = deepboru;
@@ -311,22 +316,23 @@ namespace Bonkers
             }
         }
 
-
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             configFlag = 0;
+
+            // Check if the node's tag is null (e.g., after a refresh)
             if (e.Node.Tag == null)
             {
-                // Handle the case where the tag is null (e.g., after a refresh)
                 return;
             }
 
+            // Clear status labels
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
             toolStripStatusLabel3.Text = "";
             toolStripStatusLabel4.Text = "";
             toolStripStatusLabel5.Text = "";
-            richTextBox1.Text = "";
+
             // Ensure that the selected node in the TreeView is visible
             e.Node.EnsureVisible();
 
@@ -337,16 +343,23 @@ namespace Bonkers
             await Task.Delay(1000);
 
             // Get the path of the selected node in the TreeView
-
             string selectedPath = e.Node.Tag.ToString();
-            if (pathCheck == selectedPath) { return; } // this fixed a bug where after reloading tree, it would attempt to load the directory images twice
+
+            // Check if this path has already been processed to prevent duplicate loading
+            if (pathCheck == selectedPath)
+            {
+                return;
+            }
+
+            // Update pathCheck to the current selected path
             pathCheck = selectedPath;
+
+            // Output debug information
             if (consoleTrack % 2 == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
                 Console.Out.WriteLine("selected path " + selectedPath);
-
             }
             else
             {
@@ -424,27 +437,7 @@ namespace Bonkers
                     listView1.Items.Add(item);
 
                     // Update the progress bar value
-                    try
-                    {
-                        toolStripProgressBar1.Value++;
-                    }
-                    catch (Exception c)
-                    {
-                        if (consoleTrack % 2 == 0)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine(c.Message);
-
-                        }
-                        else
-                        {
-                            Console.ForegroundColor = ConsoleColor.White; // Default color
-                            Console.WriteLine(c.Message);
-                        }
-
-                        consoleTrack++;
-
-                    }
+                    toolStripProgressBar1.Value++;
                 }
             }
             catch (OperationCanceledException)
@@ -531,22 +524,32 @@ namespace Bonkers
                 // Create the path for the corresponding text file by changing the extension of the image file to .txt
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
-                // Check if the text file exists
-                if (File.Exists(txtFilePath))
-                {
-                    // Read the text content from the text file
-                    string textContent = File.ReadAllText(txtFilePath);
+                // Find the RichTextBox with the corresponding tag
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
 
-                    // Set the text content to richTextBox1
-                    richTextBox1.Text = textContent;
-                }
-                else
+                if (selectedRichTextBox != null)
                 {
-                    // Display an error message if the text file does not exist
-                    MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Check if the text file exists
+                    if (File.Exists(txtFilePath))
+                    {
+                        // Read the text content from the text file
+                        string textContent = File.ReadAllText(txtFilePath);
+
+                        // Set the text content to the selected RichTextBox
+                        AddTextToSelectedRichTextBox(selectedRichTextBox, textContent);
+
+                        // Display a message box to inform the user that the text file has been loaded successfully
+                        MessageBox.Show("Text file loaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Display an error message if the text file does not exist
+                        MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
+
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -562,22 +565,28 @@ namespace Bonkers
                 // Create the path for the corresponding text file by changing the extension of the image file to .txt
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
-                // Check if the text file exists
-                if (File.Exists(txtFilePath))
-                {
-                    // Get the text content from richTextBox1
-                    string textContent = richTextBox1.Text;
+                // Find the RichTextBox with the corresponding tag
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
 
-                    // Write the text content to the text file, overwriting its current content
-                    File.WriteAllText(txtFilePath, textContent);
-
-                    // Display a message box to inform the user that the text file has been saved successfully
-                    MessageBox.Show("Text file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
+                if (selectedRichTextBox != null)
                 {
-                    // Display an error message if the text file does not exist
-                    MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Check if the text file exists
+                    if (File.Exists(txtFilePath))
+                    {
+                        // Get the text content from the selected RichTextBox
+                        string textContent = selectedRichTextBox.Text;
+
+                        // Write the text content to the text file, overwriting its current content
+                        File.WriteAllText(txtFilePath, textContent);
+
+                        // Display a message box to inform the user that the text file has been saved successfully
+                        MessageBox.Show("Text file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Display an error message if the text file does not exist
+                        MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
@@ -588,31 +597,44 @@ namespace Bonkers
             string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
             // Get all text files (*.txt) in the selected directory
-            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-            // Iterate through each text file in the array
-            foreach (string txtFile in imageFiles)
+            // Find the RichTextBox with the corresponding tag
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+
+            if (selectedRichTextBox != null)
             {
-                // Get the text content from richTextBox1
-                string textContent = richTextBox1.Text; // Append text from richTextBox1
+                // Iterate through each text file in the array
+                foreach (string txtFile in textFiles)
+                {
+                    // Read the existing text content from the text file
+                    string textContent = File.ReadAllText(txtFile);
 
-                // Write the text content to the text file, overwriting its current content
-                File.WriteAllText(txtFile, textContent);
+                    // Append text from the selected RichTextBox to the existing text content
+                    textContent += selectedRichTextBox.Text;
+
+                    // Write the updated text content back to the text file, overwriting its current content
+                    File.WriteAllText(txtFile, textContent);
+                }
+
+                // Select all text in the selected RichTextBox
+                selectedRichTextBox.SelectAll();
+
+                // Change the color of the selected text to green
+                selectedRichTextBox.SelectionColor = Color.Green;
+
+                // Deselect all text
+                selectedRichTextBox.DeselectAll();
+
+                // Set the cursor position to the end of the text
+                selectedRichTextBox.SelectionStart = selectedRichTextBox.Text.Length;
+
+                // Scroll to the caret position (end of text)
+                selectedRichTextBox.ScrollToCaret();
+
+                // Display a message box to inform the user that the text files have been saved successfully
+                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            // Select all text in richTextBox1
-            richTextBox1.SelectAll();
-            // Change the color of the selected text to green
-            richTextBox1.SelectionColor = Color.Green;
-            // Deselect all text
-            richTextBox1.DeselectAll();
-            // Set the cursor position to the end of the text
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            // Scroll to the caret position (end of text)
-            richTextBox1.ScrollToCaret();
-
-            // Display a message box to inform the user that the text files have been saved successfully
-            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void editAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -637,95 +659,128 @@ namespace Bonkers
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (richTextBox1.Focused == false)
+                foreach (TabPage tabPage in tabControl1.TabPages)
                 {
-                    richTextBox1.Size = new System.Drawing.Size(1268, 137);
+                    // Find the RichTextBox in the TabPage
+                    RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>().FirstOrDefault();
 
+                    // Ensure the RichTextBox is not null and matches the correct tag condition (adjust as per your RTTS tag)
+                    if (richTextBox != null && richTextBox.Tag != null && richTextBox.Tag.ToString() == tabTag.ToString())
+                    {
+                        if (!richTextBox.Focused)
+                        {
+                            richTextBox.Size = new System.Drawing.Size(1268, 137);
+                        }
+                    }
                 }
             }
         }
-        private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
+        private void richTextBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (richTextBox1.Focused == true)
+                RichTextBox richTextBox = sender as RichTextBox;
+                if (richTextBox != null && richTextBox.Focused)
                 {
-                    richTextBox1.Size = new System.Drawing.Size(1268, 300);
-
+                    richTextBox.Size = new System.Drawing.Size(1268, 300);
                 }
             }
         }
-        private void listView1_ItemSelectionChanged(Object sender, ListViewItemSelectionChangedEventArgs e)
+        private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             configFlag = 0;
             // Check if an item is selected
             if (listView1.SelectedItems.Count > 0)
             {
                 currentIndex = e.ItemIndex;
-                //SaveRichTextBoxContent();
-                OpenTextFileOfSelectedPhoto();
-
+                //SaveRichTextBoxContent(); // Ensure to save content when item selection changes
+                OpenTextFileOfSelectedPhoto(); // Load text file content for the selected photo
             }
         }
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (richTextBox1.Focused == false)
+            foreach (TabPage tabPage in tabControl1.TabPages)
             {
-                richTextBox1.Size = new System.Drawing.Size(1268, 137);
+                // Find the RichTextBox in the TabPage
+                RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>().FirstOrDefault();
 
+                // Ensure the RichTextBox is not null and matches the correct tag condition (adjust as per your RTTS tag)
+                if (richTextBox != null && richTextBox.Tag != null && richTextBox.Tag.ToString() == tabTag.ToString())
+                {
+                    if (!richTextBox.Focused)
+                    {
+                        // Change the size of the RichTextBox
+                        richTextBox.Size = new System.Drawing.Size(1268, 137);
+
+                        // Change the size of the TabControl
+                        tabControl1.Size = new System.Drawing.Size(1300, 200); // Adjust the size as needed
+                    }
+                }
             }
         }
-        private void richTextBox1_KeyDown(object sender, KeyEventArgs e)
+
+        private void richTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            // Check if Ctrl+S is pressed
+            RichTextBox richTextBox = sender as RichTextBox;
+            if (richTextBox == null) return;
+
+            // Check if Ctrl+S is pressed to save content
             if (e.Control && e.KeyCode == Keys.S)
             {
-                // Save the content of richTextBox1
+                // Save the content of the RichTextBox
+                SaveRichTextBoxContent(richTextBox);
+
                 // Save the current cursor position
-                int currentCursorPosition = richTextBox1.SelectionStart;
+                int currentCursorPosition = richTextBox.SelectionStart;
 
-                // Save the content of the RichTextBox (assuming SaveRichTextBoxContent is a method that does this)
-                SaveRichTextBoxContent();
-
-                // Select all text and change its color
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Green;
-                richTextBox1.DeselectAll();
+                // Select all text and change its color to green
+                richTextBox.SelectAll();
+                richTextBox.SelectionColor = Color.Green;
+                richTextBox.DeselectAll();
 
                 // Restore the cursor position
-                richTextBox1.SelectionStart = currentCursorPosition;
-                richTextBox1.SelectionLength = 0; // Ensure nothing is selected
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position
+                richTextBox.SelectionStart = currentCursorPosition;
+                richTextBox.SelectionLength = 0; // Ensure nothing is selected
+                richTextBox.ScrollToCaret(); // Scroll to the caret position
             }
             else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down ||
                      e.KeyCode == Keys.Enter || e.KeyCode == Keys.Back || e.KeyCode == Keys.Shift || e.KeyCode == Keys.Space || e.Control)
             {
                 // Handle other keys if necessary
+
+                // Example: Allow default behavior for arrow keys, Enter, Backspace, Shift, Space, and Ctrl
+                // (No specific action needed here for these keys, so no additional code is added)
             }
-
-
             else
             {
-                // Get the current selection
-                int selectionStart = richTextBox1.SelectionStart;
-                int selectionLength = richTextBox1.SelectionLength;
+                // For any other key press (not specifically handled above)
 
-                // Delete the selected text
-                if (selectionLength > 0 && e.Control is not true)
+                // Get the current selection
+                int selectionStart = richTextBox.SelectionStart;
+                int selectionLength = richTextBox.SelectionLength;
+
+                // Delete the selected text if Ctrl is not pressed
+                if (selectionLength > 0 && !e.Control)
                 {
-                    richTextBox1.Text = richTextBox1.Text.Remove(selectionStart, selectionLength);
-                    richTextBox1.SelectionStart = selectionStart;
+                    richTextBox.Text = richTextBox.Text.Remove(selectionStart, selectionLength);
+                    richTextBox.SelectionStart = selectionStart;
                 }
 
-                // Change the color of the text
-                int currentCursorPosition = richTextBox1.SelectionStart;
-                richTextBox1.SelectAll();
-                richTextBox1.SelectionColor = Color.Red;
-                richTextBox1.DeselectAll();
-                richTextBox1.SelectionStart = currentCursorPosition;
-                richTextBox1.SelectionLength = 0; // Ensure nothing is selected
-                richTextBox1.ScrollToCaret(); // Scroll to the caret position
+                // Change the color of the text to red
+                int currentCursorPosition = richTextBox.SelectionStart;
+                richTextBox.SelectAll();
+                richTextBox.SelectionColor = Color.Red;
+                richTextBox.DeselectAll();
+                richTextBox.SelectionStart = currentCursorPosition;
+                richTextBox.SelectionLength = 0; // Ensure nothing is selected
+                richTextBox.ScrollToCaret(); // Scroll to the caret position
             }
+        }
+
+        private void SaveRichTextBoxContent(RichTextBox richTextBox)
+        {
+            // Implement your save logic here
+            // For example, save to a file or database
         }
         private void SaveRichTextBoxContent()
         {
@@ -744,14 +799,22 @@ namespace Bonkers
                     // Create the path for the text file associated with the image
                     string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
-                    // Check if the text file already exists
-                    if (File.Exists(txtFilePath))
+                    // Get the current selected tab in tabControl1
+                    TabPage selectedTab = tabControl1.SelectedTab;
+
+                    // Find the RichTextBox within the selected tab
+                    RichTextBox selectedRichTextBox = FindRichTextBoxInTab(selectedTab);
+
+                    if (selectedRichTextBox != null && File.Exists(txtFilePath))
                     {
-                        // Get the text content from richTextBox1
-                        string textContent = richTextBox1.Text;
+                        // Get the text content from the selected RichTextBox
+                        string textContent = selectedRichTextBox.Text;
 
                         // Write the text content to the text file
                         File.WriteAllText(txtFilePath, textContent);
+
+                        // Optionally update a status label with a success message
+                        // toolStripStatusLabel4.Text = "Text content saved successfully";
                     }
                 }
             }
@@ -762,6 +825,7 @@ namespace Bonkers
             }
         }
 
+
         private void OpenTextFileOfSelectedPhoto()
         {
             // Check if an item is selected in listView1
@@ -771,39 +835,57 @@ namespace Bonkers
                 string selectedImage = listView1.SelectedItems[0].Text;
 
                 // Combine the image path using the selected node in treeView1 and the selected image name
-                string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
+                string imagePath = Path.Combine(treeView1.SelectedNode?.Tag?.ToString(), selectedImage); // Added null checks
 
                 // Update the text of toolStripStatusLabel1 with the image path
-                toolStripStatusLabel1.Text = imagePath.ToString();
+                toolStripStatusLabel1.Text = imagePath?.ToString(); // Added null check
 
                 // Create the path for the associated text file with the image
                 string txtFilePath = Path.Combine(Path.GetDirectoryName(imagePath), Path.GetFileNameWithoutExtension(imagePath) + ".txt");
 
-                // Check if the text file exists
-                if (File.Exists(txtFilePath))
+                // Check if tabControl1.SelectedTab is not null before accessing its properties
+                if (tabControl1.SelectedTab != null)
                 {
-                    // Read the text content from the text file
-                    string textContent = File.ReadAllText(txtFilePath);
+                    // Find the RichTextBox with the corresponding tag
+                    RichTextBox selectedRichTextBox = FindRichTextBoxByTag(tabControl1.SelectedTab.Tag as int?);
 
-                    // Set the text content to richTextBox1
-                    richTextBox1.Text = textContent;
+                    if (selectedRichTextBox != null)
+                    {
+                        // Check if the text file exists
+                        if (File.Exists(txtFilePath))
+                        {
+                            // Read the text content from the text file
+                            string textContent = File.ReadAllText(txtFilePath);
 
-                    // Update toolStripStatusLabel2 with the path of the text file
-                    toolStripStatusLabel2.Text = txtFilePath.ToString();
+                            // Set the text content to the selected RichTextBox
+                            AddTextToSelectedRichTextBox(selectedRichTextBox, textContent);
 
-                    // Update toolStripStatusLabel3 to indicate that the text file exists
-                    toolStripStatusLabel3.Text = "TXT File Exists";
+                            // Update toolStripStatusLabel2 with the path of the text file
+                            toolStripStatusLabel2.Text = txtFilePath?.ToString(); // Added null check
+
+                            // Update toolStripStatusLabel3 to indicate that the text file exists
+                            toolStripStatusLabel3.Text = "TXT File Exists";
+                        }
+                        else
+                        {
+                            // Clear toolStripStatusLabel2
+                            toolStripStatusLabel2.Text = "";
+
+                            // Update toolStripStatusLabel3 to indicate that no text file is loaded
+                            toolStripStatusLabel3.Text = "No TXT File Loaded";
+
+                            // Clear the text in the selected RichTextBox
+                            selectedRichTextBox.Clear();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("No RichTextBox found with the specified tag.");
+                    }
                 }
                 else
                 {
-                    // Clear toolStripStatusLabel2
-                    toolStripStatusLabel2.Text = "";
-
-                    // Update toolStripStatusLabel3 to indicate that no text file is loaded
-                    toolStripStatusLabel3.Text = "No TXT File Loaded";
-
-                    // Clear the text in richTextBox1
-                    richTextBox1.Clear();
+                    MessageBox.Show("No tab selected in tabControl1.");
                 }
             }
         }
@@ -886,38 +968,44 @@ namespace Bonkers
             string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
             // Get all text files in the selected directory
-            string[] imageFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
 
-            // Iterate through each text file
-            foreach (string txtFile in imageFiles)
+            // Find the RichTextBox with the corresponding tag
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+
+            if (selectedRichTextBox != null)
             {
-                // Read the existing text content from the text file
-                string textContent = File.ReadAllText(txtFile);
+                // Iterate through each text file
+                foreach (string txtFile in textFiles)
+                {
+                    // Read the existing text content from the text file
+                    string textContent = File.ReadAllText(txtFile);
 
-                // Append text from richTextBox1 to the existing text content
-                textContent += richTextBox1.Text;
+                    // Append text from the selected RichTextBox to the existing text content
+                    textContent += selectedRichTextBox.Text;
 
-                // Write the updated text content back to the text file
-                File.WriteAllText(txtFile, textContent);
+                    // Write the updated text content back to the text file
+                    File.WriteAllText(txtFile, textContent);
+                }
+
+                // Select all text in the selected RichTextBox
+                selectedRichTextBox.SelectAll();
+
+                // Set the selection color to green in the selected RichTextBox
+                selectedRichTextBox.SelectionColor = Color.Green;
+
+                // Deselect all text in the selected RichTextBox
+                selectedRichTextBox.DeselectAll();
+
+                // Set the selection start to the end of the text in the selected RichTextBox
+                selectedRichTextBox.SelectionStart = selectedRichTextBox.Text.Length;
+
+                // Scroll to the caret position (end of text) in the selected RichTextBox
+                selectedRichTextBox.ScrollToCaret();
+
+                // Show a success message box
+                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            // Select all text in richTextBox1
-            richTextBox1.SelectAll();
-
-            // Set the selection color to green in richTextBox1
-            richTextBox1.SelectionColor = Color.Green;
-
-            // Deselect all text in richTextBox1
-            richTextBox1.DeselectAll();
-
-            // Set the selection start to the end of the text in richTextBox1
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-
-            // Scroll to the caret position (end of text) in richTextBox1
-            richTextBox1.ScrollToCaret();
-
-            // Show a success message box
-            MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -1027,8 +1115,11 @@ namespace Bonkers
                     // Convert the image to base64 string (PNG format)
                     string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
 
+                    // Get the selected RichTextBox
+                    RichTextBox selectedRichTextBox = GetSelectedRichTextBox(); // Implement this method based on your application logic
+
                     // Send the API request asynchronously
-                    await SendApiRequest(base64String);
+                    await SendApiRequest(base64String, selectedRichTextBox);
                 }
             }
             else
@@ -1054,16 +1145,16 @@ namespace Bonkers
         }
 
         // Define an asynchronous task to send an API request with a Base64 image string
-        private async Task SendApiRequest(string base64Image)
+        private async Task SendApiRequest(string base64Image, RichTextBox selectedRichTextBox)
         {
             // Create a new HttpClient for making HTTP requests
             using (var client = new HttpClient())
             {
                 // Get the local API address from the localAPI variable
-                string ipAdd = localAPI;
+                string ipAdd = localAPI; // Make sure localAPI is defined and accessible
 
                 // Create a new HttpRequestMessage for the API endpoint
-                var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
+                var request = new HttpRequestMessage(HttpMethod.Post, $"http://{ipAdd}:7860/sdapi/v1/interrogate");
                 try
                 {
                     // Set the request content to JSON format with the Base64 image string
@@ -1078,11 +1169,11 @@ namespace Bonkers
 
                     // Read the response content as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
+
                     if (consoleTrack % 2 == 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(responseContent);
-
                     }
                     else
                     {
@@ -1092,13 +1183,12 @@ namespace Bonkers
 
                     consoleTrack++;
 
-
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
                     string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
 
-                    // Update the richTextBox1 with the extracted caption
-                    richTextBox1.Text = caption;
+                    // Update the selected RichTextBox with the extracted caption
+                    UpdateRichTextBox(selectedRichTextBox, caption);
                 }
                 catch (Exception e)
                 {
@@ -1106,7 +1196,6 @@ namespace Bonkers
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(e.Message);
-
                     }
                     else
                     {
@@ -1115,7 +1204,6 @@ namespace Bonkers
                     }
 
                     consoleTrack++;
-
                 }
                 // Optionally update a status label with a success message
                 // toolStripStatusLabel4.Text = "Request successful";
@@ -1123,7 +1211,7 @@ namespace Bonkers
         }
 
         // Define an asynchronous task to send an API request with a Base64 image string (without specifying the model)
-        private async Task SendApiRequestNormal(string base64Image)
+        private async Task SendApiRequestNormal(string base64Image, RichTextBox selectedRichTextBox)
         {
             // Create a new HttpClient for making HTTP requests
             using (var client = new HttpClient())
@@ -1133,7 +1221,7 @@ namespace Bonkers
                 try
                 {
                     // Create a new HttpRequestMessage for the API endpoint without specifying the model
-                    var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":7860/sdapi/v1/interrogate");
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"http://{ipAdd}:7860/sdapi/v1/interrogate");
 
                     // Set the request content to JSON format with the Base64 image string
                     var content = new StringContent($"{{\n    \"image\": \"{base64Image}\"\n}}", Encoding.UTF8, "application/json");
@@ -1147,11 +1235,11 @@ namespace Bonkers
 
                     // Read the response content as a string
                     string responseContent = await response.Content.ReadAsStringAsync();
+
                     if (consoleTrack % 2 == 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(responseContent);
-
                     }
                     else
                     {
@@ -1161,13 +1249,12 @@ namespace Bonkers
 
                     consoleTrack++;
 
-
                     // Parse the JSON response to extract the caption
                     var jsonDocument = JsonDocument.Parse(responseContent);
                     string caption = jsonDocument.RootElement.GetProperty("caption").GetString();
 
-                    // Update the richTextBox1 with the extracted caption
-                    richTextBox1.Text = caption;
+                    // Update the selected RichTextBox with the extracted caption
+                    UpdateRichTextBox(selectedRichTextBox, caption);
                 }
                 catch (Exception e)
                 {
@@ -1175,7 +1262,6 @@ namespace Bonkers
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(e.Message);
-
                     }
                     else
                     {
@@ -1184,28 +1270,24 @@ namespace Bonkers
                     }
 
                     consoleTrack++;
-
-
                 }
                 // Optionally update a status label with a success message
-                //toolStripStatusLabel4.Text = "Request successful";
+                // toolStripStatusLabel4.Text = "Request successful";
             }
         }
-        private async Task SendApiRequestChatCompletions(string base64Image)
+        private async Task SendApiRequestChatCompletions(string base64Image, RichTextBox selectedRichTextBox)
         {
             string thinkTags = "";
             string hintTag = hint;
-            if (hintTag is not "" && richTextBox1.Text is not "")
+            if (hintTag != "" && selectedRichTextBox.Text != "")
             {
-                thinkTags = richTextBox1.Text;
+                thinkTags = selectedRichTextBox.Text;
             }
             else
             {
                 thinkTags = "";
                 hintTag = "";
             }
-
-
 
             // Create a new HttpClient for making HTTP requests
             using (var client = new HttpClient())
@@ -1214,42 +1296,39 @@ namespace Bonkers
                 string ipAdd = localAPI;
                 try
                 {
-                    //*********this needs to be made a config item********** oops
+                    // Config item
                     string nonsense = "you are a AI artwork tagging assistant, you primarily tag images in detail. Tag appearance, tag clothing, tag background, tag expression, tag position, tag pose, tag camera angle:  ";
+
                     // Create a new HttpRequestMessage for the chat completions API endpoint
-                    var request = new HttpRequestMessage(HttpMethod.Post, "http://" + ipAdd + ":8000/v1/chat/completions");
+                    var request = new HttpRequestMessage(HttpMethod.Post, $"http://{ipAdd}:8000/v1/chat/completions");
 
                     // Set the request content to JSON format with the specified JSON payload
-                    //cogvlm-grounding-generalist
-                    //glm-4
-                    //cogview-3
-
                     var jsonPayload = $@"
+    {{
+        ""model"": ""cogview-3"",
+        ""messages"": [
             {{
-              ""model"": ""cogview-3"",
-              ""messages"": [
-                  
-                {{
-                  ""role"": ""user"",
-                  ""content"": [
+                ""role"": ""user"",
+                ""content"": [
                     {{
-                      ""type"": ""text"",
-                      ""text"": ""{nonsense}{CogVLMprompt}{hintTag}{thinkTags}""
+                        ""type"": ""text"",
+                        ""text"": ""{nonsense}{CogVLMprompt}{hintTag}{thinkTags}""
                     }},
                     {{
-                      ""type"": ""image_url"",
-                      ""image_url"": {{
-                        ""url"": ""data:image/jpeg;base64,{base64Image}""
-                      }}
+                        ""type"": ""image_url"",
+                        ""image_url"": {{
+                            ""url"": ""data:image/jpeg;base64,{base64Image}""
+                        }}
                     }}
-                  ]
-                }}
-              ],
-              ""stream"": false,
-              ""max_tokens"": {CogVLMmax_tokens},
-              ""temperature"": {CogVLMtemperature},
-              ""top_p"": {CogVLMtop_p}
-            }}";
+                ]
+            }}
+        ],
+        ""stream"": false,
+        ""max_tokens"": {CogVLMmax_tokens},
+        ""temperature"": {CogVLMtemperature},
+        ""top_p"": {CogVLMtop_p}
+    }}";
+
                     var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                     request.Content = content;
 
@@ -1275,13 +1354,14 @@ namespace Bonkers
                                 var message = firstChoice.GetProperty("message");
                                 string chatContent = message.GetProperty("content").GetString();
 
-                                // Update richTextBox1 with the extracted content
-                                richTextBox1.Text = chatContent;
+                                // Update the selected RichTextBox with the extracted content
+                                UpdateRichTextBox(selectedRichTextBox, chatContent);
+
+                                // Print to console
                                 if (consoleTrack % 2 == 0)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Green;
                                     Console.WriteLine(chatContent);
-
                                 }
                                 else
                                 {
@@ -1290,18 +1370,17 @@ namespace Bonkers
                                 }
 
                                 consoleTrack++;
-
                             }
                         }
                     }
                 }
                 catch (Exception e)
                 {
+                    // Print exception message to console
                     if (consoleTrack % 2 == 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine(e.Message);
-
                     }
                     else
                     {
@@ -1310,38 +1389,49 @@ namespace Bonkers
                     }
 
                     consoleTrack++;
-
                 }
                 // Optionally update a status label with a success message
-                //toolStripStatusLabel4.Text = "Request successful";
+                // toolStripStatusLabel4.Text = "Request successful";
             }
         }
+
         // Define an asynchronous event handler for the blipToolStripMenuItem click event
         private async void blipToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Clear toolStripStatusLabel5 text
             toolStripStatusLabel5.Text = "";
 
-            // Check if the file path in toolStripStatusLabel1 exists
-            if (File.Exists(toolStripStatusLabel1.Text))
+            // Get the selected RichTextBox
+            RichTextBox selectedRichTextBox = GetSelectedRichTextBox();
+
+            if (selectedRichTextBox != null)
             {
-                // Get the file path
-                string filePath = toolStripStatusLabel1.Text;
-
-                // Load the image from the file path
-                using (Image image = Image.FromFile(filePath))
+                // Check if the file path in toolStripStatusLabel1 exists
+                if (File.Exists(toolStripStatusLabel1.Text))
                 {
-                    // Convert the image to base64 string (PNG format)
-                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    // Get the file path
+                    string filePath = toolStripStatusLabel1.Text;
 
-                    // Send the API request (without specifying the model)
-                    await SendApiRequestNormal(base64String);
+                    // Load the image from the file path
+                    using (Image image = Image.FromFile(filePath))
+                    {
+                        // Convert the image to base64 string (PNG format)
+                        string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                        // Send the API request asynchronously
+                        await SendApiRequestNormal(base64String, selectedRichTextBox);
+                    }
+                }
+                else
+                {
+                    // Update toolStripStatusLabel5 with an error message
+                    toolStripStatusLabel5.Text = "Invalid file path";
                 }
             }
             else
             {
-                // Update toolStripStatusLabel5 with an error message
-                toolStripStatusLabel5.Text = "Invalid file path";
+                // Handle case where no RichTextBox is found
+                toolStripStatusLabel5.Text = "No RichTextBox found for selected tab";
             }
         }
 
@@ -1429,7 +1519,7 @@ namespace Bonkers
             toolStripStatusLabel3.Text = "";
             toolStripStatusLabel4.Text = "";
             toolStripStatusLabel5.Text = "";
-            richTextBox1.Text = "";
+            //richTextBox1.Text = "";
 
             // Hide the progress bar and reset its value
             toolStripProgressBar1.Visible = false;
@@ -1451,20 +1541,32 @@ namespace Bonkers
             toolStripStatusLabel3.Text = "";
             toolStripStatusLabel4.Text = "";
             toolStripStatusLabel5.Text = "";
-            // Check if the config file exists
-            if (File.Exists(configPath))
-            {
-                // Read the content of the config file and display it in richTextBox1
-                string configContent = File.ReadAllText(configPath);
-                richTextBox1.Text = configContent;
 
-                // Set the configFlag to 1 to indicate that config is loaded
-                configFlag = 1;
+            // Get the current RichTextBox based on its tag
+            int tabTag = tabControl1.SelectedIndex + 1; // Assuming tabTag starts from 1
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(tabTag);
+
+            if (selectedRichTextBox != null)
+            {
+                // Check if the config file exists
+                if (File.Exists(configPath))
+                {
+                    // Read the content of the config file and display it in the selected RichTextBox
+                    string configContent = File.ReadAllText(configPath);
+                    UpdateRichTextBox(selectedRichTextBox, configContent);
+
+                    // Set the configFlag to 1 to indicate that config is loaded
+                    configFlag = 1;
+                }
+                else
+                {
+                    // Display an error message if the config file is not found
+                    MessageBox.Show("Config file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
-                // Display an error message if the config file is not found
-                MessageBox.Show("Config file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -1474,17 +1576,25 @@ namespace Bonkers
             // Define the path to the config file
             string configPath = "Bonkers.cfg";
 
-            // Check if the config file exists
-            if (File.Exists(configPath))
-            {
-                // Get the text content from richTextBox1 and write it to the config file
-                string textContent = richTextBox1.Text;
-                File.WriteAllText(configPath, textContent);
-            }
+            // Get the current RichTextBox based on its tag
+            int tabTag = tabControl1.SelectedIndex + 1; // Assuming tabTag starts from 1
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(tabTag);
 
-            // Reset the configFlag to 0 and reload the config
-            //configFlag = 0;
-            LoadConfig();
+            if (selectedRichTextBox != null)
+            {
+                // Get the text content from the selected RichTextBox
+                string textContent = selectedRichTextBox.Text;
+
+                // Write the content to the config file
+                File.WriteAllText(configPath, textContent);
+
+                // Optionally display a message to indicate successful save
+                MessageBox.Show("Config file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // Define an event handler for reloading the config
@@ -1653,7 +1763,7 @@ namespace Bonkers
             {
                 pictureBox1.Focus();
             }
-           
+
         }
         //EXPERIMENTAL
 
@@ -1682,26 +1792,37 @@ namespace Bonkers
             // Clear toolStripStatusLabel5 text
             toolStripStatusLabel5.Text = "";
 
-            // Check if the file path in toolStripStatusLabel1 exists
-            if (File.Exists(toolStripStatusLabel1.Text))
+            // Get the selected RichTextBox
+            RichTextBox selectedRichTextBox = GetSelectedRichTextBox();
+
+            if (selectedRichTextBox != null)
             {
-                // Get the file path
-                string filePath = toolStripStatusLabel1.Text;
-
-                // Load the image from the file path
-                using (Image image = Image.FromFile(filePath))
+                // Check if the file path in toolStripStatusLabel1 exists
+                if (File.Exists(toolStripStatusLabel1.Text))
                 {
-                    // Convert the image to base64 string (PNG format)
-                    string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+                    // Get the file path
+                    string filePath = toolStripStatusLabel1.Text;
 
-                    // Send the API request (without specifying the model)
-                    await SendApiRequestChatCompletions(base64String);
+                    // Load the image from the file path
+                    using (Image image = Image.FromFile(filePath))
+                    {
+                        // Convert the image to base64 string (PNG format)
+                        string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                        // Send the API request asynchronously
+                        await SendApiRequestChatCompletions(base64String, selectedRichTextBox);
+                    }
+                }
+                else
+                {
+                    // Update toolStripStatusLabel5 with an error message
+                    toolStripStatusLabel5.Text = "Invalid file path";
                 }
             }
             else
             {
-                // Update toolStripStatusLabel5 with an error message
-                toolStripStatusLabel5.Text = "Invalid file path";
+                // Handle case where no RichTextBox is found
+                toolStripStatusLabel5.Text = "No RichTextBox found for selected tab";
             }
         }
 
@@ -1712,84 +1833,88 @@ namespace Bonkers
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Text = "";
+            // Get the currently selected tab
+            TabPage selectedTab = tabControl1.SelectedTab;
+
+            // Find the RichTextBox within the selected tab
+            RichTextBox selectedRichTextBox = FindRichTextBoxInTab(selectedTab);
+
+            if (selectedRichTextBox != null)
+            {
+                // Clear the content of the selected RichTextBox
+                selectedRichTextBox.Clear();
+
+                // Optionally, display a message to indicate success
+                MessageBox.Show("RichTextBox cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
-                if (!string.IsNullOrEmpty(richTextBox1.SelectedText))
+                // Get the currently selected RichTextBox based on the active TabPage
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+
+                if (selectedRichTextBox != null && !string.IsNullOrEmpty(selectedRichTextBox.SelectedText))
                 {
                     Clipboard.Clear();
-                    string clip = richTextBox1.SelectedText.ToString();
+                    string clip = selectedRichTextBox.SelectedText;
 
+                    // Output to console for debugging
+                    LogToConsole("copied text: " + clip);
 
-                    if (consoleTrack % 2 == 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Out.WriteLine("copied text: " + clip);
-
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White; // Default color
-                        Console.Out.WriteLine("copied text: " + clip);
-                    }
-                    consoleTrack++;
-                    System.Threading.Thread.Sleep(50);
+                    // Copy the selected text to clipboard
                     Clipboard.SetText(clip);
                 }
                 else
                 {
-                    if (consoleTrack % 2 == 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Out.WriteLine("No text selected to copy.");
-
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White; // Default color
-                        Console.Out.WriteLine("No text selected to copy.");
-                    }
-                    consoleTrack++;
+                    // Output to console for debugging
+                    LogToConsole("No text selected to copy.");
                 }
             }
             catch (ExternalException ex)
             {
-
+                // Handle clipboard exceptions if necessary
+                Console.WriteLine("Clipboard operation failed: " + ex.Message);
             }
         }
 
+        private void LogToConsole(string message)
+        {
+            // Toggle console text color for readability
+            Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+            Console.Out.WriteLine(message);
+            consoleTrack++;
+        }
+
+
         private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (Clipboard.ContainsText())
-            {
-                // If there is selected text, replace it
-                if (richTextBox1.SelectedText != string.Empty)
-                {
-                    richTextBox1.SelectedText = Clipboard.GetText();
-                }
-                // If no text is selected, insert at the current position
-                else
-                {
-                    int selectionStart = richTextBox1.SelectionStart;
-                    richTextBox1.Text = richTextBox1.Text.Insert(selectionStart, Clipboard.GetText());
-                    richTextBox1.SelectionStart = selectionStart + Clipboard.GetText().Length;
-                }
-                if (consoleTrack % 2 == 0)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Out.WriteLine("pasted text: " + Clipboard.GetText());
+            // Get the currently selected RichTextBox based on the active TabPage
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
 
+            if (selectedRichTextBox != null && Clipboard.ContainsText())
+            {
+                // If text is selected, replace it with clipboard content
+                if (selectedRichTextBox.SelectedText != string.Empty)
+                {
+                    selectedRichTextBox.SelectedText = Clipboard.GetText();
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.White; // Default color
-                    Console.Out.WriteLine("pasted text: " + Clipboard.GetText());
+                    // Insert clipboard content at current cursor position
+                    int selectionStart = selectedRichTextBox.SelectionStart;
+                    selectedRichTextBox.Text = selectedRichTextBox.Text.Insert(selectionStart, Clipboard.GetText());
+                    selectedRichTextBox.SelectionStart = selectionStart + Clipboard.GetText().Length;
                 }
-                consoleTrack++;
+
+                // Output to console for debugging
+                LogToConsole("pasted text: " + Clipboard.GetText());
             }
         }
 
@@ -1797,57 +1922,45 @@ namespace Bonkers
         {
             try
             {
-                if (richTextBox1.SelectedText != string.Empty)
+                // Get the currently selected RichTextBox based on the active TabPage
+                RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+
+                if (selectedRichTextBox != null && !string.IsNullOrEmpty(selectedRichTextBox.SelectedText))
                 {
                     Clipboard.Clear();
-                    string cut = richTextBox1.SelectedText.ToString();
-                    System.Threading.Thread.Sleep(50);
-                    richTextBox1.SelectedText = "";
+                    string cut = selectedRichTextBox.SelectedText;
 
+                    // Output to console for debugging
+                    LogToConsole("cut text: " + cut);
 
-
-
-                    if (consoleTrack % 2 == 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Out.WriteLine("cut text: " + cut);
-
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White; // Default color
-                        Console.Out.WriteLine("cut text: " + cut);
-                    }
-                    consoleTrack++;
+                    // Cut the selected text and copy to clipboard
+                    selectedRichTextBox.SelectedText = "";
                     Clipboard.SetText(cut);
                 }
                 else
                 {
-                    if (consoleTrack % 2 == 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Out.WriteLine("No text selected to copy.");
-
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White; // Default color
-                        Console.Out.WriteLine("No text selected to copy.");
-                    }
-                    consoleTrack++;
+                    // Output to console for debugging
+                    LogToConsole("No text selected to cut.");
                 }
             }
             catch (ExternalException ex)
             {
-
+                // Handle clipboard exceptions if necessary
+                Console.WriteLine("Clipboard operation failed: " + ex.Message);
             }
         }
 
         private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            richTextBox1.Focus();
-            richTextBox1.SelectAll();
+            // Get the currently selected RichTextBox based on the active TabPage
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
 
+            if (selectedRichTextBox != null)
+            {
+                // Focus on the RichTextBox and select all text
+                selectedRichTextBox.Focus();
+                selectedRichTextBox.SelectAll();
+            }
         }
 
         private async void ollamaAPIToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1893,7 +2006,7 @@ namespace Bonkers
         }}";
 
             var jsonContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-            
+
             if (ollamaAddress is not null)
             {
                 apiURL = "http://" + ollamaAddress.ToString() + ":11434/api/generate";
@@ -1902,7 +2015,7 @@ namespace Bonkers
             {
                 apiURL = "http://localhost:11434/api/generate";
             }
-            
+
             try
             {
                 var response = await client.PostAsync(apiURL, jsonContent);
@@ -1920,47 +2033,35 @@ namespace Bonkers
 
         private void HandleResponse(string responseBody)
         {
-            using (JsonDocument doc = JsonDocument.Parse(responseBody))
+            // Find the RichTextBox associated with the current TabPage
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag((int)tabControl1.SelectedTab.Tag);
+
+            if (selectedRichTextBox != null)
             {
-                JsonElement root = doc.RootElement;
-
-                //string model = root.GetProperty("model").GetString();
-                //string createdAt = root.GetProperty("created_at").GetString();
-                string responseText = root.GetProperty("response").GetString();
-                //bool done = root.GetProperty("done").GetBoolean();
-                //string doneReason = root.GetProperty("done_reason").GetString();
-                //JsonElement context = root.GetProperty("context");
-                //long totalDuration = root.GetProperty("total_duration").GetInt64();
-                //long loadDuration = root.GetProperty("load_duration").GetInt64();
-                //int promptEvalCount = root.GetProperty("prompt_eval_count").GetInt32();
-                //long promptEvalDuration = root.GetProperty("prompt_eval_duration").GetInt64();
-                //int evalCount = root.GetProperty("eval_count").GetInt32();
-                //long evalDuration = root.GetProperty("eval_duration").GetInt64();
-
-                //Console.WriteLine("Model: " + model);
-                //Console.WriteLine("Created At: " + createdAt);
-                if (consoleTrack % 2 == 0)
+                // Parse the JSON response body
+                using (JsonDocument doc = JsonDocument.Parse(responseBody))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Response: " + responseText);
+                    JsonElement root = doc.RootElement;
+
+                    // Extract the response text from JSON
+                    string responseText = root.GetProperty("response").GetString();
+
+                    // Print response to console with alternating colors for tracking
+                    if (consoleTrack % 2 == 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Response: " + responseText);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White; // Default color
+                        Console.WriteLine("Response: " + responseText);
+                    }
+                    consoleTrack++;
+
+                    // Update the selected RichTextBox with the response text
+                    selectedRichTextBox.Text = responseText;
                 }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.White; // Default color
-                    Console.WriteLine("Response: " + responseText);
-                }
-                consoleTrack++;
-                
-                //Console.WriteLine("Done: " + done);
-                //Console.WriteLine("Done Reason: " + doneReason);
-                //Console.WriteLine("Context: " + context);
-                //Console.WriteLine("Total Duration: " + totalDuration);
-                //Console.WriteLine("Load Duration: " + loadDuration);
-                //Console.WriteLine("Prompt Eval Count: " + promptEvalCount);
-                //Console.WriteLine("Prompt Eval Duration: " + promptEvalDuration);
-                //Console.WriteLine("Eval Count: " + evalCount);
-                //Console.WriteLine("Eval Duration: " + evalDuration);
-                richTextBox1.Text = responseText;
             }
         }
 
@@ -1969,15 +2070,228 @@ namespace Bonkers
 
         }
 
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        private void richTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (richTextBox1.Focused == true)
-            {
-                richTextBox1.Size = new System.Drawing.Size(1268, 300);
+            RichTextBox richTextBox = sender as RichTextBox;
+            if (richTextBox == null)
+                return;
 
+            // Iterate through all TabPages in the TabControl
+            foreach (TabPage tabPage in tabControl1.TabPages)
+            {
+                // Find all RichTextBox controls in the current TabPage
+                foreach (Control control in tabPage.Controls)
+                {
+                    RichTextBox rtb = control as RichTextBox;
+                    if (rtb != null && rtb.Focused && rtb.Tag != null && rtb.Tag.ToString() == "YourTag")
+                    {
+                        rtb.Size = new System.Drawing.Size(1268, 300);
+                    }
+                }
             }
         }
 
-       
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+        //EXTREMELY EXPERIMENTAL
+        private void AddNewTab()
+        {
+
+            // Create a new TabPage
+            TabPage newTabPage = new TabPage("Tab: " + tabTag);
+
+            // Create a new RichTextBox
+            RichTextBox newRichTextBox = new RichTextBox
+            {
+                Dock = DockStyle.Fill, // Fill the TabPage with the RichTextBox
+                ContextMenuStrip = contextMenuStrip4, // Attach contextMenuStrip4 to the RichTextBox
+                Tag = tabTag.ToString() // Set the tag as needed
+            };
+
+            // Attach the KeyDown event handler
+            newRichTextBox.KeyDown += richTextBox_KeyDown;
+
+            // Add the RichTextBox to the TabPage
+            newTabPage.Controls.Add(newRichTextBox);
+
+            // Add the TabPage to the TabControl
+            tabControl1.TabPages.Add(newTabPage);
+
+            // Set the newly added tab as the selected tab
+            tabControl1.SelectedTab = newTabPage;
+            tabTag++;
+        }
+
+
+        private void newTabToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddNewTab();
+        }
+
+        //HYPER EXPERIMENTAL
+        private void AddTextToSelectedRichTextBox(RichTextBox richTextBox, string text)
+        {
+            // Ensure we are operating on the UI thread
+            if (richTextBox.InvokeRequired)
+            {
+                richTextBox.Invoke(new Action(() => richTextBox.Text = text));
+            }
+            else
+            {
+                richTextBox.Text = text;
+            }
+        }
+        private RichTextBox GetSelectedRichTextBox()
+        {
+            // Assuming each tab contains a RichTextBox and tabTag holds the tag integer
+            int selectedTabTag = (int)tabControl1.SelectedTab.Tag;
+
+            // Assuming each RichTextBox's Tag property is set to an integer corresponding to tabTag
+            // Example: RichTextBox tag setup during creation:
+            // richTextBox.Tag = tabTag; // Where tabTag is incremented with each new tab creation
+
+            // Find the RichTextBox in the selected tab based on its tag
+            foreach (Control control in tabControl1.SelectedTab.Controls)
+            {
+                if (control is RichTextBox rtb && (int)rtb.Tag == selectedTabTag)
+                {
+                    return rtb;
+                }
+            }
+
+            return null; // Return null if no RichTextBox is found (handle accordingly in your application)
+        }
+        private string ReadTextFromSelectedRichTextBox()
+        {
+            if (tabControl1.SelectedTab != null)
+            {
+                // Find the RichTextBox in the selected TabPage
+                RichTextBox selectedRichTextBox = tabControl1.SelectedTab.Controls.OfType<RichTextBox>().FirstOrDefault();
+
+                if (selectedRichTextBox != null)
+                {
+                    // Return the text from the selected RichTextBox
+                    return selectedRichTextBox.Text;
+                }
+            }
+            return string.Empty; // Return an empty string if no RichTextBox is found
+        }
+        private void ModifySelectedRichTextBox()
+        {
+            if (tabControl1.SelectedTab != null)
+            {
+                // Find the RichTextBox in the selected TabPage
+                RichTextBox selectedRichTextBox = tabControl1.SelectedTab.Controls.OfType<RichTextBox>().FirstOrDefault();
+
+                if (selectedRichTextBox != null)
+                {
+                    // Select all text
+                    selectedRichTextBox.SelectAll();
+                    // Change the color of the selected text to green
+                    selectedRichTextBox.SelectionColor = Color.Green;
+                    // Deselect all text
+                    selectedRichTextBox.DeselectAll();
+                    // Set the cursor position to the end of the text
+                    selectedRichTextBox.SelectionStart = selectedRichTextBox.Text.Length;
+                    // Scroll to the caret position (end of text)
+                    selectedRichTextBox.ScrollToCaret();
+                }
+            }
+        }
+        private void ClearRichTextBoxWithTag(string tag)
+        {
+            foreach (TabPage tabPage in tabControl1.TabPages)
+            {
+                // Find the RichTextBox in the TabPage
+                RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>().FirstOrDefault(rtb => rtb.Tag != null && rtb.Tag.ToString() == tag);
+
+                if (richTextBox != null)
+                {
+                    // Clear the text of the RichTextBox
+                    richTextBox.Clear();
+                    break; // Exit the loop after clearing the first matching RichTextBox
+                }
+            }
+        }
+        private RichTextBox FindRichTextBoxByTag(int? tag)
+        {
+            if (tag == null)
+            {
+                return null;
+            }
+
+            foreach (TabPage tabPage in tabControl1.TabPages)
+            {
+                RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>()
+                                                         .FirstOrDefault(rtb => rtb.Tag != null && (int)rtb.Tag == tag);
+                if (richTextBox != null)
+                {
+                    return richTextBox;
+                }
+            }
+            return null;
+        }
+
+
+        private void UpdateRichTextBox(RichTextBox richTextBox, string text)
+        {
+            // Ensure we are operating on the UI thread
+            if (richTextBox.InvokeRequired)
+            {
+                richTextBox.Invoke(new Action(() => richTextBox.Text = text));
+            }
+            else
+            {
+                richTextBox.Text = text;
+            }
+        }
+
+        private RichTextBox FindRichTextBoxInTab(TabPage tab)
+        {
+            foreach (Control control in tab.Controls)
+            {
+                if (control is RichTextBox rtb)
+                {
+                    return rtb;
+                }
+            }
+            return null;
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Get the currently selected tab
+            TabPage selectedTab = tabControl1.SelectedTab;
+
+            if (selectedTab != null)
+            {
+                // Iterate through the controls in the selected tab page
+                foreach (Control control in selectedTab.Controls)
+                {
+                    // Check if the control is a RichTextBox
+                    if (control is RichTextBox richTextBox)
+                    {
+                        // Get the tag of the RichTextBox and log it to the console
+                        object rtbTag = richTextBox.Tag;
+                        Console.WriteLine($"Tag of RichTextBox in selected tab: {rtbTag}");
+
+                        // Convert the tag to int
+                        if (rtbTag != null && int.TryParse(rtbTag.ToString(), out int tagValue))
+                        {
+                            currentTextboxTag = tagValue;
+                            Console.WriteLine($"Converted Tag to int: {currentTextboxTag}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Failed to parse Tag to int.");
+                        }
+
+                        break; // Assuming there's only one RichTextBox per tab, break after finding it
+                    }
+                }
+            }
+        }
     }
 }

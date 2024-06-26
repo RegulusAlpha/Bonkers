@@ -30,7 +30,6 @@
         {
             components = new System.ComponentModel.Container();
             imageList1 = new ImageList(components);
-            richTextBox1 = new RichTextBox();
             contextMenuStrip3 = new ContextMenuStrip(components);
             cutToolStripMenuItem = new ToolStripMenuItem();
             copyToolStripMenuItem = new ToolStripMenuItem();
@@ -68,12 +67,16 @@
             reloadConfigToolStripMenuItem = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
+            tabControl1 = new TabControl();
+            contextMenuStrip4 = new ContextMenuStrip(components);
+            newTabToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            contextMenuStrip4.SuspendLayout();
             SuspendLayout();
             // 
             // imageList1
@@ -81,20 +84,6 @@
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
             imageList1.ImageSize = new Size(255, 255);
             imageList1.TransparentColor = Color.Transparent;
-            // 
-            // richTextBox1
-            // 
-            richTextBox1.BackColor = SystemColors.ScrollBar;
-            richTextBox1.ContextMenuStrip = contextMenuStrip3;
-            richTextBox1.Dock = DockStyle.Bottom;
-            richTextBox1.Location = new Point(0, 506);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(1268, 137);
-            richTextBox1.TabIndex = 0;
-            richTextBox1.Text = "";
-            richTextBox1.TextChanged += richTextBox1_TextChanged;
-            richTextBox1.KeyDown += richTextBox1_KeyDown;
-            richTextBox1.MouseDown += richTextBox1_MouseDown;
             // 
             // contextMenuStrip3
             // 
@@ -142,7 +131,6 @@
             // 
             treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
-            treeView1.Dock = DockStyle.Left;
             treeView1.Location = new Point(0, 0);
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(156, 506);
@@ -181,8 +169,7 @@
             // 
             listView1.BackColor = SystemColors.ScrollBar;
             listView1.ContextMenuStrip = contextMenuStrip2;
-            listView1.Dock = DockStyle.Fill;
-            listView1.Location = new Point(156, 0);
+            listView1.Location = new Point(152, -80);
             listView1.Name = "listView1";
             listView1.Size = new Size(1112, 506);
             listView1.TabIndex = 4;
@@ -280,9 +267,9 @@
             // 
             statusStrip1.BackColor = SystemColors.Control;
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripProgressBar1, toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5 });
-            statusStrip1.Location = new Point(156, 484);
+            statusStrip1.Location = new Point(0, 621);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(1112, 22);
+            statusStrip1.Size = new Size(1268, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -322,9 +309,9 @@
             // menuStrip1
             // 
             menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem });
-            menuStrip1.Location = new Point(156, 0);
+            menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1112, 24);
+            menuStrip1.Size = new Size(1268, 24);
             menuStrip1.TabIndex = 6;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -378,17 +365,41 @@
             pictureBox1.MouseUp += PictureBox_MouseUp;
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             // 
+            // tabControl1
+            // 
+            tabControl1.ContextMenuStrip = contextMenuStrip4;
+            tabControl1.Dock = DockStyle.Bottom;
+            tabControl1.Location = new Point(0, 482);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(1268, 139);
+            tabControl1.TabIndex = 8;
+            tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
+            // 
+            // contextMenuStrip4
+            // 
+            contextMenuStrip4.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem });
+            contextMenuStrip4.Name = "contextMenuStrip4";
+            contextMenuStrip4.Size = new Size(117, 26);
+            // 
+            // newTabToolStripMenuItem
+            // 
+            newTabToolStripMenuItem.Name = "newTabToolStripMenuItem";
+            newTabToolStripMenuItem.Size = new Size(116, 22);
+            newTabToolStripMenuItem.Text = "new tab";
+            newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
+            Controls.Add(tabControl1);
             Controls.Add(pictureBox1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             Controls.Add(listView1);
             Controls.Add(treeView1);
-            Controls.Add(richTextBox1);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Bonkers";
@@ -400,6 +411,7 @@
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            contextMenuStrip4.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -408,7 +420,6 @@
         #endregion
 
         private ImageList imageList1;
-        private RichTextBox richTextBox1;
         private TreeView treeView1;
         private ListView listView1;
         private ContextMenuStrip contextMenuStrip1;
@@ -446,5 +457,8 @@
         private ToolStripMenuItem cutToolStripMenuItem;
         private ToolStripMenuItem selectAllToolStripMenuItem;
         private ToolStripMenuItem ollamaAPIToolStripMenuItem;
+        private TabControl tabControl1;
+        private ContextMenuStrip contextMenuStrip4;
+        private ToolStripMenuItem newTabToolStripMenuItem;
     }
 }
