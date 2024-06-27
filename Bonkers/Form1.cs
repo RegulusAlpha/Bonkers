@@ -355,6 +355,7 @@ namespace Bonkers
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            string listBoxTab = currentImageBoxTag.ToString();
             configFlag = 0;
 
             // Check if the node's tag is null (e.g., after a refresh)
@@ -440,8 +441,11 @@ namespace Bonkers
 
             try
             {
+                int i = 0;
                 // Iterate through each image file
                 foreach (string file in imageFiles)
+                //for (int i = 0; i < imageList.Images.Count && i < imageFiles.Length; i++)
+
                 {
                     // Check if cancellation is requested before processing each file
                     if (cancellationTokenSource.Token.IsCancellationRequested)
@@ -476,15 +480,29 @@ namespace Bonkers
 
                     // Add the resized image to the ImageList
                     imageList.Images.Add(resizedImage);
-                    //UpdateListViewWithImages(imageList);
+                    string filename = Path.GetFileName(file); // Get the filename from the path
 
+                    // Create a new ListViewItem
+                    System.Windows.Forms.ListViewItem newItem = new System.Windows.Forms.ListViewItem();
+
+                    // Assign the image from ImageList to the ListViewItem
+                    newItem.ImageIndex = i; // Set the index of the image in the ImageList
+
+                    // Set the text of the ListViewItem to the filename
+                    newItem.Text = filename;
+
+                    // Add the ListViewItem to the ListView
+                    listView.Items.Add(newItem);
+                    //UpdateListViewWithImages(imageList);
+                    //UpdateListViewWithImages(listBoxTab, imageList, imageFiles);
                     // Update the progress bar value
                     toolStripProgressBar1.Value++;
+                    i++;
                 }
 
                 // Once all images are added, update the ListView
                 int imageCount = imageList.Images.Count;
-                UpdateListViewWithImages(currentImageBoxTag.ToString(), imageList, imageFiles);
+                //UpdateListViewWithImages(currentImageBoxTag.ToString(), imageList, imageFiles);
                 LogToConsole($"Number of images in ImageList: {imageCount}");
                
                 int itemCount = listView.Items.Count;
@@ -896,14 +914,16 @@ namespace Bonkers
 
         private void SaveRichTextBoxContent()
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
             // Check if configFlag is 0
             if (configFlag == 0)
             {
                 // Check if an item is selected in listView1
-                if (listView1.SelectedItems.Count > 0)
+                if (listView.SelectedItems.Count > 0)
                 {
                     // Get the selected image name from the first selected item in listView1
-                    string selectedImage = listView1.SelectedItems[0].Text;
+                    string selectedImage = listView.SelectedItems[0].Text;
 
                     // Combine the image path using the selected node in treeView1 and the selected image name
                     string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
@@ -944,11 +964,12 @@ namespace Bonkers
 
         private void OpenTextFileOfSelectedPhoto()
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
             // Check if an item is selected in listView1
-            if (listView1.SelectedItems.Count > 0)
+            if (listView.SelectedItems.Count > 0)
             {
                 // Get the selected image name from the first selected item in listView1
-                string selectedImage = listView1.SelectedItems[0].Text;
+                string selectedImage = listView.SelectedItems[0].Text;
 
                 // Combine the image path using the selected node in treeView1 and the selected image name
                 string imagePath = Path.Combine(treeView1.SelectedNode?.Tag?.ToString(), selectedImage); // Added null checks
@@ -1552,6 +1573,8 @@ namespace Bonkers
         // Define an asynchronous method to cancel a task and clear lists
         private async void CancelTaskAndClearLists()
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
             // Cancel the task if it's running
             if (cancellationTokenSource != null && !cancellationTokenSource.Token.IsCancellationRequested)
             {
@@ -1561,20 +1584,20 @@ namespace Bonkers
 
             // Clear imageList1 and listView1
 
-            LogToConsole("Items count before clearing: " + listView1.Items.Count);
-            LogToConsole("Images count before clearing: " + imageList1.Images.Count);
+            LogToConsole("Items count before clearing: " + listView.Items.Count);
+            LogToConsole("Images count before clearing: " + imageList.Images.Count);
 
 
 
             // Clear items and images
 
-            listView1.Items.Clear();
-            imageList1.Images.Clear();
+            listView.Items.Clear();
+            imageList.Images.Clear();
 
             // After clearing
 
-            LogToConsole("Items count after clearing: " + listView1.Items.Count);
-            LogToConsole("Images count after clearing: " + imageList1.Images.Count);
+            LogToConsole("Items count after clearing: " + listView.Items.Count);
+            LogToConsole("Images count after clearing: " + imageList.Images.Count);
 
 
 
@@ -1747,7 +1770,85 @@ namespace Bonkers
                 MessageBox.Show("Image file path is empty.");
             }
         }
+        private void listView_DoubleClick(object sender, EventArgs e)
+        {
+            string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
 
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                try
+                {
+                    // Load the original image from the file path
+                    Image originalImage = Image.FromFile(imagePath);
+
+                    // Calculate the aspect ratio
+                    float aspectRatio = (float)originalImage.Width / (float)originalImage.Height;
+
+                    // Set the maximum width and height for the resized image
+                    int maxWidth = MaxPboxW;
+                    int maxHeight = MaxPboxH;
+
+                    // Calculate the new dimensions while maintaining aspect ratio
+                    int newWidth = Math.Min(originalImage.Width, maxWidth);
+                    int newHeight = (int)(newWidth / aspectRatio);
+
+                    // Check if the height exceeds maxHeight, then adjust dimensions
+                    if (newHeight > maxHeight)
+                    {
+                        newHeight = maxHeight;
+                        newWidth = (int)(newHeight * aspectRatio);
+                    }
+
+                    // Create a new Bitmap with the resized dimensions
+                    Bitmap resizedImage = new Bitmap(originalImage, newWidth, newHeight);
+
+                    // Set the size of the PictureBox to match the resized image
+                    pictureBox1.Size = new Size(newWidth, newHeight);
+
+                    // Calculate the initial location for PictureBox placement
+                    int edgeOffset = (int)(0.1 * this.ClientSize.Width); // 10% from the edge
+                    int pictureBoxX = (this.ClientSize.Width - pictureBox1.Width) / 2; // Center horizontally initially
+                    int pictureBoxY = (this.ClientSize.Height - pictureBox1.Height) / 2; // Center vertically initially
+
+                    // Determine the mouse position relative to the form
+                    Point mousePos = this.PointToClient(Control.MousePosition);
+
+                    // Determine if the click was on the left or right side of the form
+                    bool clickedFromRight = mousePos.X > this.ClientSize.Width / 2;
+
+                    // Adjust initial PictureBox placement based on click position
+                    if (clickedFromRight)
+                    {
+                        pictureBoxX = edgeOffset; // Place on the left
+                    }
+                    else
+                    {
+                        pictureBoxX = this.ClientSize.Width - pictureBox1.Width - edgeOffset; // Place on the right
+                    }
+
+                    // Set the location of the PictureBox
+                    pictureBox1.Location = new Point(pictureBoxX, pictureBoxY);
+
+                    // Display the resized image in the PictureBox
+                    pictureBox1.Image = resizedImage;
+                    pictureBox1.BackColor = Color.Transparent;
+                    pictureBox1.Visible = true;
+
+                    // Attach event handlers for drag-and-drop
+                    pictureBox1.MouseDown += PictureBox_MouseDown;
+                    pictureBox1.MouseMove += PictureBox_MouseMove;
+                    pictureBox1.MouseUp += PictureBox_MouseUp;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading/resizing image: {ex.Message}");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Image file path is empty.");
+            }
+        }
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -2158,26 +2259,26 @@ namespace Bonkers
 
         private void listView1_Enter(object sender, EventArgs e)
         {
-            if (tabControl1.Height != 148)
-            {
-                // Resize the TabControl to a height of 500
-                int kl = tabControlExpand - 148;
-                tabControl1.Height = 148;
-                tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
-                // Resize the parent container of the TabControl if necessary
-            }
+           // if (tabControl1.Height != 148)
+           // {
+           //     // Resize the TabControl to a height of 500
+           //     int kl = tabControlExpand - 148;
+           // /    tabControl1.Height = 148;
+           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+           //     // Resize the parent container of the TabControl if necessary
+           // }
 
         }
         private void RichTextBox_Enter(object sender, EventArgs e)
         {
-            if (tabControl1.Height != tabControlExpand)
-            {
-                int kl = tabControlExpand - 148;
-                // Resize the TabControl to a height of 500
-                tabControl1.Height = tabControlExpand = 200;
-                tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y - kl);
-                // Resize the parent container of the TabControl if necessary
-            }
+            //if (tabControl1.Height != tabControlExpand)
+           // {
+           //     int kl = tabControlExpand - 148;
+           //     // Resize the TabControl to a height of 500
+           //     tabControl1.Height = tabControlExpand = 200;
+           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y - kl);
+           //     // Resize the parent container of the TabControl if necessary
+           // }
         }
         private void newTabToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2392,10 +2493,10 @@ namespace Bonkers
                 //ForeColor = System.Drawing.Color.Black, // Set the text color to black
                 //View = System.Windows.Forms.View.LargeIcon, // Set the view to large icon
                 LargeImageList = imageList,
-                Visible = true         
+                Visible = true,
+                Sorting = SortOrder.Ascending
 
-                
-                
+
             };
             //newListView.LargeImageList = imageList;
             newListView.LargeImageList = imageList;
@@ -2407,14 +2508,56 @@ namespace Bonkers
 
             // Store the ImageList in the dictionary with its tag for future reference
             imageListDictionary.Add(imgTabTag.ToString(), imageList);
-
+            newListView.ItemSelectionChanged += ListView_ItemSelectionChanged;
+            newListView.MouseDown += NewListView_MouseDown;
+            newListView.MouseDoubleClick += listView_DoubleClick;
             // Set the newly added tab as the selected tab
             tabControl2.SelectedTab = newTabPage;
 
             // Increment imgTabTag for the next tab
             imgTabTag++;
+
+                    
+           
         }
 
+        private void NewListView_MouseDown(object? sender, MouseEventArgs e)
+        {
+           // if (tabControl1.Height != 148)
+           // {
+           //     // Resize the TabControl to a height of 500
+           //     int kl = tabControlExpand - 148;
+           //     tabControl1.Height = 148;
+           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+           //     // Resize the parent container of the TabControl if necessary
+           // }
+        }
+
+       
+        private void ListView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+
+            configFlag = 0;
+            // Check if an item is selected
+            if (listView.SelectedItems.Count > 0)
+            {
+                currentIndex = e.ItemIndex;
+                //SaveRichTextBoxContent(); // Ensure to save content when item selection changes
+                OpenTextFileOfSelectedPhoto(); // Load text file content for the selected photo
+            }
+           // if (tabControl1.Height != 148)
+           // {
+           //     // Resize the TabControl to a height of 500
+           //     int kl = tabControlExpand - 148;
+           //     tabControl1.Height = 148;
+           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+           //     // Resize the parent container of the TabControl if necessary
+           // }
+        }
+
+       
         private ImageList GetImageListByTag(string tag)
         {
             if (imageListDictionary.ContainsKey(tag))
@@ -2427,7 +2570,7 @@ namespace Bonkers
 
         private void tabControl2_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            
             // Get the currently selected tab
             System.Windows.Forms.TabPage selectedTab = tabControl2.SelectedTab;
 

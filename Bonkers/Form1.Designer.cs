@@ -135,11 +135,12 @@
             // 
             // treeView1
             // 
+            treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
             treeView1.Location = new Point(0, 27);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(168, 449);
+            treeView1.Size = new Size(168, 440);
             treeView1.TabIndex = 3;
             // 
             // contextMenuStrip1
@@ -376,7 +377,7 @@
             // 
             // tabControl1
             // 
-            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl1.ContextMenuStrip = contextMenuStrip4;
             tabControl1.Location = new Point(0, 473);
             tabControl1.Name = "tabControl1";
@@ -401,12 +402,12 @@
             // 
             // tabControl2
             // 
-            tabControl2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl2.ContextMenuStrip = contextMenuStrip5;
             tabControl2.Location = new Point(174, 27);
             tabControl2.Name = "tabControl2";
             tabControl2.SelectedIndex = 0;
-            tabControl2.Size = new Size(1094, 449);
+            tabControl2.Size = new Size(1094, 440);
             tabControl2.TabIndex = 9;
             tabControl2.SelectedIndexChanged += tabControl2_SelectedIndexChanged;
             tabControl2.MouseDown += tabControl2_MouseDown;
@@ -443,11 +444,11 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
-            Controls.Add(listView1);
-            Controls.Add(pictureBox1);
             Controls.Add(tabControl1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
+            Controls.Add(pictureBox1);
+            Controls.Add(listView1);
             Controls.Add(treeView1);
             Controls.Add(tabControl2);
             MainMenuStrip = menuStrip1;
