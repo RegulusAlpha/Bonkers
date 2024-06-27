@@ -68,17 +68,21 @@
             reloadConfigToolStripMenuItem = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
             consoleModeToolStripMenuItem = new ToolStripMenuItem();
-            pictureBox1 = new PictureBox();
             tabControl1 = new TabControl();
             contextMenuStrip4 = new ContextMenuStrip(components);
             newTabToolStripMenuItem = new ToolStripMenuItem();
+            tabControl2 = new TabControl();
+            contextMenuStrip5 = new ContextMenuStrip(components);
+            newTabToolStripMenuItem1 = new ToolStripMenuItem();
+            pictureBox1 = new PictureBox();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             contextMenuStrip4.SuspendLayout();
+            contextMenuStrip5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // imageList1
@@ -172,17 +176,18 @@
             listView1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             listView1.BackColor = SystemColors.ScrollBar;
             listView1.ContextMenuStrip = contextMenuStrip2;
-            listView1.Location = new Point(174, 27);
+            listView1.Location = new Point(52, 85);
             listView1.Name = "listView1";
-            listView1.Size = new Size(1094, 449);
+            listView1.Size = new Size(249, 137);
             listView1.TabIndex = 4;
             listView1.TileSize = new Size(255, 255);
             listView1.UseCompatibleStateImageBehavior = false;
+            listView1.Visible = false;
             listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
             listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             listView1.DoubleClick += listView1_DoubleClick;
-            listView1.MouseDown += listView1_MouseDown;
             listView1.Enter += listView1_Enter;
+            listView1.MouseDown += listView1_MouseDown;
             // 
             // contextMenuStrip2
             // 
@@ -369,20 +374,6 @@
             consoleModeToolStripMenuItem.Text = "Console Mode";
             consoleModeToolStripMenuItem.Click += consoleModeToolStripMenuItem_Click;
             // 
-            // pictureBox1
-            // 
-            pictureBox1.Location = new Point(813, 47);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(420, 420);
-            pictureBox1.TabIndex = 7;
-            pictureBox1.TabStop = false;
-            pictureBox1.Visible = false;
-            pictureBox1.MouseDown += PictureBox_MouseDown;
-            pictureBox1.MouseEnter += PictureBox1_MouseEnter;
-            pictureBox1.MouseMove += PictureBox_MouseMove;
-            pictureBox1.MouseUp += PictureBox_MouseUp;
-            pictureBox1.MouseWheel += PictureBox1_MouseWheel;
-            // 
             // tabControl1
             // 
             tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -408,17 +399,57 @@
             newTabToolStripMenuItem.Text = "new tab";
             newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
             // 
+            // tabControl2
+            // 
+            tabControl2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl2.ContextMenuStrip = contextMenuStrip5;
+            tabControl2.Location = new Point(174, 27);
+            tabControl2.Name = "tabControl2";
+            tabControl2.SelectedIndex = 0;
+            tabControl2.Size = new Size(1094, 449);
+            tabControl2.TabIndex = 9;
+            tabControl2.SelectedIndexChanged += tabControl2_SelectedIndexChanged;
+            tabControl2.MouseDown += tabControl2_MouseDown;
+            // 
+            // contextMenuStrip5
+            // 
+            contextMenuStrip5.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem1 });
+            contextMenuStrip5.Name = "contextMenuStrip5";
+            contextMenuStrip5.Size = new Size(120, 26);
+            // 
+            // newTabToolStripMenuItem1
+            // 
+            newTabToolStripMenuItem1.Name = "newTabToolStripMenuItem1";
+            newTabToolStripMenuItem1.Size = new Size(119, 22);
+            newTabToolStripMenuItem1.Text = "New Tab";
+            newTabToolStripMenuItem1.Click += newTabToolStripMenuItem1_Click;
+            // 
+            // pictureBox1
+            // 
+            pictureBox1.Location = new Point(12, 47);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(420, 420);
+            pictureBox1.TabIndex = 7;
+            pictureBox1.TabStop = false;
+            pictureBox1.Visible = false;
+            pictureBox1.MouseDown += PictureBox_MouseDown;
+            pictureBox1.MouseEnter += PictureBox1_MouseEnter;
+            pictureBox1.MouseMove += PictureBox_MouseMove;
+            pictureBox1.MouseUp += PictureBox_MouseUp;
+            pictureBox1.MouseWheel += PictureBox1_MouseWheel;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
-            Controls.Add(tabControl1);
+            Controls.Add(listView1);
             Controls.Add(pictureBox1);
+            Controls.Add(tabControl1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             Controls.Add(treeView1);
-            Controls.Add(listView1);
+            Controls.Add(tabControl2);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Bonkers";
@@ -429,8 +460,9 @@
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             contextMenuStrip4.ResumeLayout(false);
+            contextMenuStrip5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -467,7 +499,6 @@
         private ToolStripMenuItem openConfigToolStripMenuItem1;
         private ToolStripMenuItem reloadConfigToolStripMenuItem;
         private ToolStripMenuItem reloadConfigToolStripMenuItem1;
-        private PictureBox pictureBox1;
         private ToolStripMenuItem cogVLMToolStripMenuItem;
         private ContextMenuStrip contextMenuStrip3;
         private ToolStripMenuItem clearToolStripMenuItem;
@@ -481,5 +512,9 @@
         private ToolStripMenuItem newTabToolStripMenuItem;
         private ToolStripMenuItem testToolStripMenuItem;
         private ToolStripMenuItem consoleModeToolStripMenuItem;
+        private TabControl tabControl2;
+        private PictureBox pictureBox1;
+        private ContextMenuStrip contextMenuStrip5;
+        private ToolStripMenuItem newTabToolStripMenuItem1;
     }
 }

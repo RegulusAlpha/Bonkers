@@ -14,6 +14,7 @@ using System.Runtime.InteropServices.Marshalling;
 using System.Runtime.InteropServices;
 using System.Drawing.Text;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Diagnostics;
 
 
 namespace Bonkers
@@ -58,11 +59,15 @@ namespace Bonkers
         private StringWriter consoleOutput;
         private int consoleMode = 0;
         private int tabControlExpand = 200;
+        private int imgTabTag = 1;
+        private int currentImageBoxTag = 1;
+        Dictionary<string, ImageList> imageListDictionary = new Dictionary<string, ImageList>();
         public Form1()
         {
             InitializeComponent();
             LoadConfig();
             AddNewTab();
+            AddNewImageTab();
             LoadDirectories();
             Clipboard.Clear();
             //Console.ForegroundColor = ConsoleColor.Red;
@@ -71,7 +76,7 @@ namespace Bonkers
 
 
 
-        Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+            Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
 
         }
 
@@ -106,14 +111,14 @@ namespace Bonkers
                     Console.Write(c);
 
                     // Adjust delay for effect
-                    Thread.Sleep(964/1000);
+                    Thread.Sleep(964 / 1000);
                 }
                 Console.WriteLine();
             }
 
             // Reset console color
             Console.ResetColor();
- 
+
         }
         static ConsoleColor GetRainbowColor(int position)
         {
@@ -245,23 +250,9 @@ namespace Bonkers
         private void LoadDirectories()
         {
             // Clear existing nodes in the TreeView
-            // Before clearing
-
-            // need to add logging levels 
-
-            //LogToConsole("Items count before clearing: " + listView1.Items.Count);
-            //LogToConsole("Images count before clearing: " + imageList1.Images.Count);
-            //LogToConsole("Nodes count before clearing: " + treeView1.Nodes.Count);
-
-            // Clear items and images
             treeView1.Nodes.Clear();
             listView1.Items.Clear();
             imageList1.Images.Clear();
-
-            //LogToConsole("Items count after clearing: " + listView1.Items.Count);
-            //LogToConsole("Images count after clearing: " + imageList1.Images.Count);
-            //LogToConsole("Nodes count after clearing: " + treeView1.Nodes.Count);
-
 
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -416,6 +407,18 @@ namespace Bonkers
 
             consoleTrack++;
 
+            // Get the tag of the currently selected tab
+            //string currentImageBoxTag = tabControl2.SelectedTab.Tag.ToString();
+
+            // Get the ImageList from the dictionary based on currentImageBoxTag
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+            var listView = FindListViewByTag(currentImageBoxTag);
+            if (imageList == null)
+            {
+                LogToConsole($"ImageList not found for tag: {currentImageBoxTag}");
+                return;
+            }
+
             // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
             string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
                 .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -424,12 +427,9 @@ namespace Bonkers
                             s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            // Clear the items in the ListView
-            listView1.Items.Clear();
-
-            // Set the LargeImageList property of the ListView to imageList1
-            listView1.LargeImageList = imageList1;
-
+            // Clear the images in the found ImageList
+            imageList.Images.Clear();
+            listView.LargeImageList = imageList;
             // Show the progress bar and set its maximum value to the number of image files
             toolStripProgressBar1.Visible = true;
             toolStripProgressBar1.Maximum = imageFiles.Length;
@@ -446,10 +446,6 @@ namespace Bonkers
                     // Check if cancellation is requested before processing each file
                     if (cancellationTokenSource.Token.IsCancellationRequested)
                         break;
-
-                    // Create a new ListViewItem for the image file
-                    ListViewItem item = new ListViewItem(new FileInfo(file).Name);
-                    item.ImageIndex = imageList1.Images.Count;
 
                     // Load the image asynchronously and resize it
                     Bitmap resizedImage = await Task.Run(() =>
@@ -478,13 +474,21 @@ namespace Bonkers
                         }
                     }, cancellationTokenSource.Token);
 
-                    // Add the resized image to imageList1 and the corresponding ListViewItem to listView1
-                    imageList1.Images.Add(resizedImage);
-                    listView1.Items.Add(item);
+                    // Add the resized image to the ImageList
+                    imageList.Images.Add(resizedImage);
+                    //UpdateListViewWithImages(imageList);
 
                     // Update the progress bar value
                     toolStripProgressBar1.Value++;
                 }
+
+                // Once all images are added, update the ListView
+                int imageCount = imageList.Images.Count;
+                UpdateListViewWithImages(currentImageBoxTag.ToString(), imageList, imageFiles);
+                LogToConsole($"Number of images in ImageList: {imageCount}");
+               
+                int itemCount = listView.Items.Count;
+                LogToConsole($"Number of items in ListView: {itemCount}");
             }
             catch (OperationCanceledException)
             {
@@ -497,6 +501,52 @@ namespace Bonkers
                 toolStripProgressBar1.Visible = false;
             }
         }
+
+        private void UpdateListViewWithImages(string currentImageBoxTag, System.Windows.Forms.ImageList imageList, string[] imageFiles)
+        {
+            // Find the ListView with the matching tag in the selected TabPage
+            foreach (Control control in tabControl2.SelectedTab.Controls)
+            {
+                if (control is System.Windows.Forms.ListView listView && listView.Tag.ToString() == currentImageBoxTag)
+                {
+                    LogToConsole("UpdateListViewWithImages got passed control");
+
+                    // Clear existing items in the ListView
+                    listView.Items.Clear();
+
+                    // Iterate through each image in the ImageList and corresponding filename in imageFiles
+                    for (int i = 0; i < imageList.Images.Count && i < imageFiles.Length; i++)
+                    {
+                        string filename = Path.GetFileName(imageFiles[i]); // Get the filename from the path
+
+                        // Create a new ListViewItem
+                        System.Windows.Forms.ListViewItem newItem = new System.Windows.Forms.ListViewItem();
+
+                        // Assign the image from ImageList to the ListViewItem
+                        newItem.ImageIndex = i; // Set the index of the image in the ImageList
+
+                        // Set the text of the ListViewItem to the filename
+                        newItem.Text = filename;
+
+                        // Add the ListViewItem to the ListView
+                        listView.Items.Add(newItem);
+                    }
+
+                    // Assign the ImageList to the ListView's LargeImageList
+                    listView.LargeImageList = imageList;
+
+                    // Set the view to display large icons
+                    listView.View = System.Windows.Forms.View.LargeIcon;
+
+                    // Refresh the ListView to display the images
+                    listView.Refresh();
+
+                    // Exit the loop since we've found and updated the ListView
+                    break;
+                }
+            }
+        }
+
 
 
         private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -2108,11 +2158,12 @@ namespace Bonkers
 
         private void listView1_Enter(object sender, EventArgs e)
         {
-            if (tabControl1.Height != 148) {
+            if (tabControl1.Height != 148)
+            {
                 // Resize the TabControl to a height of 500
-            int kl = tabControlExpand - 148;
-            tabControl1.Height = 148;
-            tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+                int kl = tabControlExpand - 148;
+                tabControl1.Height = 148;
+                tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
                 // Resize the parent container of the TabControl if necessary
             }
 
@@ -2159,6 +2210,33 @@ namespace Bonkers
                 }
             }
         }
+        private void tabControl2_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            // Check if middle mouse button (mouse wheel click) is clicked
+            if (e.Button == System.Windows.Forms.MouseButtons.Middle)
+            {
+                // Ensure there is more than one tab before attempting to close
+                if (tabControl2.TabCount > 1)
+                {
+                    // Get the tab at the clicked position
+                    for (int i = 0; i < tabControl2.TabCount; i++)
+                    {
+                        System.Drawing.Rectangle tabRect = tabControl2.GetTabRect(i);
+                        if (tabRect.Contains(e.Location))
+                        {
+                            // Close the tab
+                            tabControl2.TabPages.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Optionally handle the case where only one tab is remaining
+                    LogToConsole("Cannot close the last tab.");
+                }
+            }
+        }
         //HYPER EXPERIMENTAL
         private void AddTextToSelectedRichTextBox(RichTextBox richTextBox, string text)
         {
@@ -2172,27 +2250,6 @@ namespace Bonkers
                 richTextBox.Text = text;
             }
         }
-        private RichTextBox GetSelectedRichTextBox()
-        {
-            // Assuming each tab contains a RichTextBox and tabTag holds the tag integer
-            int selectedTabTag = currentTextboxTag;
-
-            // Assuming each RichTextBox's Tag property is set to an integer corresponding to tabTag
-            // Example: RichTextBox tag setup during creation:
-            // richTextBox.Tag = tabTag; // Where tabTag is incremented with each new tab creation
-
-            // Find the RichTextBox in the selected tab based on its tag
-            foreach (Control control in tabControl1.SelectedTab.Controls)
-            {
-                if (control is RichTextBox rtb && (int)rtb.Tag == selectedTabTag)
-                {
-                    return rtb;
-                }
-            }
-
-            return null; // Return null if no RichTextBox is found (handle accordingly in your application)
-        }
-
         private RichTextBox FindRichTextBoxByTag(int tag)
         {
             foreach (TabPage tabPage in tabControl1.TabPages)
@@ -2207,8 +2264,23 @@ namespace Bonkers
             }
             return null;
         }
-
-
+        private System.Windows.Forms.ListView FindListViewByTag(int tag)
+        {
+            foreach (System.Windows.Forms.TabPage tabPage in tabControl2.TabPages)
+            {
+                foreach (System.Windows.Forms.Control control in tabPage.Controls)
+                {
+                    if (control is System.Windows.Forms.ListView listView && listView.Tag is string lvTagString && int.TryParse(lvTagString, out int lvTag) && lvTag == tag)
+                    {
+                        LogToConsole("FindListViewByTag returned: " + listView);
+                        return listView;
+                        
+                    }
+                }
+            }
+            return null;
+        }
+       
         private void UpdateRichTextBox(RichTextBox richTextBox, string text)
         {
             // Ensure we are operating on the UI thread
@@ -2227,7 +2299,7 @@ namespace Bonkers
         {
             // Get the currently selected tab
             TabPage selectedTab = tabControl1.SelectedTab;
-            
+
             if (selectedTab != null)
             {
                 // Iterate through the controls in the selected tab page
@@ -2259,15 +2331,18 @@ namespace Bonkers
 
         private void testToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RichTextBox targetRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
-            if (targetRichTextBox != null)
-            {
-                targetRichTextBox.AppendText("this is a test");
-            }
-            else
-            {
-                MessageBox.Show("RichTextBox not found for the current tag.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //RichTextBox targetRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
+            //if (targetRichTextBox != null)
+            // {
+            //     targetRichTextBox.AppendText("this is a test");
+            // }
+            // else
+            // {
+            //    MessageBox.Show("RichTextBox not found for the current tag.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            // }
+           FindListViewByTag(currentImageBoxTag);
+           
+
         }
 
         ///EXTRA HYPER SUPER EXPERIMENTAL
@@ -2286,14 +2361,108 @@ namespace Bonkers
                 Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
                 Console.WriteLine("Enter some text:");
                 consoleTrack++;
-                
+
                 string userInput = await Task.Run(() => Console.ReadLine());
-                
+
                 Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
                 Console.WriteLine($"You entered: {userInput}");
                 consoleTrack++;
             }
         }
+        private void AddNewImageTab()
+        {
+            // Create a new TabPage
+            System.Windows.Forms.TabPage newTabPage = new System.Windows.Forms.TabPage("Tab: " + imgTabTag);
 
+        
+
+            // Create a new ImageList and attach it to the ListView
+            System.Windows.Forms.ImageList imageList = new System.Windows.Forms.ImageList
+            {
+                Tag = imgTabTag.ToString(), // Set the ImageList tag as the current imgTabTag
+                ImageSize = new Size(256, 256) // Set the image size to 256x256 pixels
+            };
+            // Create a new ListView
+            System.Windows.Forms.ListView newListView = new System.Windows.Forms.ListView
+            {
+                Dock = System.Windows.Forms.DockStyle.Fill, // Fill the TabPage with the ListView
+                ContextMenuStrip = contextMenuStrip2, // Attach contextMenuStrip2 to the ListView
+                Tag = imgTabTag.ToString(), // Set the ListView tag as the current imgTabTag
+                //BackColor = System.Drawing.Color.LightGray, // Set the background color to light gray
+                //ForeColor = System.Drawing.Color.Black, // Set the text color to black
+                //View = System.Windows.Forms.View.LargeIcon, // Set the view to large icon
+                LargeImageList = imageList,
+                Visible = true         
+
+                
+                
+            };
+            //newListView.LargeImageList = imageList;
+            newListView.LargeImageList = imageList;
+            // Add the ListView to the TabPage
+            newTabPage.Controls.Add(newListView);
+
+            // Add the TabPage to the TabControl
+            tabControl2.TabPages.Add(newTabPage);
+
+            // Store the ImageList in the dictionary with its tag for future reference
+            imageListDictionary.Add(imgTabTag.ToString(), imageList);
+
+            // Set the newly added tab as the selected tab
+            tabControl2.SelectedTab = newTabPage;
+
+            // Increment imgTabTag for the next tab
+            imgTabTag++;
+        }
+
+        private ImageList GetImageListByTag(string tag)
+        {
+            if (imageListDictionary.ContainsKey(tag))
+            {
+                LogToConsole("image list " + tag);
+                return imageListDictionary[tag];
+            }
+            return null; // Handle case where ImageList with specified tag is not found
+        }
+
+        private void tabControl2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            // Get the currently selected tab
+            System.Windows.Forms.TabPage selectedTab = tabControl2.SelectedTab;
+
+            if (selectedTab != null)
+            {
+                // Iterate through the controls in the selected tab page
+                foreach (System.Windows.Forms.Control control in selectedTab.Controls)
+                {
+                    // Check if the control is a ListView
+                    if (control is System.Windows.Forms.ListView listView)
+                    {
+                        // Get the tag of the ListView and log it to the console
+                        object lvTag = listView.Tag;
+                        LogToConsole($"Tag of ListView in selected tab: {lvTag}");
+
+                        // Convert the tag to int
+                        if (lvTag != null && int.TryParse(lvTag.ToString(), out int tagValue))
+                        {
+                            currentImageBoxTag = tagValue;
+                            LogToConsole($"Converted Tag to int: {currentImageBoxTag}");
+                        }
+                        else
+                        {
+                            LogToConsole("Failed to parse Tag to int.");
+                        }
+
+                        break; // Assuming there's only one ListView per tab, break after finding it
+                    }
+                }
+            }
+        }
+
+        private void newTabToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            AddNewImageTab();
+        }
     }
 }
