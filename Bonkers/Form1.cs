@@ -57,6 +57,7 @@ namespace Bonkers
         private int currentTextboxTag = 1;
         private StringWriter consoleOutput;
         private int consoleMode = 0;
+        private int tabControlExpand = 200;
         public Form1()
         {
             InitializeComponent();
@@ -157,6 +158,7 @@ namespace Bonkers
             public string ollamaSystem { get; set; }
             public string ollamaPrompt { get; set; }
             public string ollamaAddress { get; set; }
+            public int tabControlExpand { get; set; }
         }
         private void LoadConfig()
         {
@@ -188,7 +190,8 @@ namespace Bonkers
                     ollamaModel = "llava",
                     ollamaPrompt = "Whats in this photo",
                     ollamaSystem = "The user will send an image, make short descriptive image tags",
-                    ollamaAddress = "localhost"
+                    ollamaAddress = "localhost",
+                    tabControlExpand = 200
 
                 };
 
@@ -2083,7 +2086,9 @@ namespace Bonkers
             {
                 Dock = DockStyle.Fill, // Fill the TabPage with the RichTextBox
                 ContextMenuStrip = contextMenuStrip3, // Attach contextMenuStrip4 to the RichTextBox
-                Tag = tabTag.ToString() // Set the tag as needed
+                Tag = tabTag.ToString(), // Set the tag as needed
+                BackColor = Color.LightGray, // Set the background color to black
+                ForeColor = Color.White // Set the text color to green
             };
 
             // Attach the KeyDown event handler
@@ -2097,10 +2102,32 @@ namespace Bonkers
 
             // Set the newly added tab as the selected tab
             tabControl1.SelectedTab = newTabPage;
+            newRichTextBox.Enter += RichTextBox_Enter;
             tabTag++;
         }
 
+        private void listView1_Enter(object sender, EventArgs e)
+        {
+            if (tabControl1.Height != 148) {
+                // Resize the TabControl to a height of 500
+            int kl = tabControlExpand - 148;
+            tabControl1.Height = 148;
+            tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+                // Resize the parent container of the TabControl if necessary
+            }
 
+        }
+        private void RichTextBox_Enter(object sender, EventArgs e)
+        {
+            if (tabControl1.Height != tabControlExpand)
+            {
+                int kl = tabControlExpand - 148;
+                // Resize the TabControl to a height of 500
+                tabControl1.Height = tabControlExpand = 200;
+                tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y - kl);
+                // Resize the parent container of the TabControl if necessary
+            }
+        }
         private void newTabToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AddNewTab();
@@ -2200,7 +2227,7 @@ namespace Bonkers
         {
             // Get the currently selected tab
             TabPage selectedTab = tabControl1.SelectedTab;
-
+            
             if (selectedTab != null)
             {
                 // Iterate through the controls in the selected tab page

@@ -67,11 +67,11 @@
             openConfigToolStripMenuItem1 = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
+            consoleModeToolStripMenuItem = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
             tabControl1 = new TabControl();
             contextMenuStrip4 = new ContextMenuStrip(components);
             newTabToolStripMenuItem = new ToolStripMenuItem();
-            consoleModeToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -131,7 +131,6 @@
             // 
             // treeView1
             // 
-            treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
             treeView1.Location = new Point(0, 27);
@@ -170,7 +169,7 @@
             // 
             // listView1
             // 
-            listView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listView1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             listView1.BackColor = SystemColors.ScrollBar;
             listView1.ContextMenuStrip = contextMenuStrip2;
             listView1.Location = new Point(174, 27);
@@ -183,6 +182,7 @@
             listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
             listView1.DoubleClick += listView1_DoubleClick;
             listView1.MouseDown += listView1_MouseDown;
+            listView1.Enter += listView1_Enter;
             // 
             // contextMenuStrip2
             // 
@@ -362,6 +362,13 @@
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 
+            // consoleModeToolStripMenuItem
+            // 
+            consoleModeToolStripMenuItem.Name = "consoleModeToolStripMenuItem";
+            consoleModeToolStripMenuItem.Size = new Size(96, 20);
+            consoleModeToolStripMenuItem.Text = "Console Mode";
+            consoleModeToolStripMenuItem.Click += consoleModeToolStripMenuItem_Click;
+            // 
             // pictureBox1
             // 
             pictureBox1.Location = new Point(813, 47);
@@ -378,7 +385,7 @@
             // 
             // tabControl1
             // 
-            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl1.ContextMenuStrip = contextMenuStrip4;
             tabControl1.Location = new Point(0, 473);
             tabControl1.Name = "tabControl1";
@@ -401,20 +408,13 @@
             newTabToolStripMenuItem.Text = "new tab";
             newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
             // 
-            // consoleModeToolStripMenuItem
-            // 
-            consoleModeToolStripMenuItem.Name = "consoleModeToolStripMenuItem";
-            consoleModeToolStripMenuItem.Size = new Size(96, 20);
-            consoleModeToolStripMenuItem.Text = "Console Mode";
-            consoleModeToolStripMenuItem.Click += consoleModeToolStripMenuItem_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
-            Controls.Add(pictureBox1);
             Controls.Add(tabControl1);
+            Controls.Add(pictureBox1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             Controls.Add(treeView1);
