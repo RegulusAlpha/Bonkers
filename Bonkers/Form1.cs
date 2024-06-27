@@ -55,6 +55,8 @@ namespace Bonkers
         private string apiURL;
         private int tabTag = 1;
         private int currentTextboxTag = 1;
+        private StringWriter consoleOutput;
+        private int consoleMode= 0;
         public Form1()
         {
             InitializeComponent();
@@ -62,6 +64,10 @@ namespace Bonkers
             AddNewTab();
             LoadDirectories();
             Clipboard.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("BBBBB   OOO   N   N  K  K  EEEEE  RRRR    SSS \r\nB   B  O   O  NN  N  K K   E      R   R  S    \r\nBBBB   O   O  N N N  KK    EEEE   RRRR    SSS \r\nB   B  O   O  N  NN  K K   E      R  RR      S\r\nBBBBB   OOO   N   N  K  K  EEEEE  R   RR  SSS  \r\n");
+            Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+
         }
         public class Config
         {
@@ -176,25 +182,20 @@ namespace Bonkers
             // Clear existing nodes in the TreeView
             // Before clearing
 
-            
-               
-            LogToConsole("Items count before clearing: " + listView1.Items.Count);
-            LogToConsole("Images count before clearing: " + imageList1.Images.Count);
-            LogToConsole("Nodes count before clearing: " + treeView1.Nodes.Count);
+            // need to add logging levels 
 
-            
+            //LogToConsole("Items count before clearing: " + listView1.Items.Count);
+            //LogToConsole("Images count before clearing: " + imageList1.Images.Count);
+            //LogToConsole("Nodes count before clearing: " + treeView1.Nodes.Count);
 
-            
             // Clear items and images
             treeView1.Nodes.Clear();
             listView1.Items.Clear();
             imageList1.Images.Clear();
 
-
-
-            LogToConsole("Items count after clearing: " + listView1.Items.Count);
-            LogToConsole("Images count after clearing: " + imageList1.Images.Count);
-            LogToConsole("Nodes count after clearing: " + treeView1.Nodes.Count);
+            //LogToConsole("Items count after clearing: " + listView1.Items.Count);
+            //LogToConsole("Images count after clearing: " + imageList1.Images.Count);
+            //LogToConsole("Nodes count after clearing: " + treeView1.Nodes.Count);
 
 
             // Get all drives on the system
@@ -722,6 +723,26 @@ namespace Bonkers
                 richTextBox.SelectionStart = currentCursorPosition;
                 richTextBox.SelectionLength = 0; // Ensure nothing is selected
                 richTextBox.ScrollToCaret(); // Scroll to the caret position
+            }
+            else if (e.Control && e.KeyCode == Keys.T)
+            {
+                // Handle Ctrl+T (open new tab)
+                AddNewTab(); // Prevent default handling if needed
+                             // Your logic to open a new tab
+            }
+            else if (e.Control && e.KeyCode == Keys.W)
+            {
+                if (tabControl1.TabCount > 1)
+                {
+                    // Close the currently selected tab
+                    tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
+                }
+                else
+                {
+                    // Optionally handle the case where only one tab is remaining
+                    LogToConsole("Cannot close the last tab.");
+                }
+
             }
             else if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down ||
                      e.KeyCode == Keys.Enter || e.KeyCode == Keys.Back || e.KeyCode == Keys.Shift || e.KeyCode == Keys.Space || e.Control)
@@ -1322,7 +1343,7 @@ namespace Bonkers
 
 
                                 LogToConsole(chatContent);
-                               
+
                             }
                         }
                     }
@@ -1331,7 +1352,7 @@ namespace Bonkers
                 {
 
                     LogToConsole(e.Message);
-                   
+
                 }
                 // Optionally update a status label with a success message
                 // toolStripStatusLabel4.Text = "Request successful";
@@ -1440,7 +1461,7 @@ namespace Bonkers
             LogToConsole("Items count after clearing: " + listView1.Items.Count);
             LogToConsole("Images count after clearing: " + imageList1.Images.Count);
 
-           
+
 
             toolStripStatusLabel1.Text = "";
             toolStripStatusLabel2.Text = "";
@@ -1766,7 +1787,7 @@ namespace Bonkers
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           //IDK what I want to do with this yet
+            //IDK what I want to do with this yet
         }
 
         private void copyToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1961,7 +1982,7 @@ namespace Bonkers
                         string responseText = responseElement.GetString();
 
                         // Print response to console with alternating colors for tracking
-                       
+
                         LogToConsole("Response: " + responseText);
                         //Console.ResetColor(); // Reset to default color after print
                         //consoleTrack++;
@@ -1985,9 +2006,9 @@ namespace Bonkers
         {
 
         }
-             
 
-      
+
+
         //EXTREMELY EXPERIMENTAL
         private void AddNewTab()
         {
@@ -1999,7 +2020,7 @@ namespace Bonkers
             RichTextBox newRichTextBox = new RichTextBox
             {
                 Dock = DockStyle.Fill, // Fill the TabPage with the RichTextBox
-                ContextMenuStrip = contextMenuStrip4, // Attach contextMenuStrip4 to the RichTextBox
+                ContextMenuStrip = contextMenuStrip3, // Attach contextMenuStrip4 to the RichTextBox
                 Tag = tabTag.ToString() // Set the tag as needed
             };
 
@@ -2022,7 +2043,33 @@ namespace Bonkers
         {
             AddNewTab();
         }
-
+        private void tabControl1_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Check if middle mouse button (mouse wheel click) is clicked
+            if (e.Button == MouseButtons.Middle)
+            {
+                // Ensure there is more than one tab before attempting to close
+                if (tabControl1.TabCount > 1)
+                {
+                    // Get the tab at the clicked position
+                    for (int i = 0; i < tabControl1.TabCount; i++)
+                    {
+                        Rectangle tabRect = tabControl1.GetTabRect(i);
+                        if (tabRect.Contains(e.Location))
+                        {
+                            // Close the tab
+                            tabControl1.TabPages.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Optionally handle the case where only one tab is remaining
+                    LogToConsole("Cannot close the last tab.");
+                }
+            }
+        }
         //HYPER EXPERIMENTAL
         private void AddTextToSelectedRichTextBox(RichTextBox richTextBox, string text)
         {
@@ -2056,7 +2103,7 @@ namespace Bonkers
 
             return null; // Return null if no RichTextBox is found (handle accordingly in your application)
         }
-      
+
         private RichTextBox FindRichTextBoxByTag(int tag)
         {
             foreach (TabPage tabPage in tabControl1.TabPages)
@@ -2086,7 +2133,7 @@ namespace Bonkers
             }
         }
 
-        
+
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             // Get the currently selected tab
@@ -2133,5 +2180,31 @@ namespace Bonkers
                 MessageBox.Show("RichTextBox not found for the current tag.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        ///EXTRA HYPER SUPER EXPERIMENTAL
+        ///
+
+        private async void consoleModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            consoleMode = 1;
+            await StartConsoleMode();
+            consoleMode = 0;
+        }
+        private async Task StartConsoleMode()
+        {
+            while (consoleMode == 1)
+            {
+                Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+                Console.WriteLine("Enter some text:");
+                consoleTrack++;
+                
+                string userInput = await Task.Run(() => Console.ReadLine());
+                
+                Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+                Console.WriteLine($"You entered: {userInput}");
+                consoleTrack++;
+            }
+        }
+
     }
 }

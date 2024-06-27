@@ -71,6 +71,7 @@
             tabControl1 = new TabControl();
             contextMenuStrip4 = new ContextMenuStrip(components);
             newTabToolStripMenuItem = new ToolStripMenuItem();
+            consoleModeToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -318,7 +319,7 @@
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem, consoleModeToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1268, 24);
@@ -377,7 +378,7 @@
             // 
             // tabControl1
             // 
-            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl1.ContextMenuStrip = contextMenuStrip4;
             tabControl1.Location = new Point(0, 473);
             tabControl1.Name = "tabControl1";
@@ -385,6 +386,7 @@
             tabControl1.Size = new Size(1268, 148);
             tabControl1.TabIndex = 8;
             tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
+            tabControl1.MouseDown += tabControl1_MouseDown;
             // 
             // contextMenuStrip4
             // 
@@ -398,6 +400,13 @@
             newTabToolStripMenuItem.Size = new Size(116, 22);
             newTabToolStripMenuItem.Text = "new tab";
             newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
+            // 
+            // consoleModeToolStripMenuItem
+            // 
+            consoleModeToolStripMenuItem.Name = "consoleModeToolStripMenuItem";
+            consoleModeToolStripMenuItem.Size = new Size(96, 20);
+            consoleModeToolStripMenuItem.Text = "Console Mode";
+            consoleModeToolStripMenuItem.Click += consoleModeToolStripMenuItem_Click;
             // 
             // Form1
             // 
@@ -471,5 +480,6 @@
         private ContextMenuStrip contextMenuStrip4;
         private ToolStripMenuItem newTabToolStripMenuItem;
         private ToolStripMenuItem testToolStripMenuItem;
+        private ToolStripMenuItem consoleModeToolStripMenuItem;
     }
 }
