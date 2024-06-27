@@ -56,7 +56,7 @@ namespace Bonkers
         private int tabTag = 1;
         private int currentTextboxTag = 1;
         private StringWriter consoleOutput;
-        private int consoleMode= 0;
+        private int consoleMode = 0;
         public Form1()
         {
             InitializeComponent();
@@ -64,10 +64,72 @@ namespace Bonkers
             AddNewTab();
             LoadDirectories();
             Clipboard.Clear();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("BBBBB   OOO   N   N  K  K  EEEEE  RRRR    SSS \r\nB   B  O   O  NN  N  K K   E      R   R  S    \r\nBBBB   O   O  N N N  KK    EEEE   RRRR    SSS \r\nB   B  O   O  N  NN  K K   E      R  RR      S\r\nBBBBB   OOO   N   N  K  K  EEEEE  R   RR  SSS  \r\n");
-            Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+            //Console.ForegroundColor = ConsoleColor.Red;
+            //Console.WriteLine("      ___           ___           ___           ___           ___           ___           ___     \r\n     /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\    \r\n    /  /::\\       /  /::\\       /  /::|       /  /:/        /  /::\\       /  /::\\       /  /::\\   \r\n   /  /:/\\:\\     /  /:/\\:\\     /  /:|:|      /  /:/        /  /:/\\:\\     /  /:/\\:\\     /__/:/\\:\\  \r\n  /  /::\\ \\:\\   /  /:/  \\:\\   /  /:/|:|__   /  /::\\____   /  /::\\ \\:\\   /  /::\\ \\:\\   _\\_ \\:\\ \\:\\ \r\n /__/:/\\:\\_\\:| /__/:/ \\__\\:\\ /__/:/ |:| /\\ /__/:/\\:::::\\ /__/:/\\:\\ \\:\\ /__/:/\\:\\_\\:\\ /__/\\ \\:\\ \\:\\\r\n \\  \\:\\ \\:\\/:/ \\  \\:\\ /  /:/ \\__\\/  |:|/:/ \\__\\/~|:|~~~~ \\  \\:\\ \\:\\_\\/ \\__\\/~|::\\/:/ \\  \\:\\ \\:\\_\\/\r\n  \\  \\:\\_\\::/   \\  \\:\\  /:/      |  |:/:/     |  |:|      \\  \\:\\ \\:\\      |  |:|::/   \\  \\:\\_\\:\\  \r\n   \\  \\:\\/:/     \\  \\:\\/:/       |__|::/      |  |:|       \\  \\:\\_\\/      |  |:|\\/     \\  \\:\\/:/  \r\n    \\__\\::/       \\  \\::/        /__/:/       |__|:|        \\  \\:\\        |__|:|~       \\  \\::/   \r\n        ~~         \\__\\/         \\__\\/         \\__\\|         \\__\\/         \\__\\|         \\__\\/    \r\n\r\n");
+            consoleStart();
 
+
+
+        Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+
+        }
+
+        private void consoleStart()
+        {
+
+            string asciiArt =
+@"      ___           ___           ___           ___           ___           ___           ___     
+     /  /\         /  /\         /  /\         /  /\         /  /\         /  /\         /  /\    
+    /  /::\       /  /::\       /  /::|       /  /:/        /  /::\       /  /::\       /  /::\   
+   /  /:/\:\     /  /:/\:\     /  /:|:|      /  /:/        /  /:/\:\     /  /:/\:\     /__/:/\:\  
+  /  /::\ \:\   /  /:/  \:\   /  /:/|:|__   /  /::\____   /  /::\ \:\   /  /::\ \:\   _\_ \:\ \:\ 
+ /__/:/\:\_\:| /__/:/ \__\:\ /__/:/ |:| /\ /__/:/\:::::\ /__/:/\:\ \:\ /__/:/\:\_\:\ /__/\ \:\ \:\
+ \  \:\ \:\/:/ \  \:\ /  /:/ \__\/  |:|/:/ \__\/~|:|~~~~ \  \:\ \:\_\/ \__\/~|::\/:/ \  \:\ \:\_\/
+  \  \:\_\::/   \  \:\  /:/      |  |:/:/     |  |:|      \  \:\ \:\      |  |:|::/   \  \:\_\:\  
+   \  \:\/:/     \  \:\/:/       |__|::/      |  |:|       \  \:\_\/      |  |:|\/     \  \:\/:/  
+    \__\::/       \  \::/        /__/:/       |__|:|        \  \:\        |__|:|~       \  \::/   
+        ~~         \__\/         \__\/         \__\|         \__\/         \__\|         \__\/    
+
+";
+
+            string[] lines = asciiArt.Split('\n');
+
+            foreach (string line in lines)
+            {
+                foreach (char c in line)
+                {
+                    // Choose a color based on the character's position
+                    ConsoleColor color = GetRainbowColor(line.IndexOf(c));
+
+                    Console.ForegroundColor = color;
+                    Console.Write(c);
+
+                    // Adjust delay for effect
+                    Thread.Sleep(964/1000);
+                }
+                Console.WriteLine();
+            }
+
+            // Reset console color
+            Console.ResetColor();
+ 
+        }
+        static ConsoleColor GetRainbowColor(int position)
+        {
+            // Define an array of rainbow colors
+            ConsoleColor[] colors = {
+            ConsoleColor.Red,
+            ConsoleColor.Yellow,
+            ConsoleColor.Green,
+            ConsoleColor.Cyan,
+            ConsoleColor.Blue,
+            ConsoleColor.Magenta
+        };
+            //int index = position % colors.Length;
+            int length = colors.Length;
+            Random Random = new Random();
+            int index = Random.Next(0, length);
+            return colors[index];
         }
         public class Config
         {
