@@ -41,7 +41,6 @@
             generateTxtFilesToolStripMenuItem = new ToolStripMenuItem();
             refreshToolStripMenuItem = new ToolStripMenuItem();
             copyConvertToolStripMenuItem = new ToolStripMenuItem();
-            listView1 = new ListView();
             contextMenuStrip2 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
             saveToolStripMenuItem = new ToolStripMenuItem();
@@ -142,6 +141,7 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(168, 440);
             treeView1.TabIndex = 3;
+            treeView1.NodeMouseClick += treeView1_NodeMouseClick;
             // 
             // contextMenuStrip1
             // 
@@ -171,24 +171,6 @@
             copyConvertToolStripMenuItem.Size = new Size(169, 22);
             copyConvertToolStripMenuItem.Text = "Copy Convert";
             copyConvertToolStripMenuItem.Click += copyConvertToolStripMenuItem_Click;
-            // 
-            // listView1
-            // 
-            listView1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            listView1.BackColor = SystemColors.ScrollBar;
-            listView1.ContextMenuStrip = contextMenuStrip2;
-            listView1.Location = new Point(52, 85);
-            listView1.Name = "listView1";
-            listView1.Size = new Size(249, 137);
-            listView1.TabIndex = 4;
-            listView1.TileSize = new Size(255, 255);
-            listView1.UseCompatibleStateImageBehavior = false;
-            listView1.Visible = false;
-            listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
-            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
-            listView1.DoubleClick += listView1_DoubleClick;
-            listView1.Enter += listView1_Enter;
-            listView1.MouseDown += listView1_MouseDown;
             // 
             // contextMenuStrip2
             // 
@@ -427,7 +409,7 @@
             // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(12, 47);
+            pictureBox1.Location = new Point(12, 40);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(420, 420);
             pictureBox1.TabIndex = 7;
@@ -444,11 +426,10 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
+            Controls.Add(pictureBox1);
             Controls.Add(tabControl1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
-            Controls.Add(pictureBox1);
-            Controls.Add(listView1);
             Controls.Add(treeView1);
             Controls.Add(tabControl2);
             MainMenuStrip = menuStrip1;
@@ -473,7 +454,6 @@
 
         private ImageList imageList1;
         private TreeView treeView1;
-        private ListView listView1;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem generateTxtFilesToolStripMenuItem;
         private ContextMenuStrip contextMenuStrip2;

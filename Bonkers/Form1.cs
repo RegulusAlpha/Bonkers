@@ -249,10 +249,12 @@ namespace Bonkers
 
         private void LoadDirectories()
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
             // Clear existing nodes in the TreeView
             treeView1.Nodes.Clear();
-            listView1.Items.Clear();
-            imageList1.Images.Clear();
+            listView.Items.Clear();
+            imageList.Images.Clear();
 
             // Get all drives on the system
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -520,6 +522,197 @@ namespace Bonkers
             }
         }
 
+        //NODE MOUSE CLICK
+
+        private async void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            // Check if the right mouse button is clicked
+            if (e.Button == MouseButtons.Right)
+            {
+                // Call the CancelTaskAndClearLists method to cancel any ongoing task and clear lists
+                CancelTaskAndClearLists();
+
+                // Set the selected node in the TreeView to the node that was clicked
+                treeView1.SelectedNode = e.Node;
+
+                // Show the context menu strip at the location of the mouse click relative to the TreeView
+                contextMenuStrip1.Show(treeView1, e.Location);
+            }
+            else
+            {
+
+
+                string listBoxTab = currentImageBoxTag.ToString();
+                configFlag = 0;
+
+                // Check if the node's tag is null (e.g., after a refresh)
+                if (e.Node.Tag == null)
+                {
+                    LogToConsole("node tag is null");
+                    return;
+                    
+                }
+
+                // Clear status labels
+                toolStripStatusLabel1.Text = "";
+                toolStripStatusLabel2.Text = "";
+                toolStripStatusLabel3.Text = "";
+                toolStripStatusLabel4.Text = "";
+                toolStripStatusLabel5.Text = "";
+
+                // Ensure that the selected node in the TreeView is visible
+                e.Node.EnsureVisible();
+
+                // Cancel any previous task and clear associated lists
+                CancelTaskAndClearLists();
+
+                // Wait for 1 second before continuing execution
+                await Task.Delay(1000);
+
+                // Get the path of the selected node in the TreeView
+                string selectedPath = e.Node.Tag.ToString();
+
+                // Check if this path has already been processed to prevent duplicate loading
+                //if (pathCheck == selectedPath)
+               // {
+               //     LogToConsole("pathCheck prevented processing");
+               //     return;
+               // }
+
+                // Update pathCheck to the current selected path
+                pathCheck = selectedPath;
+
+                // Output debug information
+                if (consoleTrack % 2 == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
+                    Console.Out.WriteLine("selected path " + selectedPath);
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White; // Default color
+                    Console.Out.WriteLine("node tag: " + e.Node.Tag.ToString());
+                    Console.Out.WriteLine("selected path " + selectedPath);
+                }
+
+                consoleTrack++;
+
+                // Get the tag of the currently selected tab
+                //string currentImageBoxTag = tabControl2.SelectedTab.Tag.ToString();
+
+                // Get the ImageList from the dictionary based on currentImageBoxTag
+                var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+                var listView = FindListViewByTag(currentImageBoxTag);
+                if (imageList == null)
+                {
+                    LogToConsole($"ImageList not found for tag: {currentImageBoxTag}");
+                    return;
+                }
+
+                // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
+                string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
+                    .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                s.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
+                                s.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                // Clear the images in the found ImageList
+                imageList.Images.Clear();
+                listView.LargeImageList = imageList;
+                // Show the progress bar and set its maximum value to the number of image files
+                toolStripProgressBar1.Visible = true;
+                toolStripProgressBar1.Maximum = imageFiles.Length;
+                toolStripProgressBar1.Value = 0;
+
+                // Create a CancellationTokenSource for canceling the asynchronous task
+                cancellationTokenSource = new CancellationTokenSource();
+
+                try
+                {
+                    int i = 0;
+                    // Iterate through each image file
+                    foreach (string file in imageFiles)
+                    //for (int i = 0; i < imageList.Images.Count && i < imageFiles.Length; i++)
+
+                    {
+                        // Check if cancellation is requested before processing each file
+                        if (cancellationTokenSource.Token.IsCancellationRequested)
+                            break;
+
+                        // Load the image asynchronously and resize it
+                        Bitmap resizedImage = await Task.Run(() =>
+                        {
+                            // Open the original image file
+                            using (Image originalImage = Image.FromFile(file))
+                            {
+                                // Calculate the new dimensions for resizing
+                                int originalWidth = originalImage.Width;
+                                int originalHeight = originalImage.Height;
+                                float ratio = Math.Min((float)255 / originalWidth, (float)255 / originalHeight);
+                                int newWidth = (int)(originalWidth * ratio);
+                                int newHeight = (int)(originalHeight * ratio);
+
+                                // Create a new bitmap with the resized dimensions
+                                Bitmap resized = new Bitmap(newWidth, newHeight);
+
+                                // Draw the resized image
+                                using (Graphics g = Graphics.FromImage(resized))
+                                {
+                                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                    g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                                }
+
+                                return resized;
+                            }
+                        }, cancellationTokenSource.Token);
+
+                        // Add the resized image to the ImageList
+                        imageList.Images.Add(resizedImage);
+                        string filename = Path.GetFileName(file); // Get the filename from the path
+
+                        // Create a new ListViewItem
+                        System.Windows.Forms.ListViewItem newItem = new System.Windows.Forms.ListViewItem();
+
+                        // Assign the image from ImageList to the ListViewItem
+                        newItem.ImageIndex = i; // Set the index of the image in the ImageList
+
+                        // Set the text of the ListViewItem to the filename
+                        newItem.Text = filename;
+
+                        // Add the ListViewItem to the ListView
+                        listView.Items.Add(newItem);
+                        //UpdateListViewWithImages(imageList);
+                        //UpdateListViewWithImages(listBoxTab, imageList, imageFiles);
+                        // Update the progress bar value
+                        toolStripProgressBar1.Value++;
+                        i++;
+                    }
+
+                    // Once all images are added, update the ListView
+                    int imageCount = imageList.Images.Count;
+                    //UpdateListViewWithImages(currentImageBoxTag.ToString(), imageList, imageFiles);
+                    LogToConsole($"Number of images in ImageList: {imageCount}");
+
+                    int itemCount = listView.Items.Count;
+                    LogToConsole($"Number of items in ListView: {itemCount}");
+                }
+                catch (OperationCanceledException)
+                {
+                    // Display a message if the task was canceled
+                    MessageBox.Show("Task canceled.");
+                }
+                finally
+                {
+                    // Hide the progress bar after the task is completed or canceled
+                    toolStripProgressBar1.Visible = false;
+                }
+            }
+        }
+
+
+        //END NODE MOUSE CLICK
         private void UpdateListViewWithImages(string currentImageBoxTag, System.Windows.Forms.ImageList imageList, string[] imageFiles)
         {
             // Find the ListView with the matching tag in the selected TabPage
@@ -564,24 +757,7 @@ namespace Bonkers
                 }
             }
         }
-
-
-
-        private void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            // Check if the right mouse button is clicked
-            if (e.Button == MouseButtons.Right)
-            {
-                // Call the CancelTaskAndClearLists method to cancel any ongoing task and clear lists
-                CancelTaskAndClearLists();
-
-                // Set the selected node in the TreeView to the node that was clicked
-                treeView1.SelectedNode = e.Node;
-
-                // Show the context menu strip at the location of the mouse click relative to the TreeView
-                contextMenuStrip1.Show(treeView1, e.Location);
-            }
-        }
+          
 
 
         private async void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -619,18 +795,19 @@ namespace Bonkers
                 });
 
                 // Display a message box to inform the user that the text files have been generated successfully
-                MessageBox.Show("Text files generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Text files generated successfully!");
             }
         }
 
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
             // Check if any items are selected in the ListView
-            if (listView1.SelectedItems.Count > 0)
+            if (listView.SelectedItems.Count > 0)
             {
                 // Get the name of the selected image
-                string selectedImage = listView1.SelectedItems[0].Text;
+                string selectedImage = listView.SelectedItems[0].Text;
 
                 // Combine the path of the selected node in the TreeView with the selected image name to get the full image path
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
@@ -653,12 +830,12 @@ namespace Bonkers
                         AddTextToSelectedRichTextBox(selectedRichTextBox, textContent);
 
                         // Display a message box to inform the user that the text file has been loaded successfully
-                        MessageBox.Show("Text file loaded successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LogToConsole("Text file loaded successfully!");
                     }
                     else
                     {
                         // Display an error message if the text file does not exist
-                        MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        LogToConsole("Text file not found for the selected image.");
                     }
                 }
             }
@@ -667,11 +844,13 @@ namespace Bonkers
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
+
             // Check if any items are selected in the ListView
-            if (listView1.SelectedItems.Count > 0)
+            if (listView.SelectedItems.Count > 0)
             {
                 // Get the name of the selected image
-                string selectedImage = listView1.SelectedItems[0].Text;
+                string selectedImage = listView.SelectedItems[0].Text;
 
                 // Combine the path of the selected node in the TreeView with the selected image name to get the full image path
                 string imagePath = Path.Combine(treeView1.SelectedNode.Tag.ToString(), selectedImage);
@@ -694,12 +873,12 @@ namespace Bonkers
                         File.WriteAllText(txtFilePath, textContent);
 
                         // Display a message box to inform the user that the text file has been saved successfully
-                        MessageBox.Show("Text file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LogToConsole("Text file saved successfully!");
                     }
                     else
                     {
                         // Display an error message if the text file does not exist
-                        MessageBox.Show("Text file not found for the selected image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        LogToConsole("Text file not found for the selected image.");
                     }
                 }
             }
@@ -769,26 +948,7 @@ namespace Bonkers
             // Display a message box to inform the user that the text files have been cleared successfully
             MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void listView1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                foreach (TabPage tabPage in tabControl1.TabPages)
-                {
-                    // Find the RichTextBox in the TabPage
-                    RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>().FirstOrDefault();
-
-                    // Ensure the RichTextBox is not null and matches the correct tag condition (adjust as per your RTTS tag)
-                    if (richTextBox != null && richTextBox.Tag != null && richTextBox.Tag.ToString() == tabTag.ToString())
-                    {
-                        if (!richTextBox.Focused)
-                        {
-                            richTextBox.Size = new System.Drawing.Size(1268, 137);
-                        }
-                    }
-                }
-            }
-        }
+ 
         private void richTextBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -800,39 +960,7 @@ namespace Bonkers
                 }
             }
         }
-        private void listView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
-        {
-            configFlag = 0;
-            // Check if an item is selected
-            if (listView1.SelectedItems.Count > 0)
-            {
-                currentIndex = e.ItemIndex;
-                //SaveRichTextBoxContent(); // Ensure to save content when item selection changes
-                OpenTextFileOfSelectedPhoto(); // Load text file content for the selected photo
-            }
-        }
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            foreach (TabPage tabPage in tabControl1.TabPages)
-            {
-                // Find the RichTextBox in the TabPage
-                RichTextBox richTextBox = tabPage.Controls.OfType<RichTextBox>().FirstOrDefault();
-
-                // Ensure the RichTextBox is not null and matches the correct tag condition (adjust as per your RTTS tag)
-                if (richTextBox != null && richTextBox.Tag != null && richTextBox.Tag.ToString() == tabTag.ToString())
-                {
-                    if (!richTextBox.Focused)
-                    {
-                        // Change the size of the RichTextBox
-                        richTextBox.Size = new System.Drawing.Size(1268, 137);
-
-                        // Change the size of the TabControl
-                        tabControl1.Size = new System.Drawing.Size(1300, 200); // Adjust the size as needed
-                    }
-                }
-            }
-        }
-
+ 
         private void richTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             RichTextBox richTextBox = sender as RichTextBox;
@@ -937,7 +1065,7 @@ namespace Bonkers
                     // Find the RichTextBox within the selected tab using the currentTextboxTag
                     RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
 
-                    if (selectedRichTextBox != null && File.Exists(txtFilePath))
+                    if (selectedRichTextBox != null) // && File.Exists(txtFilePath)
                     {
                         // Get the text content from the selected RichTextBox
                         string textContent = selectedRichTextBox.Text;
@@ -1545,11 +1673,12 @@ namespace Bonkers
         // Define an event handler for the deselectToolStripMenuItem click event
         private void deselectToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var listView = FindListViewByTag(currentImageBoxTag);
             // Clear the selected items in listView1
-            listView1.SelectedItems.Clear();
+            listView.SelectedItems.Clear();
 
             // Set focus to listView1
-            listView1.Focus();
+            listView.Focus();
 
             // Clear status labels
             toolStripStatusLabel1.Text = "";
@@ -1691,85 +1820,7 @@ namespace Bonkers
         }
 
 
-        private void listView1_DoubleClick(object sender, EventArgs e)
-        {
-            string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
-
-            if (!string.IsNullOrEmpty(imagePath))
-            {
-                try
-                {
-                    // Load the original image from the file path
-                    Image originalImage = Image.FromFile(imagePath);
-
-                    // Calculate the aspect ratio
-                    float aspectRatio = (float)originalImage.Width / (float)originalImage.Height;
-
-                    // Set the maximum width and height for the resized image
-                    int maxWidth = MaxPboxW;
-                    int maxHeight = MaxPboxH;
-
-                    // Calculate the new dimensions while maintaining aspect ratio
-                    int newWidth = Math.Min(originalImage.Width, maxWidth);
-                    int newHeight = (int)(newWidth / aspectRatio);
-
-                    // Check if the height exceeds maxHeight, then adjust dimensions
-                    if (newHeight > maxHeight)
-                    {
-                        newHeight = maxHeight;
-                        newWidth = (int)(newHeight * aspectRatio);
-                    }
-
-                    // Create a new Bitmap with the resized dimensions
-                    Bitmap resizedImage = new Bitmap(originalImage, newWidth, newHeight);
-
-                    // Set the size of the PictureBox to match the resized image
-                    pictureBox1.Size = new Size(newWidth, newHeight);
-
-                    // Calculate the initial location for PictureBox placement
-                    int edgeOffset = (int)(0.1 * this.ClientSize.Width); // 10% from the edge
-                    int pictureBoxX = (this.ClientSize.Width - pictureBox1.Width) / 2; // Center horizontally initially
-                    int pictureBoxY = (this.ClientSize.Height - pictureBox1.Height) / 2; // Center vertically initially
-
-                    // Determine the mouse position relative to the form
-                    Point mousePos = this.PointToClient(Control.MousePosition);
-
-                    // Determine if the click was on the left or right side of the form
-                    bool clickedFromRight = mousePos.X > this.ClientSize.Width / 2;
-
-                    // Adjust initial PictureBox placement based on click position
-                    if (clickedFromRight)
-                    {
-                        pictureBoxX = edgeOffset; // Place on the left
-                    }
-                    else
-                    {
-                        pictureBoxX = this.ClientSize.Width - pictureBox1.Width - edgeOffset; // Place on the right
-                    }
-
-                    // Set the location of the PictureBox
-                    pictureBox1.Location = new Point(pictureBoxX, pictureBoxY);
-
-                    // Display the resized image in the PictureBox
-                    pictureBox1.Image = resizedImage;
-                    pictureBox1.BackColor = Color.Transparent;
-                    pictureBox1.Visible = true;
-
-                    // Attach event handlers for drag-and-drop
-                    pictureBox1.MouseDown += PictureBox_MouseDown;
-                    pictureBox1.MouseMove += PictureBox_MouseMove;
-                    pictureBox1.MouseUp += PictureBox_MouseUp;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error loading/resizing image: {ex.Message}");
-                }
-            }
-            else
-            {
-                MessageBox.Show("Image file path is empty.");
-            }
-        }
+      
         private void listView_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
@@ -1841,12 +1892,12 @@ namespace Bonkers
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error loading/resizing image: {ex.Message}");
+                    LogToConsole($"Error loading/resizing image: {ex.Message}");
                 }
             }
             else
             {
-                MessageBox.Show("Image file path is empty.");
+                LogToConsole("Image file path is empty.");
             }
         }
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
@@ -2256,19 +2307,7 @@ namespace Bonkers
             newRichTextBox.Enter += RichTextBox_Enter;
             tabTag++;
         }
-
-        private void listView1_Enter(object sender, EventArgs e)
-        {
-           // if (tabControl1.Height != 148)
-           // {
-           //     // Resize the TabControl to a height of 500
-           //     int kl = tabControlExpand - 148;
-           // /    tabControl1.Height = 148;
-           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
-           //     // Resize the parent container of the TabControl if necessary
-           // }
-
-        }
+                
         private void RichTextBox_Enter(object sender, EventArgs e)
         {
             //if (tabControl1.Height != tabControlExpand)
@@ -2510,6 +2549,7 @@ namespace Bonkers
             imageListDictionary.Add(imgTabTag.ToString(), imageList);
             newListView.ItemSelectionChanged += ListView_ItemSelectionChanged;
             newListView.MouseDown += NewListView_MouseDown;
+            newListView.MouseClick += listView_MouseClick;
             newListView.MouseDoubleClick += listView_DoubleClick;
             // Set the newly added tab as the selected tab
             tabControl2.SelectedTab = newTabPage;
@@ -2532,8 +2572,20 @@ namespace Bonkers
            //     // Resize the parent container of the TabControl if necessary
            // }
         }
+        private void listView_MouseClick(object sender, MouseEventArgs e)
+        {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            if (e.Button == MouseButtons.Left)
+            {
+                ListViewHitTestInfo hit = listView.HitTest(e.Location);
+                if (hit.Item != null)
+                {
+                    // Handle the click on the specific item
+                   LogToConsole($"Item clicked: {hit.Item.Text}");
+                }
+            }
+        }
 
-       
         private void ListView_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
         {
             var listView = FindListViewByTag(currentImageBoxTag);
