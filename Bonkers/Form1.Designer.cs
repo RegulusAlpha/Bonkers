@@ -74,6 +74,7 @@
             contextMenuStrip5 = new ContextMenuStrip(components);
             newTabToolStripMenuItem1 = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
+            addBookmarkToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -141,18 +142,18 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(168, 440);
             treeView1.TabIndex = 3;
-            treeView1.NodeMouseClick += treeView1_NodeMouseClick;
+            //treeView1.NodeMouseClick += treeView1_NodeMouseClick;
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem, addBookmarkToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(170, 70);
+            contextMenuStrip1.Size = new Size(181, 114);
             // 
             // generateTxtFilesToolStripMenuItem
             // 
             generateTxtFilesToolStripMenuItem.Name = "generateTxtFilesToolStripMenuItem";
-            generateTxtFilesToolStripMenuItem.Size = new Size(169, 22);
+            generateTxtFilesToolStripMenuItem.Size = new Size(180, 22);
             generateTxtFilesToolStripMenuItem.Text = "Generate TXT Files";
             generateTxtFilesToolStripMenuItem.ToolTipText = "This will generate txt files for all the images if they do not already exist";
             generateTxtFilesToolStripMenuItem.Click += generateTxtFilesToolStripMenuItem_Click;
@@ -160,7 +161,7 @@
             // refreshToolStripMenuItem
             // 
             refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
-            refreshToolStripMenuItem.Size = new Size(169, 22);
+            refreshToolStripMenuItem.Size = new Size(180, 22);
             refreshToolStripMenuItem.Text = "Refresh";
             refreshToolStripMenuItem.ToolTipText = "refreshes the directory tree";
             refreshToolStripMenuItem.Click += refreshToolStripMenuItem_Click;
@@ -168,7 +169,7 @@
             // copyConvertToolStripMenuItem
             // 
             copyConvertToolStripMenuItem.Name = "copyConvertToolStripMenuItem";
-            copyConvertToolStripMenuItem.Size = new Size(169, 22);
+            copyConvertToolStripMenuItem.Size = new Size(180, 22);
             copyConvertToolStripMenuItem.Text = "Copy Convert";
             copyConvertToolStripMenuItem.Click += copyConvertToolStripMenuItem_Click;
             // 
@@ -421,6 +422,13 @@
             pictureBox1.MouseUp += PictureBox_MouseUp;
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             // 
+            // addBookmarkToolStripMenuItem
+            // 
+            addBookmarkToolStripMenuItem.Name = "addBookmarkToolStripMenuItem";
+            addBookmarkToolStripMenuItem.Size = new Size(180, 22);
+            addBookmarkToolStripMenuItem.Text = "Add Bookmark";
+            addBookmarkToolStripMenuItem.Click += addBookmarkToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -497,5 +505,6 @@
         private PictureBox pictureBox1;
         private ContextMenuStrip contextMenuStrip5;
         private ToolStripMenuItem newTabToolStripMenuItem1;
+        private ToolStripMenuItem addBookmarkToolStripMenuItem;
     }
 }

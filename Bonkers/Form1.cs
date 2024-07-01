@@ -61,6 +61,7 @@ namespace Bonkers
         private int tabControlExpand = 200;
         private int imgTabTag = 1;
         private int currentImageBoxTag = 1;
+        private string[] bookmarks;
         Dictionary<string, ImageList> imageListDictionary = new Dictionary<string, ImageList>();
         public Form1()
         {
@@ -164,16 +165,15 @@ namespace Bonkers
             public string ollamaPrompt { get; set; }
             public string ollamaAddress { get; set; }
             public int tabControlExpand { get; set; }
+            public string[] Bookmarks { get; set; }
         }
+
         private void LoadConfig()
         {
-            // Specify the path to the configuration file
             string configPath = "Bonkers.cfg";
 
-            // Check if the configuration file exists
             if (!File.Exists(configPath))
             {
-                // Create a default configuration object
                 Config defaultConfig = new Config
                 {
                     LocalAPI = "192.168.2.200",
@@ -196,27 +196,15 @@ namespace Bonkers
                     ollamaPrompt = "Whats in this photo",
                     ollamaSystem = "The user will send an image, make short descriptive image tags",
                     ollamaAddress = "localhost",
-                    tabControlExpand = 200
-
+                    tabControlExpand = 200,
+                    Bookmarks = new string[] { }
                 };
-
-                // Serialize the default configuration object to JSON with indentation
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                };
-
-                string json = JsonSerializer.Serialize(defaultConfig, options);
-
-                // Write the JSON string to the configuration file
-                File.WriteAllText(configPath, json);
+                SaveConfig(defaultConfig);
+                //SaveBookmarks(defaultConfig.Bookmarks);
             }
 
-            // Read the content of the configuration file
             string configContent = File.ReadAllText(configPath);
-
-            // Deserialize the JSON content into a Config object
-            Config config = System.Text.Json.JsonSerializer.Deserialize<Config>(configContent);
+            Config config = JsonSerializer.Deserialize<Config>(configContent);
 
             // Assign values from the deserialized configuration object to variables
             localAPI = config.LocalAPI;
@@ -231,12 +219,6 @@ namespace Bonkers
             blip = config.blip;
             deepboru = config.deepboru;
             deselect = config.deselect;
-            // Use localAPI and externalAPI as needed
-            //richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
-            deselectToolStripMenuItem.Visible = deselect;
-            blipToolStripMenuItem.Visible = blip;
-            deepboruToolStripMenuItem.Visible = deepboru;
-            cogVLMToolStripMenuItem.Visible = CogVLM;
             CogVLMmax_tokens = config.CogVLMmax_tokens;
             CogVLMtop_p = config.CogVLMtop_p;
             CogVLMtemperature = config.CogVLMtemperature;
@@ -245,6 +227,14 @@ namespace Bonkers
             ollamaModel = config.ollamaModel;
             OllamaPrompt = config.ollamaPrompt;
             ollamaAddress = config.ollamaAddress;
+            string[] bookmarks = config.Bookmarks;
+
+            // Use localAPI, externalAPI, bookmarks, etc. as needed
+            // richTextBox1.Font = new Font(fontName, fontSize, FontStyle.Regular);
+            deselectToolStripMenuItem.Visible = deselect;
+            blipToolStripMenuItem.Visible = blip;
+            deepboruToolStripMenuItem.Visible = deepboru;
+            cogVLMToolStripMenuItem.Visible = CogVLM;
         }
 
         private void LoadDirectories()
@@ -295,31 +285,38 @@ namespace Bonkers
                 }
             }
 
+            // Load bookmarks into the TreeView
+            LoadBookmarks();
+
             // Attach event handlers for further interactions with the TreeView nodes
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
         }
-
-        private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        private void LoadBookmarks()
         {
-            // Ensure that the expanded node is visible in the TreeView
-            e.Node.EnsureVisible();
+            // Load bookmarks from the configuration file
+            string configPath = "Bonkers.cfg";
+            string configContent = File.ReadAllText(configPath);
+            Config config = JsonSerializer.Deserialize<Config>(configContent);
 
-            try
+            if (config.Bookmarks != null && config.Bookmarks.Length > 0)
             {
-                // Check if the first child node is a placeholder ("Loading...")
-                if (e.Node.Nodes[0].Text == "Loading...")
-                {
-                    // Remove all child nodes
-                    e.Node.Nodes.Clear();
+                TreeNode bookmarksNode = new TreeNode("Bookmarks");
+                treeView1.Nodes.Add(bookmarksNode);
 
-                    // Load directories for the expanded node
-                    LoadDirectories(e.Node);
+                foreach (string bookmark in config.Bookmarks)
+                {
+                    // Create a node for each bookmark
+                    TreeNode bookmarkNode = new TreeNode(bookmark)
+                    {
+                        Tag = bookmark
+                    };
+
+                    // Add the bookmark node under the bookmarks node
+                    bookmarksNode.Nodes.Add(bookmarkNode);
                 }
             }
-            catch { }
         }
-
         private void LoadDirectories(TreeNode node)
         {
             // Get the path from the node's tag
@@ -354,9 +351,31 @@ namespace Bonkers
                 // Handle unauthorized access exceptions if needed
             }
         }
+        private void treeView1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
+        {
+            // Ensure that the expanded node is visible in the TreeView
+            e.Node.EnsureVisible();
+
+            try
+            {
+                // Check if the first child node is a placeholder ("Loading...")
+                if (e.Node.Nodes[0].Text == "Loading...")
+                {
+                    // Remove all child nodes
+                    e.Node.Nodes.Clear();
+
+                    // Load directories for the expanded node
+                    LoadDirectories(e.Node);
+                }
+            }
+            catch { }
+        }
+
+       
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            CancelTaskAndClearLists();
             string listBoxTab = currentImageBoxTag.ToString();
             configFlag = 0;
 
@@ -377,7 +396,7 @@ namespace Bonkers
             e.Node.EnsureVisible();
 
             // Cancel any previous task and clear associated lists
-            CancelTaskAndClearLists();
+            
 
             // Wait for 1 second before continuing execution
             await Task.Delay(1000);
@@ -388,6 +407,7 @@ namespace Bonkers
             // Check if this path has already been processed to prevent duplicate loading
             if (pathCheck == selectedPath)
             {
+                LogToConsole("pathCheck prevented loading of " + selectedPath);
                 return;
             }
 
@@ -506,7 +526,7 @@ namespace Bonkers
                 int imageCount = imageList.Images.Count;
                 //UpdateListViewWithImages(currentImageBoxTag.ToString(), imageList, imageFiles);
                 LogToConsole($"Number of images in ImageList: {imageCount}");
-               
+
                 int itemCount = listView.Items.Count;
                 LogToConsole($"Number of items in ListView: {itemCount}");
             }
@@ -526,6 +546,11 @@ namespace Bonkers
 
         private async void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
+            var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+            if (imageList == null)
+            {
+                return;
+            }
             // Check if the right mouse button is clicked
             if (e.Button == MouseButtons.Right)
             {
@@ -550,7 +575,7 @@ namespace Bonkers
                 {
                     LogToConsole("node tag is null");
                     return;
-                    
+
                 }
 
                 // Clear status labels
@@ -574,10 +599,10 @@ namespace Bonkers
 
                 // Check if this path has already been processed to prevent duplicate loading
                 //if (pathCheck == selectedPath)
-               // {
-               //     LogToConsole("pathCheck prevented processing");
-               //     return;
-               // }
+                // {
+                //     LogToConsole("pathCheck prevented processing");
+                //     return;
+                // }
 
                 // Update pathCheck to the current selected path
                 pathCheck = selectedPath;
@@ -602,7 +627,7 @@ namespace Bonkers
                 //string currentImageBoxTag = tabControl2.SelectedTab.Tag.ToString();
 
                 // Get the ImageList from the dictionary based on currentImageBoxTag
-                var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+                //var imageList = GetImageListByTag(currentImageBoxTag.ToString());
                 var listView = FindListViewByTag(currentImageBoxTag);
                 if (imageList == null)
                 {
@@ -757,7 +782,7 @@ namespace Bonkers
                 }
             }
         }
-          
+
 
 
         private async void generateTxtFilesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -948,7 +973,7 @@ namespace Bonkers
             // Display a message box to inform the user that the text files have been cleared successfully
             MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
- 
+
         private void richTextBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -960,7 +985,7 @@ namespace Bonkers
                 }
             }
         }
- 
+
         private void richTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             RichTextBox richTextBox = sender as RichTextBox;
@@ -1785,8 +1810,63 @@ namespace Bonkers
                 MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        // save bookmarks 
+
+        private void AddBookmark(string path)
+        {
+            string configPath = "Bonkers.cfg";
+
+            // Load the existing configuration
+            string configContent = File.ReadAllText(configPath);
+            Config config = JsonSerializer.Deserialize<Config>(configContent);
+
+            // Add the new bookmark if it doesn't already exist
+            List<string> bookmarks = config.Bookmarks?.ToList() ?? new List<string>();
+            if (!bookmarks.Contains(path))
+            {
+                bookmarks.Add(path);
+                config.Bookmarks = bookmarks.ToArray();
+                SaveBookmarks(config.Bookmarks);
+                LoadConfig();
+            }
+            else
+            {
+                MessageBox.Show("Bookmark already exists!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void SaveBookmarks(string[] bookmarks)
+        {
+            string configPath = "Bonkers.cfg";
+
+            // Load the existing configuration
+            string configContent = File.ReadAllText(configPath);
+            Config config = JsonSerializer.Deserialize<Config>(configContent);
+
+            // Update only the bookmarks
+            config.Bookmarks = bookmarks;
+
+            // Save the updated configuration
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(config, options);
+            File.WriteAllText(configPath, json);
+
+            MessageBox.Show("Bookmarks saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         // Define a method for saving the config
+
+        private void SaveConfig(Config config)
+        {
+            string configPath = "Bonkers.cfg";
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(config, options);
+            File.WriteAllText(configPath, json);
+
+            MessageBox.Show("Config file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+
         private void saveConfig()
         {
             // Define the path to the config file
@@ -1820,7 +1900,7 @@ namespace Bonkers
         }
 
 
-      
+
         private void listView_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
@@ -2307,17 +2387,17 @@ namespace Bonkers
             newRichTextBox.Enter += RichTextBox_Enter;
             tabTag++;
         }
-                
+
         private void RichTextBox_Enter(object sender, EventArgs e)
         {
             //if (tabControl1.Height != tabControlExpand)
-           // {
-           //     int kl = tabControlExpand - 148;
-           //     // Resize the TabControl to a height of 500
-           //     tabControl1.Height = tabControlExpand = 200;
-           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y - kl);
-           //     // Resize the parent container of the TabControl if necessary
-           // }
+            // {
+            //     int kl = tabControlExpand - 148;
+            //     // Resize the TabControl to a height of 500
+            //     tabControl1.Height = tabControlExpand = 200;
+            //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y - kl);
+            //     // Resize the parent container of the TabControl if necessary
+            // }
         }
         private void newTabToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2414,13 +2494,13 @@ namespace Bonkers
                     {
                         LogToConsole("FindListViewByTag returned: " + listView);
                         return listView;
-                        
+
                     }
                 }
             }
             return null;
         }
-       
+
         private void UpdateRichTextBox(RichTextBox richTextBox, string text)
         {
             // Ensure we are operating on the UI thread
@@ -2480,8 +2560,8 @@ namespace Bonkers
             // {
             //    MessageBox.Show("RichTextBox not found for the current tag.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             // }
-           FindListViewByTag(currentImageBoxTag);
-           
+            FindListViewByTag(currentImageBoxTag);
+
 
         }
 
@@ -2514,7 +2594,7 @@ namespace Bonkers
             // Create a new TabPage
             System.Windows.Forms.TabPage newTabPage = new System.Windows.Forms.TabPage("Tab: " + imgTabTag);
 
-        
+
 
             // Create a new ImageList and attach it to the ListView
             System.Windows.Forms.ImageList imageList = new System.Windows.Forms.ImageList
@@ -2557,20 +2637,20 @@ namespace Bonkers
             // Increment imgTabTag for the next tab
             imgTabTag++;
 
-                    
-           
+
+
         }
 
         private void NewListView_MouseDown(object? sender, MouseEventArgs e)
         {
-           // if (tabControl1.Height != 148)
-           // {
-           //     // Resize the TabControl to a height of 500
-           //     int kl = tabControlExpand - 148;
-           //     tabControl1.Height = 148;
-           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
-           //     // Resize the parent container of the TabControl if necessary
-           // }
+            // if (tabControl1.Height != 148)
+            // {
+            //     // Resize the TabControl to a height of 500
+            //     int kl = tabControlExpand - 148;
+            //     tabControl1.Height = 148;
+            //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+            //     // Resize the parent container of the TabControl if necessary
+            // }
         }
         private void listView_MouseClick(object sender, MouseEventArgs e)
         {
@@ -2581,7 +2661,7 @@ namespace Bonkers
                 if (hit.Item != null)
                 {
                     // Handle the click on the specific item
-                   LogToConsole($"Item clicked: {hit.Item.Text}");
+                    LogToConsole($"Item clicked: {hit.Item.Text}");
                 }
             }
         }
@@ -2599,17 +2679,17 @@ namespace Bonkers
                 //SaveRichTextBoxContent(); // Ensure to save content when item selection changes
                 OpenTextFileOfSelectedPhoto(); // Load text file content for the selected photo
             }
-           // if (tabControl1.Height != 148)
-           // {
-           //     // Resize the TabControl to a height of 500
-           //     int kl = tabControlExpand - 148;
-           //     tabControl1.Height = 148;
-           //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
-           //     // Resize the parent container of the TabControl if necessary
-           // }
+            // if (tabControl1.Height != 148)
+            // {
+            //     // Resize the TabControl to a height of 500
+            //     int kl = tabControlExpand - 148;
+            //     tabControl1.Height = 148;
+            //     tabControl1.Location = new Point(tabControl1.Location.X, tabControl1.Location.Y + kl);
+            //     // Resize the parent container of the TabControl if necessary
+            // }
         }
 
-       
+
         private ImageList GetImageListByTag(string tag)
         {
             if (imageListDictionary.ContainsKey(tag))
@@ -2622,7 +2702,7 @@ namespace Bonkers
 
         private void tabControl2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+
             // Get the currently selected tab
             System.Windows.Forms.TabPage selectedTab = tabControl2.SelectedTab;
 
@@ -2658,6 +2738,19 @@ namespace Bonkers
         private void newTabToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             AddNewImageTab();
+        }
+
+        private void addBookmarkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (treeView1.SelectedNode != null)
+            {
+                string path = treeView1.SelectedNode.Tag as string;
+
+                if (!string.IsNullOrEmpty(path))
+                {
+                    AddBookmark(path);
+                }
+            }
         }
     }
 }
