@@ -2053,6 +2053,7 @@ namespace Bonkers
         }
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
+            Image originalImage = Image.FromFile(toolStripStatusLabel1.Text);
             const double scaleFactor = 1.1;
             int newWidth, newHeight;
 
@@ -2074,9 +2075,13 @@ namespace Bonkers
             {
                 pictureBox1.Width = newWidth;
                 pictureBox1.Height = newHeight;
+                Bitmap resizedImage = new Bitmap(originalImage, newWidth, newHeight);
+                pictureBox1.Image = resizedImage;
                 pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             }
         }
+                
+
         private void PictureBox1_MouseEnter(object sender, EventArgs e)
         {
             if (pictureBox1.Visible == true)
@@ -2834,6 +2839,88 @@ namespace Bonkers
                 currentIndex = e.ItemIndex;
                 //SaveRichTextBoxContent(); // Ensure to save content when item selection changes
                 OpenTextFileOfSelectedPhoto(); // Load text file content for the selected photo
+
+                if (pictureBox1.Visible == true)
+                {
+                    string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
+
+                    if (!string.IsNullOrEmpty(imagePath))
+                    {
+                        try
+                        {
+                            // Load the original image from the file path
+                            Image originalImage = Image.FromFile(imagePath);
+
+                            // Calculate the aspect ratio
+                            float aspectRatio = (float)originalImage.Width / (float)originalImage.Height;
+
+                            // Set the maximum width and height for the resized image
+                            int maxWidth = MaxPboxW;
+                            int maxHeight = MaxPboxH;
+
+                            // Calculate the new dimensions while maintaining aspect ratio
+                            int newWidth = Math.Min(originalImage.Width, maxWidth);
+                            int newHeight = (int)(newWidth / aspectRatio);
+
+                            // Check if the height exceeds maxHeight, then adjust dimensions
+                            if (newHeight > maxHeight)
+                            {
+                                newHeight = maxHeight;
+                                newWidth = (int)(newHeight * aspectRatio);
+                            }
+
+                            // Create a new Bitmap with the resized dimensions
+                            Bitmap resizedImage = new Bitmap(originalImage, newWidth, newHeight);
+
+                            // Set the size of the PictureBox to match the resized image
+                            pictureBox1.Size = new Size(newWidth, newHeight);
+
+                            // Calculate the initial location for PictureBox placement
+                            int edgeOffset = (int)(0.1 * this.ClientSize.Width); // 10% from the edge
+                            int pictureBoxX = (this.ClientSize.Width - pictureBox1.Width) / 2; // Center horizontally initially
+                            int pictureBoxY = (this.ClientSize.Height - pictureBox1.Height) / 2; // Center vertically initially
+
+                            // Determine the mouse position relative to the form
+                            Point mousePos = this.PointToClient(Control.MousePosition);
+
+                            // Determine if the click was on the left or right side of the form
+                            bool clickedFromRight = mousePos.X > this.ClientSize.Width / 2;
+
+                            // Adjust initial PictureBox placement based on click position
+                            if (clickedFromRight)
+                            {
+                                pictureBoxX = edgeOffset; // Place on the left
+                            }
+                            else
+                            {
+                                pictureBoxX = this.ClientSize.Width - pictureBox1.Width - edgeOffset; // Place on the right
+                            }
+
+                            // Set the location of the PictureBox
+                            pictureBox1.Location = new Point(pictureBoxX, pictureBoxY);
+
+                            // Display the resized image in the PictureBox
+                            pictureBox1.Image = resizedImage;
+                            pictureBox1.BackColor = Color.Transparent;
+                            pictureBox1.Visible = true;
+
+                            // Attach event handlers for drag-and-drop
+                            pictureBox1.MouseDown += PictureBox_MouseDown;
+                            pictureBox1.MouseMove += PictureBox_MouseMove;
+                            pictureBox1.MouseUp += PictureBox_MouseUp;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogToConsole($"Error loading/resizing image: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        LogToConsole("Image file path is empty.");
+                    }
+                }
+
+
             }
             // if (tabControl1.Height != 148)
             // {
