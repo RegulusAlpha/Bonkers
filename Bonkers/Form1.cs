@@ -15,15 +15,34 @@ using System.Runtime.InteropServices;
 using System.Drawing.Text;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
+using System.Drawing.Imaging;
+using MetadataExtractor;
+using MetadataExtractor.Formats.Exif;
+using MetadataExtractor.Formats.Icc;
+using MetadataExtractor.Formats.Iptc;
+using MetadataExtractor.Formats.Xmp;
+using MetadataExtractor.Formats.Jpeg;
+using SysDirectory = System.IO.Directory;
+using MetaDirectory = MetadataExtractor.Directory;
+
+#pragma warning disable CS8618
+#pragma warning disable CS8600
+#pragma warning disable CS8604
+#pragma warning disable CS8602
+#pragma warning disable CS8603
+#pragma warning disable CS8622
+#pragma warning disable CS8604
+#pragma warning disable CS8601
 
 
 namespace Bonkers
 {
     public partial class Form1 : Form
     {
-        private string currentDirectory;
-        private bool editingMultipleFiles = false;
-        private string selectedImageTextFile;
+        //private string currentDirectory;
+        //private bool editingMultipleFiles = false;
+        //private string selectedImageTextFile;
         private int currentIndex = 0;
         private CancellationTokenSource cancellationTokenSource;
         private string localAPI;
@@ -33,7 +52,7 @@ namespace Bonkers
         private int configFlag = 0;
         private int fontSize;
         private string fontName;
-        private int newWidth, newHeight;
+        //private int newWidth, newHeight;
         private bool isDragging = false;
         private Point dragStartMousePosition;
         private Point dragStartPictureBoxPosition;
@@ -53,18 +72,21 @@ namespace Bonkers
         private string ollamaSystem;
         private string OllamaPrompt;
         private string ollamaAddress = "localhost";
-        private string apiURL;
+        //private string apiURL;
         private int tabTag = 1;
         private int currentTextboxTag = 1;
-        private StringWriter consoleOutput;
+        //private StringWriter consoleOutput;
         private int consoleMode = 0;
-        private int tabControlExpand = 200;
+        //private int tabControlExpand = 200;
         private int imgTabTag = 1;
         private int currentImageBoxTag = 1;
-        private string[] bookmarks;
+        //private string[] bookmarks;
         Dictionary<string, ImageList> imageListDictionary = new Dictionary<string, ImageList>();
+        private FileSystemWatcher fileSystemWatcher;
+
         public Form1()
         {
+            consoleStart();
             InitializeComponent();
             LoadConfig();
             AddNewTab();
@@ -73,7 +95,7 @@ namespace Bonkers
             Clipboard.Clear();
             //Console.ForegroundColor = ConsoleColor.Red;
             //Console.WriteLine("      ___           ___           ___           ___           ___           ___           ___     \r\n     /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\    \r\n    /  /::\\       /  /::\\       /  /::|       /  /:/        /  /::\\       /  /::\\       /  /::\\   \r\n   /  /:/\\:\\     /  /:/\\:\\     /  /:|:|      /  /:/        /  /:/\\:\\     /  /:/\\:\\     /__/:/\\:\\  \r\n  /  /::\\ \\:\\   /  /:/  \\:\\   /  /:/|:|__   /  /::\\____   /  /::\\ \\:\\   /  /::\\ \\:\\   _\\_ \\:\\ \\:\\ \r\n /__/:/\\:\\_\\:| /__/:/ \\__\\:\\ /__/:/ |:| /\\ /__/:/\\:::::\\ /__/:/\\:\\ \\:\\ /__/:/\\:\\_\\:\\ /__/\\ \\:\\ \\:\\\r\n \\  \\:\\ \\:\\/:/ \\  \\:\\ /  /:/ \\__\\/  |:|/:/ \\__\\/~|:|~~~~ \\  \\:\\ \\:\\_\\/ \\__\\/~|::\\/:/ \\  \\:\\ \\:\\_\\/\r\n  \\  \\:\\_\\::/   \\  \\:\\  /:/      |  |:/:/     |  |:|      \\  \\:\\ \\:\\      |  |:|::/   \\  \\:\\_\\:\\  \r\n   \\  \\:\\/:/     \\  \\:\\/:/       |__|::/      |  |:|       \\  \\:\\_\\/      |  |:|\\/     \\  \\:\\/:/  \r\n    \\__\\::/       \\  \\::/        /__/:/       |__|:|        \\  \\:\\        |__|:|~       \\  \\::/   \r\n        ~~         \\__\\/         \\__\\/         \\__\\|         \\__\\/         \\__\\|         \\__\\/    \r\n\r\n");
-            consoleStart();
+
 
 
 
@@ -250,7 +272,7 @@ namespace Bonkers
             DriveInfo[] allDrives = DriveInfo.GetDrives();
 
             // Check if defaultPath is set and exists
-            if (defaultPath is not null && Directory.Exists(defaultPath))
+            if (defaultPath is not null && SysDirectory.Exists(defaultPath))
             {
                 // Create the root node for the defaultPath
                 TreeNode defaultNode = new TreeNode(defaultPath)
@@ -292,6 +314,7 @@ namespace Bonkers
             treeView1.BeforeExpand += treeView1_BeforeExpand;
             treeView1.AfterSelect += treeView1_AfterSelect;
         }
+
         private void LoadBookmarks()
         {
             // Load bookmarks from the configuration file
@@ -312,6 +335,9 @@ namespace Bonkers
                         Tag = bookmark
                     };
 
+                    // Add a placeholder node to indicate that the bookmark can be expanded
+                    bookmarkNode.Nodes.Add("Loading...");
+
                     // Add the bookmark node under the bookmarks node
                     bookmarksNode.Nodes.Add(bookmarkNode);
                 }
@@ -325,7 +351,7 @@ namespace Bonkers
             try
             {
                 // Get all directories in the specified path
-                string[] directories = Directory.GetDirectories(path);
+                string[] directories = SysDirectory.GetDirectories(path);
 
                 // Iterate through each directory
                 foreach (string directory in directories)
@@ -371,7 +397,6 @@ namespace Bonkers
             catch { }
         }
 
-       
 
         private async void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -396,7 +421,7 @@ namespace Bonkers
             e.Node.EnsureVisible();
 
             // Cancel any previous task and clear associated lists
-            
+
 
             // Wait for 1 second before continuing execution
             await Task.Delay(1000);
@@ -443,7 +468,7 @@ namespace Bonkers
             }
 
             // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
-            string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
+            string[] imageFiles = SysDirectory.GetFiles(selectedPath, "*.*")
                 .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                             s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
                             s.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
@@ -636,7 +661,7 @@ namespace Bonkers
                 }
 
                 // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
+                string[] imageFiles = SysDirectory.GetFiles(selectedPath, "*.*")
                     .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                                 s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
                                 s.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
@@ -794,7 +819,7 @@ namespace Bonkers
                 string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
                 // Get all image files (*.jpg, *.png, *.bmp, *.gif) in the selected directory
-                string[] imageFiles = Directory.GetFiles(selectedPath, "*.*")
+                string[] imageFiles = SysDirectory.GetFiles(selectedPath, "*.*")
                     .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                                 s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
                                 s.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
@@ -915,7 +940,7 @@ namespace Bonkers
             string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
             // Get all text files (*.txt) in the selected directory
-            string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string[] textFiles = SysDirectory.GetFiles(selectedPath, "*.txt");
 
             // Find the RichTextBox with the corresponding tag
             RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
@@ -961,7 +986,7 @@ namespace Bonkers
             string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
             // Get all text files (*.txt) in the selected directory
-            string[] txtFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string[] txtFiles = SysDirectory.GetFiles(selectedPath, "*.txt");
 
             // Iterate through each text file in the array
             foreach (string txtFile in txtFiles)
@@ -1258,7 +1283,7 @@ namespace Bonkers
             string selectedPath = treeView1.SelectedNode.Tag.ToString();
 
             // Get all text files in the selected directory
-            string[] textFiles = Directory.GetFiles(selectedPath, "*.txt");
+            string[] textFiles = SysDirectory.GetFiles(selectedPath, "*.txt");
 
             // Find the RichTextBox with the corresponding tag
             RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
@@ -1315,15 +1340,15 @@ namespace Bonkers
                 string selectedFolderPath = Path.Combine(rootDir, selectedNode.FullPath);
 
                 // Check if the selected folder exists
-                if (Directory.Exists(selectedFolderPath))
+                if (SysDirectory.Exists(selectedFolderPath))
                 {
                     // Create a new directory for converted files
                     string destDir = Path.Combine(Path.GetDirectoryName(selectedFolderPath),
                         Path.GetFileNameWithoutExtension(selectedFolderPath) + "-conv");
-                    Directory.CreateDirectory(destDir);
+                    SysDirectory.CreateDirectory(destDir);
 
                     // Copy files from the selected folder to the destination directory
-                    foreach (string file in Directory.GetFiles(selectedFolderPath))
+                    foreach (string file in SysDirectory.GetFiles(selectedFolderPath))
                     {
                         File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
                     }
@@ -1344,7 +1369,7 @@ namespace Bonkers
         private void ConvertImagesToPng(string sourceDir, string destDir)
         {
             // Get all files (including subdirectories) from the source directory
-            string[] imageFiles = Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
+            string[] imageFiles = SysDirectory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
 
             // Iterate through each image file
             foreach (string imageFile in imageFiles)
@@ -1373,7 +1398,7 @@ namespace Bonkers
         private void DeleteNonPngFiles(string folderPath)
         {
             // Get all files in the specified folder
-            string[] files = Directory.GetFiles(folderPath);
+            string[] files = SysDirectory.GetFiles(folderPath);
 
             // Iterate through each file
             foreach (string file in files)
@@ -2574,21 +2599,111 @@ namespace Bonkers
             await StartConsoleMode();
             consoleMode = 0;
         }
+        static Command ParseArguments(string input)
+        {
+            var args = Regex.Matches(input, @"[\""].+?[\""]|[^ ]+")
+                            .Cast<Match>()
+                            .Select(m => m.Value.Replace("\"", ""))
+                            .ToArray();
+
+            if (args.Length == 0)
+            {
+                return null;
+            }
+
+            var command = new Command();
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "send":
+                        command.Name = "send";
+                        break;
+                    case "--apiCall":
+                        if (i + 1 < args.Length)
+                        {
+                            command.ApiCall = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--prompt":
+                        if (i + 1 < args.Length)
+                        {
+                            command.Prompt = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--system":
+                        if (i + 1 < args.Length)
+                        {
+                            command.System = args[i + 1];
+                            i++;
+                        }
+                        break;
+                    case "--help":
+                        Console.WriteLine("*******************************************************************************\r\n\r\n                             BONKERS 0.1.4 HELP MENU\r\n\r\nWelcome to the BONKERS 0.1.4 help screen! Below you'll find a list of available\r\ncommands and their descriptions. Use these commands to navigate and utilize the\r\nvarious functions of BONKERS 0.1.4. Type the command followed by any necessary\r\nparameters and hit ENTER.\r\n\r\n COMMAND      DESCRIPTION\r\n --------     ----------------------------------------------------------\r\n --help         Display this help menu\r\n\r\n\r\nFor detailed information on a specific command, look at the source code :)\r\n*******************************************************************************\r\n\r\n                           PRESS ANY KEY TO RETURN TO MAIN MENU\r\n\r\n*******************************************************************************");
+                        break;
+                    default:
+                        // Handle unknown argument
+                        break;
+                }
+            }
+
+            return command;
+        }
+        class Command
+        {
+            public string Name { get; set; }
+            public string ApiCall { get; set; }
+            public string Prompt { get; set; }
+            public string System { get; set; }
+        }
+#pragma warning disable CS1998
         private async Task StartConsoleMode()
         {
             while (consoleMode == 1)
             {
-                Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
-                Console.WriteLine("Enter some text:");
-                consoleTrack++;
+                //Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+                //Console.WriteLine("Enter some text:");
+                //consoleTrack++;
 
-                string userInput = await Task.Run(() => Console.ReadLine());
+                //string userInput = await Task.Run(() => Console.ReadLine());
 
-                Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
-                Console.WriteLine($"You entered: {userInput}");
-                consoleTrack++;
+                //Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
+                //Console.WriteLine($"You entered: {userInput}");
+                //consoleTrack++;
+                consoleWriter("**************************************************************************\r\n*                                                                        *\r\n*                          WELCOME TO MY APP                             *\r\n*                                                                        *\r\n*               The Ultimate Solution for Your Daily Tasks!              *\r\n*                                                                        *\r\n*               Developed by [Your Name], Version 1.0, 1985              *\r\n*                                                                        *\r\n**************************************************************************\r\n\r\nGreetings, User!\r\n\r\nPrepare yourself for an unparalleled computing experience with MY APP, \r\nthe cutting-edge software designed to simplify and enhance your workflow.\r\n\r\nInstructions:\r\n1. Follow the on-screen prompts.\r\n2. Use the arrow keys to navigate through options.\r\n3. Press ENTER to select.\r\n\r\nNeed Help? Contact our support team at 1-800-MYAPP-HELP\r\n\r\nThank you for choosing MY APP!\r\nPress any key to begin...\r\n");
+                Console.WriteLine("Enter commands (type 'exit' to quit):");
+                while (true)
+                {
+                    Console.Write("> ");
+                    var input = Console.ReadLine();
+                    if (input == "exit")
+                    {
+                        consoleMode = 0;
+                        break;
+                    }
+
+                    var command = ParseArguments(input);
+
+                    if (command != null)
+                    {
+                        // Handle the command here
+                        Console.WriteLine($"API Call: {command.ApiCall}");
+                        Console.WriteLine($"Prompt: {command.Prompt}");
+                        Console.WriteLine($"System: {command.System}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid command or arguments.");
+                    }
+                }
+
+
             }
         }
+#pragma warning restore CS1998
         private void AddNewImageTab()
         {
             // Create a new TabPage
@@ -2640,7 +2755,48 @@ namespace Bonkers
 
 
         }
+        private void consoleWriter(string message)
+        {
+            string[] lines = message.Split('\n');
 
+            foreach (string line in lines)
+            {
+                foreach (char c in line)
+                {
+                    // Choose a color based on the character's position
+                    ConsoleColor color = ConsoleColor.Green;
+
+                    Console.ForegroundColor = color;
+                    Console.Write(c);
+
+                    // Adjust delay for effect
+                    Thread.Sleep(964 / 1000);
+                }
+                Console.WriteLine();
+            }
+            return;
+        }
+        private void consoleWriterRGB(string message)
+        {
+            string[] lines = message.Split('\n');
+
+            foreach (string line in lines)
+            {
+                foreach (char c in line)
+                {
+                    // Choose a color based on the character's position
+                    ConsoleColor color = GetRainbowColor(line.IndexOf(c));
+
+                    Console.ForegroundColor = color;
+                    Console.Write(c);
+
+                    // Adjust delay for effect
+                    Thread.Sleep(900 / 1000);
+                }
+                Console.WriteLine();
+            }
+            return;
+        }
         private void NewListView_MouseDown(object? sender, MouseEventArgs e)
         {
             // if (tabControl1.Height != 148)
@@ -2752,5 +2908,124 @@ namespace Bonkers
                 }
             }
         }
+
+        private void metadataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var listView = FindListViewByTag(currentImageBoxTag);
+            if (listView.SelectedItems.Count > 0)
+            {
+                ListViewItem selectedItem = listView.SelectedItems[0];
+                int imageIndex = selectedItem.ImageIndex;
+
+                // Retrieve the corresponding image from the ImageList
+                var imageList = GetImageListByTag(currentImageBoxTag.ToString());
+                if (imageList != null && imageIndex >= 0 && imageIndex < imageList.Images.Count)
+                {
+                    //Image selectedImage = imageList.Images[imageIndex];
+                    string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
+
+                    if (!string.IsNullOrEmpty(imagePath))
+                    {
+                        try
+                        {
+                            // Load the original image from the file path
+                            //Image originalImage = Image.FromFile(imagePath);
+                           
+                            // Print metadata to the console
+                            PrintImageMetadata(imagePath);
+                        }
+                        catch { }
+
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Image not found in ImageList.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No image selected.");
+            }
+        }
+
+        private void PrintImageMetadata(string filePath)
+        {
+            // Load the image
+            using (Image image = Image.FromFile(filePath))
+            {
+                // Print basic metadata
+                Console.WriteLine($"Image Size: {image.Width}x{image.Height}");
+                Console.WriteLine($"Pixel Format: {image.PixelFormat}");
+
+                // EXIF Metadata
+                Console.WriteLine("EXIF Metadata:");
+                foreach (var prop in image.PropertyItems)
+                {
+                    string propValue = GetPropertyItemValueAsString(prop);
+                    Console.WriteLine($"Property ID: {prop.Id}, Type: {prop.Type}, Length: {prop.Len}, Value: {propValue}");
+                }
+
+                // Using MetadataExtractor for ICC, IPTC, XMP, and PNG-tEXt
+                Console.WriteLine("Additional Metadata:");
+                var directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(filePath);
+
+                foreach (MetaDirectory directory in directories)
+                {
+                    foreach (var tag in directory.Tags)
+                    {
+                        Console.WriteLine($"{directory.Name} - {tag.Name} = {tag.Description}");
+
+                        // Handle PNG-tEXt metadata
+                        if (tag.Name == "PNG-tEXt")
+                        {
+                            string[] lines = tag.Description.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            foreach (string line in lines)
+                            {
+                                // Print each line that separates with a semicolon
+                                Console.WriteLine(line.Trim());
+                            }
+                        }
+                    }
+
+                    if (directory.HasError)
+                    {
+                        foreach (var error in directory.Errors)
+                        {
+                            Console.WriteLine($"ERROR: {error}");
+                        }
+                    }
+                }
+            }
+        }
+
+        private string GetPropertyItemValueAsString(PropertyItem prop)
+        {
+            try
+            {
+                switch (prop.Type)
+                {
+                    case 1: // PropertyTagTypeByte
+                        return BitConverter.ToString(prop.Value);
+                    case 2: // PropertyTagTypeASCII
+                        return System.Text.Encoding.ASCII.GetString(prop.Value);
+                    case 3: // PropertyTagTypeShort
+                        return BitConverter.ToUInt16(prop.Value, 0).ToString();
+                    case 4: // PropertyTagTypeLong
+                        return BitConverter.ToUInt32(prop.Value, 0).ToString();
+                    case 5: // PropertyTagTypeRational
+                        uint numerator = BitConverter.ToUInt32(prop.Value, 0);
+                        uint denominator = BitConverter.ToUInt32(prop.Value, 4);
+                        return $"{numerator}/{denominator}";
+                    default:
+                        return BitConverter.ToString(prop.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error reading property item: " + ex.Message;
+            }
+        }
+
     }
 }
