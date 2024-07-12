@@ -83,7 +83,15 @@ namespace Bonkers
         //private string[] bookmarks;
         Dictionary<string, ImageList> imageListDictionary = new Dictionary<string, ImageList>();
         private FileSystemWatcher fileSystemWatcher;
-
+        private int originalTreeViewWidth;
+        private int originalTabControlWidth;
+        private int originalTabControlLeft;
+        private int originalTabControl1Height;
+        private int originalTabControl1Top;
+        private int originalTabControl2Height;
+        private int originalTreeView1Height;
+        private int minTreeViewWidth = 168;
+        private int maxTabControlWidth = 1094;
         public Form1()
         {
             consoleStart();
@@ -93,6 +101,15 @@ namespace Bonkers
             AddNewImageTab();
             LoadDirectories();
             Clipboard.Clear();
+            this.Resize += Form1_Resize;
+            UpdateDynamicConstants();
+            originalTreeViewWidth = treeView1.Width;
+            originalTabControlWidth = tabControl2.Width;
+            originalTabControlLeft = tabControl2.Left;
+            originalTabControl1Height = tabControl1.Height;
+            originalTabControl1Top = tabControl1.Top;
+            originalTabControl2Height = tabControl2.Height;
+            originalTreeView1Height = treeView1.Height;
             //Console.ForegroundColor = ConsoleColor.Red;
             //Console.WriteLine("      ___           ___           ___           ___           ___           ___           ___     \r\n     /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\         /  /\\    \r\n    /  /::\\       /  /::\\       /  /::|       /  /:/        /  /::\\       /  /::\\       /  /::\\   \r\n   /  /:/\\:\\     /  /:/\\:\\     /  /:|:|      /  /:/        /  /:/\\:\\     /  /:/\\:\\     /__/:/\\:\\  \r\n  /  /::\\ \\:\\   /  /:/  \\:\\   /  /:/|:|__   /  /::\\____   /  /::\\ \\:\\   /  /::\\ \\:\\   _\\_ \\:\\ \\:\\ \r\n /__/:/\\:\\_\\:| /__/:/ \\__\\:\\ /__/:/ |:| /\\ /__/:/\\:::::\\ /__/:/\\:\\ \\:\\ /__/:/\\:\\_\\:\\ /__/\\ \\:\\ \\:\\\r\n \\  \\:\\ \\:\\/:/ \\  \\:\\ /  /:/ \\__\\/  |:|/:/ \\__\\/~|:|~~~~ \\  \\:\\ \\:\\_\\/ \\__\\/~|::\\/:/ \\  \\:\\ \\:\\_\\/\r\n  \\  \\:\\_\\::/   \\  \\:\\  /:/      |  |:/:/     |  |:|      \\  \\:\\ \\:\\      |  |:|::/   \\  \\:\\_\\:\\  \r\n   \\  \\:\\/:/     \\  \\:\\/:/       |__|::/      |  |:|       \\  \\:\\_\\/      |  |:|\\/     \\  \\:\\/:/  \r\n    \\__\\::/       \\  \\::/        /__/:/       |__|:|        \\  \\:\\        |__|:|~       \\  \\::/   \r\n        ~~         \\__\\/         \\__\\/         \\__\\|         \\__\\/         \\__\\|         \\__\\/    \r\n\r\n");
 
@@ -102,7 +119,16 @@ namespace Bonkers
             Console.ForegroundColor = consoleTrack % 2 == 0 ? ConsoleColor.Green : ConsoleColor.White;
 
         }
+        private void UpdateDynamicConstants()
+        {
+            // Calculate minimum treeView1 width based on form size
+            minTreeViewWidth = Math.Max(treeView1.MinimumSize.Width, this.ClientSize.Width / 10); // Adjust as needed
 
+            // Calculate maximum tabControl2 width based on form size
+            maxTabControlWidth = Math.Min(tabControl2.MaximumSize.Width, this.ClientSize.Width - 10); // Adjust as needed
+
+            // Adjust other controls as needed based on form size
+        }
         private void consoleStart()
         {
 
@@ -1337,7 +1363,7 @@ namespace Bonkers
                 string rootDir = @"C:\Your\Root\Directory"; // Update this with your actual root directory
 
                 // Combine the selected node's full path with the root directory to get the selected folder path
-                string selectedFolderPath = Path.Combine(rootDir, selectedNode.FullPath);
+                string selectedFolderPath = selectedNode.FullPath;//Path.Combine(rootDir, selectedNode.FullPath);
 
                 // Check if the selected folder exists
                 if (SysDirectory.Exists(selectedFolderPath))
@@ -2017,6 +2043,10 @@ namespace Bonkers
                 dragStartMousePosition = this.PointToClient(Control.MousePosition); // Mouse position relative to the form
                 dragStartPictureBoxPosition = pictureBox1.Location;
             }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                contextMenuStrip6.Show(this, this.PointToClient(MousePosition));
+            }
         }
 
         private void PictureBox_MouseMove(object sender, MouseEventArgs e)
@@ -2080,7 +2110,7 @@ namespace Bonkers
                 pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             }
         }
-                
+
 
         private void PictureBox1_MouseEnter(object sender, EventArgs e)
         {
@@ -2415,6 +2445,8 @@ namespace Bonkers
             // Set the newly added tab as the selected tab
             tabControl1.SelectedTab = newTabPage;
             newRichTextBox.Enter += RichTextBox_Enter;
+            newRichTextBox.MouseWheel += tabControl1_MouseWheelResize;
+            newRichTextBox.MouseDown += tabControl1_MouseDownResize;
             tabTag++;
         }
 
@@ -2751,6 +2783,7 @@ namespace Bonkers
             newListView.MouseDown += NewListView_MouseDown;
             newListView.MouseClick += listView_MouseClick;
             newListView.MouseDoubleClick += listView_DoubleClick;
+            newListView.MouseDown += treeView1_MouseDown;
             // Set the newly added tab as the selected tab
             tabControl2.SelectedTab = newTabPage;
 
@@ -3017,7 +3050,7 @@ namespace Bonkers
                         {
                             // Load the original image from the file path
                             //Image originalImage = Image.FromFile(imagePath);
-                           
+
                             // Print metadata to the console
                             PrintImageMetadata(imagePath);
                         }
@@ -3111,6 +3144,140 @@ namespace Bonkers
             catch (Exception ex)
             {
                 return "Error reading property item: " + ex.Message;
+            }
+        }
+
+        private void metadataToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
+
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                try
+                {
+                    // Load the original image from the file path
+                    //Image originalImage = Image.FromFile(imagePath);
+
+                    // Print metadata to the console
+                    PrintImageMetadata(imagePath);
+                }
+                catch { }
+
+            }
+        }
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            // Calculate the maximum width for tabControl2 based on the form's client width
+            int maxTabControl2Width = this.ClientSize.Width - 10; // Adjust margin as needed
+
+            // Ensure tabControl2 doesn't exceed the maximum width
+            if (tabControl2.Width > maxTabControl2Width)
+            {
+                tabControl2.Width = maxTabControl2Width;
+            }
+
+            // Adjust treeView1 width based on tabControl2's current width
+            treeView1.Width = tabControl2.Left - treeView1.Left - 10; // Adjust margin as needed
+        }
+
+        private void treeView1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                if (e.Delta > 0) // Scrolled up
+                {
+                    // Increase widths and adjust positions
+                    if (tabControl2.Width >= maxTabControlWidth || tabControl2.Width >= 168)
+                    {
+                        treeView1.Width += 10;
+                        tabControl2.Width -= 10;
+
+                        // Move tabControl2 to the right if within bounds
+                        if (tabControl2.Left + tabControl2.Width <= this.ClientSize.Width - 10)
+                        {
+                            tabControl2.Left += 10;
+                        }
+                    }
+                }
+                else if (e.Delta < 0) // Scrolled down
+                {
+                    // Decrease widths and adjust positions
+                    if (treeView1.Width > minTreeViewWidth)
+                    {
+                        treeView1.Width -= 10;
+                        tabControl2.Width += 10;
+
+                        // Move tabControl2 to the left if within bounds
+                        if (tabControl2.Left >= 10)
+                        {
+                            tabControl2.Left -= 10;
+                        }
+                    }
+                }
+            }
+        }
+        private void treeView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle) // Middle mouse button (wheel button) clicked
+            {
+                // Reset treeView1 width to 168
+                treeView1.Width = 168;
+
+                // Calculate tabControl2 width to fit between treeView1 and the right edge of the form
+                tabControl2.Width = this.ClientSize.Width - treeView1.Width - treeView1.Left - 10; // Adjust margin as needed
+
+                // Position tabControl2 just to the right of treeView1
+                tabControl2.Left = treeView1.Right + 10; // Adjust margin as needed
+            }
+        }
+
+
+
+        private void tabControl1_MouseWheelResize(object sender, MouseEventArgs e)
+        {
+            int formHeight = this.ClientSize.Height; // Get the height of the form's client area
+            int maxTabControl1Height = formHeight / 2; // Maximum allowed height for tabControl1 (50% of form height)
+
+            if (Control.ModifierKeys.HasFlag(Keys.Control)) // Check for Control key pressed
+            {
+                if (e.Delta > 0) // Scrolled up
+                {
+                    if (tabControl1.Height < maxTabControl1Height)
+                    {
+                        tabControl1.Height += 10;
+                        tabControl1.Top -= 10;
+
+                        tabControl2.Height -= 10;
+                        treeView1.Height -= 10;
+                    }
+                }
+                else if (e.Delta < 0) // Scrolled down
+                {
+                    if (tabControl1.Height > originalTabControl1Height) // Adjust based on your original height if needed
+                    {
+                        tabControl1.Height -= 10;
+                        tabControl1.Top += 10;
+
+                        tabControl2.Height += 10;
+                        treeView1.Height += 10;
+                    }
+                }
+            }
+        }
+
+        private void tabControl1_MouseDownResize(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Middle) // Middle mouse button (wheel button) clicked
+            {
+                // Reset to original sizes and positions
+                tabControl1.Height = originalTabControl1Height;
+
+                // Move tabControl1 to the bottom of the form
+                tabControl1.Top = this.ClientSize.Height - tabControl1.Height;
+
+                // Resize tabControl2 and treeView1 just above tabControl1
+                tabControl2.Height = tabControl1.Top - tabControl2.Top;
+                treeView1.Height = tabControl1.Top - treeView1.Top;
             }
         }
 

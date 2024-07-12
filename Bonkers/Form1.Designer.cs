@@ -54,6 +54,7 @@
             cogVLMToolStripMenuItem = new ToolStripMenuItem();
             ollamaAPIToolStripMenuItem = new ToolStripMenuItem();
             testToolStripMenuItem = new ToolStripMenuItem();
+            metadataToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripProgressBar1 = new ToolStripProgressBar();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
@@ -75,7 +76,8 @@
             contextMenuStrip5 = new ContextMenuStrip(components);
             newTabToolStripMenuItem1 = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
-            metadataToolStripMenuItem = new ToolStripMenuItem();
+            contextMenuStrip6 = new ContextMenuStrip(components);
+            metadataToolStripMenuItem1 = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -84,6 +86,7 @@
             contextMenuStrip4.SuspendLayout();
             contextMenuStrip5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            contextMenuStrip6.SuspendLayout();
             SuspendLayout();
             // 
             // imageList1
@@ -143,6 +146,8 @@
             treeView1.Name = "treeView1";
             treeView1.Size = new Size(168, 440);
             treeView1.TabIndex = 3;
+            treeView1.MouseDown += treeView1_MouseDown;
+            treeView1.MouseWheel += treeView1_MouseWheel;
             // 
             // contextMenuStrip1
             // 
@@ -184,12 +189,12 @@
             // 
             contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem, testToolStripMenuItem, metadataToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(181, 290);
+            contextMenuStrip2.Size = new Size(159, 268);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(158, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.ToolTipText = "will open the text file of the currently selected image";
             openToolStripMenuItem.Visible = false;
@@ -198,7 +203,7 @@
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(158, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.ToolTipText = "will save the current text file only";
             saveToolStripMenuItem.Visible = false;
@@ -207,7 +212,7 @@
             // appendAllToolStripMenuItem
             // 
             appendAllToolStripMenuItem.Name = "appendAllToolStripMenuItem";
-            appendAllToolStripMenuItem.Size = new Size(180, 22);
+            appendAllToolStripMenuItem.Size = new Size(158, 22);
             appendAllToolStripMenuItem.Text = "Append All";
             appendAllToolStripMenuItem.ToolTipText = "will append the current text in the editor to all the text files in the directory";
             appendAllToolStripMenuItem.Click += appendAllToolStripMenuItem_Click;
@@ -215,7 +220,7 @@
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(180, 22);
+            saveAllToolStripMenuItem.Size = new Size(158, 22);
             saveAllToolStripMenuItem.Text = "Overwrite All";
             saveAllToolStripMenuItem.ToolTipText = "will overwrite all textfiles in the directory with the current text in the editor";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
@@ -223,7 +228,7 @@
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(180, 22);
+            editAllToolStripMenuItem.Size = new Size(158, 22);
             editAllToolStripMenuItem.Text = "Clear All";
             editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
@@ -231,44 +236,51 @@
             // deepboruToolStripMenuItem
             // 
             deepboruToolStripMenuItem.Name = "deepboruToolStripMenuItem";
-            deepboruToolStripMenuItem.Size = new Size(180, 22);
+            deepboruToolStripMenuItem.Size = new Size(158, 22);
             deepboruToolStripMenuItem.Text = "Deepboru  - API";
             deepboruToolStripMenuItem.Click += deepboruToolStripMenuItem_Click;
             // 
             // blipToolStripMenuItem
             // 
             blipToolStripMenuItem.Name = "blipToolStripMenuItem";
-            blipToolStripMenuItem.Size = new Size(180, 22);
+            blipToolStripMenuItem.Size = new Size(158, 22);
             blipToolStripMenuItem.Text = "Blip - API";
             blipToolStripMenuItem.Click += blipToolStripMenuItem_Click;
             // 
             // deselectToolStripMenuItem
             // 
             deselectToolStripMenuItem.Name = "deselectToolStripMenuItem";
-            deselectToolStripMenuItem.Size = new Size(180, 22);
+            deselectToolStripMenuItem.Size = new Size(158, 22);
             deselectToolStripMenuItem.Text = "Deselect";
             deselectToolStripMenuItem.Click += deselectToolStripMenuItem_Click;
             // 
             // cogVLMToolStripMenuItem
             // 
             cogVLMToolStripMenuItem.Name = "cogVLMToolStripMenuItem";
-            cogVLMToolStripMenuItem.Size = new Size(180, 22);
+            cogVLMToolStripMenuItem.Size = new Size(158, 22);
             cogVLMToolStripMenuItem.Text = "CogVLM - API";
             cogVLMToolStripMenuItem.Click += cogVLMToolStripMenuItem_Click;
             // 
             // ollamaAPIToolStripMenuItem
             // 
             ollamaAPIToolStripMenuItem.Name = "ollamaAPIToolStripMenuItem";
-            ollamaAPIToolStripMenuItem.Size = new Size(180, 22);
+            ollamaAPIToolStripMenuItem.Size = new Size(158, 22);
             ollamaAPIToolStripMenuItem.Text = "Ollama - API";
             ollamaAPIToolStripMenuItem.Click += ollamaAPIToolStripMenuItem_Click;
             // 
             // testToolStripMenuItem
             // 
             testToolStripMenuItem.Name = "testToolStripMenuItem";
-            testToolStripMenuItem.Size = new Size(180, 22);
+            testToolStripMenuItem.Size = new Size(158, 22);
             testToolStripMenuItem.Text = "test";
             testToolStripMenuItem.Click += testToolStripMenuItem_Click;
+            // 
+            // metadataToolStripMenuItem
+            // 
+            metadataToolStripMenuItem.Name = "metadataToolStripMenuItem";
+            metadataToolStripMenuItem.Size = new Size(158, 22);
+            metadataToolStripMenuItem.Text = "Metadata";
+            metadataToolStripMenuItem.Click += metadataToolStripMenuItem_Click;
             // 
             // statusStrip1
             // 
@@ -375,7 +387,8 @@
             tabControl1.Size = new Size(1268, 148);
             tabControl1.TabIndex = 8;
             tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
-            tabControl1.MouseDown += tabControl1_MouseDown;
+            tabControl1.MouseDown += tabControl1_MouseDownResize;
+            tabControl1.MouseWheel += tabControl1_MouseWheelResize;
             // 
             // contextMenuStrip4
             // 
@@ -400,7 +413,8 @@
             tabControl2.Size = new Size(1094, 440);
             tabControl2.TabIndex = 9;
             tabControl2.SelectedIndexChanged += tabControl2_SelectedIndexChanged;
-            tabControl2.MouseDown += tabControl2_MouseDown;
+            tabControl2.MouseDown += treeView1_MouseDown;
+            tabControl2.MouseWheel += treeView1_MouseWheel;
             // 
             // contextMenuStrip5
             // 
@@ -417,7 +431,7 @@
             // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(12, 40);
+            pictureBox1.Location = new Point(12, 34);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(420, 420);
             pictureBox1.TabIndex = 7;
@@ -429,12 +443,18 @@
             pictureBox1.MouseUp += PictureBox_MouseUp;
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             // 
-            // metadataToolStripMenuItem
+            // contextMenuStrip6
             // 
-            metadataToolStripMenuItem.Name = "metadataToolStripMenuItem";
-            metadataToolStripMenuItem.Size = new Size(180, 22);
-            metadataToolStripMenuItem.Text = "Metadata";
-            metadataToolStripMenuItem.Click += metadataToolStripMenuItem_Click;
+            contextMenuStrip6.Items.AddRange(new ToolStripItem[] { metadataToolStripMenuItem1 });
+            contextMenuStrip6.Name = "contextMenuStrip6";
+            contextMenuStrip6.Size = new Size(125, 26);
+            // 
+            // metadataToolStripMenuItem1
+            // 
+            metadataToolStripMenuItem1.Name = "metadataToolStripMenuItem1";
+            metadataToolStripMenuItem1.Size = new Size(124, 22);
+            metadataToolStripMenuItem1.Text = "Metadata";
+            metadataToolStripMenuItem1.Click += metadataToolStripMenuItem1_Click;
             // 
             // Form1
             // 
@@ -460,10 +480,10 @@
             contextMenuStrip4.ResumeLayout(false);
             contextMenuStrip5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            contextMenuStrip6.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
-
 
         #endregion
 
@@ -514,5 +534,7 @@
         private ToolStripMenuItem newTabToolStripMenuItem1;
         private ToolStripMenuItem addBookmarkToolStripMenuItem;
         private ToolStripMenuItem metadataToolStripMenuItem;
+        private ContextMenuStrip contextMenuStrip6;
+        private ToolStripMenuItem metadataToolStripMenuItem1;
     }
 }
