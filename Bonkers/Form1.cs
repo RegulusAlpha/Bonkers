@@ -2430,7 +2430,7 @@ namespace Bonkers
                 ContextMenuStrip = contextMenuStrip3, // Attach contextMenuStrip4 to the RichTextBox
                 Tag = tabTag.ToString(), // Set the tag as needed
                 BackColor = Color.LightGray, // Set the background color to black
-                ForeColor = Color.White // Set the text color to green
+                ForeColor = Color.Black // Set the text color to green
             };
 
             // Attach the KeyDown event handler
@@ -3281,5 +3281,50 @@ namespace Bonkers
             }
         }
 
+        private void appendAllFrontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Get the selected path from the TreeView's selected node
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+
+            // Get all text files in the selected directory
+            string[] textFiles = SysDirectory.GetFiles(selectedPath, "*.txt");
+
+            // Find the RichTextBox with the corresponding tag
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
+
+            if (selectedRichTextBox != null)
+            {
+                // Iterate through each text file
+                foreach (string txtFile in textFiles)
+                {
+                    // Read the existing text content from the text file
+                    string textContent = File.ReadAllText(txtFile);
+
+                    // Append text from the selected RichTextBox to the front of the existing text content
+                    textContent = selectedRichTextBox.Text + textContent;
+
+                    // Write the updated text content back to the text file
+                    File.WriteAllText(txtFile, textContent);
+                }
+
+                // Select all text in the selected RichTextBox
+                selectedRichTextBox.SelectAll();
+
+                // Set the selection color to green in the selected RichTextBox
+                selectedRichTextBox.SelectionColor = Color.Green;
+
+                // Deselect all text in the selected RichTextBox
+                selectedRichTextBox.DeselectAll();
+
+                // Set the selection start to the end of the text in the selectedRichTextBox
+                selectedRichTextBox.SelectionStart = selectedRichTextBox.Text.Length;
+
+                // Scroll to the caret position (end of text) in the selectedRichTextBox
+                selectedRichTextBox.ScrollToCaret();
+
+                // Show a success message box
+                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
     }
 }
