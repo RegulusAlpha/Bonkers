@@ -30,7 +30,6 @@
         {
             components = new System.ComponentModel.Container();
             imageList1 = new ImageList(components);
-            richTextBox1 = new RichTextBox();
             contextMenuStrip3 = new ContextMenuStrip(components);
             cutToolStripMenuItem = new ToolStripMenuItem();
             copyToolStripMenuItem = new ToolStripMenuItem();
@@ -42,7 +41,7 @@
             generateTxtFilesToolStripMenuItem = new ToolStripMenuItem();
             refreshToolStripMenuItem = new ToolStripMenuItem();
             copyConvertToolStripMenuItem = new ToolStripMenuItem();
-            listView1 = new ListView();
+            addBookmarkToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip2 = new ContextMenuStrip(components);
             openToolStripMenuItem = new ToolStripMenuItem();
             saveToolStripMenuItem = new ToolStripMenuItem();
@@ -54,6 +53,9 @@
             deselectToolStripMenuItem = new ToolStripMenuItem();
             cogVLMToolStripMenuItem = new ToolStripMenuItem();
             ollamaAPIToolStripMenuItem = new ToolStripMenuItem();
+            testToolStripMenuItem = new ToolStripMenuItem();
+            metadataToolStripMenuItem = new ToolStripMenuItem();
+            appendAllFrontToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripProgressBar1 = new ToolStripProgressBar();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
@@ -67,13 +69,25 @@
             openConfigToolStripMenuItem1 = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem = new ToolStripMenuItem();
             reloadConfigToolStripMenuItem1 = new ToolStripMenuItem();
+            consoleModeToolStripMenuItem = new ToolStripMenuItem();
+            tabControl1 = new TabControl();
+            contextMenuStrip4 = new ContextMenuStrip(components);
+            newTabToolStripMenuItem = new ToolStripMenuItem();
+            tabControl2 = new TabControl();
+            contextMenuStrip5 = new ContextMenuStrip(components);
+            newTabToolStripMenuItem1 = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
+            contextMenuStrip6 = new ContextMenuStrip(components);
+            metadataToolStripMenuItem1 = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
+            contextMenuStrip4.SuspendLayout();
+            contextMenuStrip5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            contextMenuStrip6.SuspendLayout();
             SuspendLayout();
             // 
             // imageList1
@@ -81,20 +95,6 @@
             imageList1.ColorDepth = ColorDepth.Depth32Bit;
             imageList1.ImageSize = new Size(255, 255);
             imageList1.TransparentColor = Color.Transparent;
-            // 
-            // richTextBox1
-            // 
-            richTextBox1.BackColor = SystemColors.ScrollBar;
-            richTextBox1.ContextMenuStrip = contextMenuStrip3;
-            richTextBox1.Dock = DockStyle.Bottom;
-            richTextBox1.Location = new Point(0, 506);
-            richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(1268, 137);
-            richTextBox1.TabIndex = 0;
-            richTextBox1.Text = "";
-            richTextBox1.TextChanged += richTextBox1_TextChanged;
-            richTextBox1.KeyDown += richTextBox1_KeyDown;
-            richTextBox1.MouseDown += richTextBox1_MouseDown;
             // 
             // contextMenuStrip3
             // 
@@ -140,19 +140,21 @@
             // 
             // treeView1
             // 
+            treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             treeView1.BackColor = SystemColors.ScrollBar;
             treeView1.ContextMenuStrip = contextMenuStrip1;
-            treeView1.Dock = DockStyle.Left;
-            treeView1.Location = new Point(0, 0);
+            treeView1.Location = new Point(0, 27);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(156, 506);
+            treeView1.Size = new Size(168, 440);
             treeView1.TabIndex = 3;
+            treeView1.MouseDown += treeView1_MouseDown;
+            treeView1.MouseWheel += treeView1_MouseWheel;
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { generateTxtFilesToolStripMenuItem, refreshToolStripMenuItem, copyConvertToolStripMenuItem, addBookmarkToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(170, 70);
+            contextMenuStrip1.Size = new Size(170, 92);
             // 
             // generateTxtFilesToolStripMenuItem
             // 
@@ -177,32 +179,23 @@
             copyConvertToolStripMenuItem.Text = "Copy Convert";
             copyConvertToolStripMenuItem.Click += copyConvertToolStripMenuItem_Click;
             // 
-            // listView1
+            // addBookmarkToolStripMenuItem
             // 
-            listView1.BackColor = SystemColors.ScrollBar;
-            listView1.ContextMenuStrip = contextMenuStrip2;
-            listView1.Dock = DockStyle.Fill;
-            listView1.Location = new Point(156, 0);
-            listView1.Name = "listView1";
-            listView1.Size = new Size(1112, 506);
-            listView1.TabIndex = 4;
-            listView1.TileSize = new Size(255, 255);
-            listView1.UseCompatibleStateImageBehavior = false;
-            listView1.ItemSelectionChanged += listView1_ItemSelectionChanged;
-            listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
-            listView1.DoubleClick += listView1_DoubleClick;
-            listView1.MouseDown += listView1_MouseDown;
+            addBookmarkToolStripMenuItem.Name = "addBookmarkToolStripMenuItem";
+            addBookmarkToolStripMenuItem.Size = new Size(169, 22);
+            addBookmarkToolStripMenuItem.Text = "Add Bookmark";
+            addBookmarkToolStripMenuItem.Click += addBookmarkToolStripMenuItem_Click;
             // 
             // contextMenuStrip2
             // 
-            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem });
+            contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, appendAllFrontToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem, testToolStripMenuItem, metadataToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(159, 224);
+            contextMenuStrip2.Size = new Size(173, 290);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(158, 22);
+            openToolStripMenuItem.Size = new Size(172, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.ToolTipText = "will open the text file of the currently selected image";
             openToolStripMenuItem.Visible = false;
@@ -211,7 +204,7 @@
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(158, 22);
+            saveToolStripMenuItem.Size = new Size(172, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.ToolTipText = "will save the current text file only";
             saveToolStripMenuItem.Visible = false;
@@ -220,7 +213,7 @@
             // appendAllToolStripMenuItem
             // 
             appendAllToolStripMenuItem.Name = "appendAllToolStripMenuItem";
-            appendAllToolStripMenuItem.Size = new Size(158, 22);
+            appendAllToolStripMenuItem.Size = new Size(172, 22);
             appendAllToolStripMenuItem.Text = "Append All";
             appendAllToolStripMenuItem.ToolTipText = "will append the current text in the editor to all the text files in the directory";
             appendAllToolStripMenuItem.Click += appendAllToolStripMenuItem_Click;
@@ -228,7 +221,7 @@
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(158, 22);
+            saveAllToolStripMenuItem.Size = new Size(172, 22);
             saveAllToolStripMenuItem.Text = "Overwrite All";
             saveAllToolStripMenuItem.ToolTipText = "will overwrite all textfiles in the directory with the current text in the editor";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
@@ -236,7 +229,7 @@
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(158, 22);
+            editAllToolStripMenuItem.Size = new Size(172, 22);
             editAllToolStripMenuItem.Text = "Clear All";
             editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
@@ -244,45 +237,66 @@
             // deepboruToolStripMenuItem
             // 
             deepboruToolStripMenuItem.Name = "deepboruToolStripMenuItem";
-            deepboruToolStripMenuItem.Size = new Size(158, 22);
+            deepboruToolStripMenuItem.Size = new Size(172, 22);
             deepboruToolStripMenuItem.Text = "Deepboru  - API";
             deepboruToolStripMenuItem.Click += deepboruToolStripMenuItem_Click;
             // 
             // blipToolStripMenuItem
             // 
             blipToolStripMenuItem.Name = "blipToolStripMenuItem";
-            blipToolStripMenuItem.Size = new Size(158, 22);
+            blipToolStripMenuItem.Size = new Size(172, 22);
             blipToolStripMenuItem.Text = "Blip - API";
             blipToolStripMenuItem.Click += blipToolStripMenuItem_Click;
             // 
             // deselectToolStripMenuItem
             // 
             deselectToolStripMenuItem.Name = "deselectToolStripMenuItem";
-            deselectToolStripMenuItem.Size = new Size(158, 22);
+            deselectToolStripMenuItem.Size = new Size(172, 22);
             deselectToolStripMenuItem.Text = "Deselect";
             deselectToolStripMenuItem.Click += deselectToolStripMenuItem_Click;
             // 
             // cogVLMToolStripMenuItem
             // 
             cogVLMToolStripMenuItem.Name = "cogVLMToolStripMenuItem";
-            cogVLMToolStripMenuItem.Size = new Size(158, 22);
+            cogVLMToolStripMenuItem.Size = new Size(172, 22);
             cogVLMToolStripMenuItem.Text = "CogVLM - API";
             cogVLMToolStripMenuItem.Click += cogVLMToolStripMenuItem_Click;
             // 
             // ollamaAPIToolStripMenuItem
             // 
             ollamaAPIToolStripMenuItem.Name = "ollamaAPIToolStripMenuItem";
-            ollamaAPIToolStripMenuItem.Size = new Size(158, 22);
+            ollamaAPIToolStripMenuItem.Size = new Size(172, 22);
             ollamaAPIToolStripMenuItem.Text = "Ollama - API";
             ollamaAPIToolStripMenuItem.Click += ollamaAPIToolStripMenuItem_Click;
+            // 
+            // testToolStripMenuItem
+            // 
+            testToolStripMenuItem.Name = "testToolStripMenuItem";
+            testToolStripMenuItem.Size = new Size(172, 22);
+            testToolStripMenuItem.Text = "test";
+            testToolStripMenuItem.Click += testToolStripMenuItem_Click;
+            // 
+            // metadataToolStripMenuItem
+            // 
+            metadataToolStripMenuItem.Name = "metadataToolStripMenuItem";
+            metadataToolStripMenuItem.Size = new Size(172, 22);
+            metadataToolStripMenuItem.Text = "Metadata";
+            metadataToolStripMenuItem.Click += metadataToolStripMenuItem_Click;
+            // 
+            // appendAllFrontToolStripMenuItem
+            // 
+            appendAllFrontToolStripMenuItem.Name = "appendAllFrontToolStripMenuItem";
+            appendAllFrontToolStripMenuItem.Size = new Size(172, 22);
+            appendAllFrontToolStripMenuItem.Text = "Append All - Front";
+            appendAllFrontToolStripMenuItem.Click += appendAllFrontToolStripMenuItem_Click;
             // 
             // statusStrip1
             // 
             statusStrip1.BackColor = SystemColors.Control;
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripProgressBar1, toolStripStatusLabel1, toolStripStatusLabel2, toolStripStatusLabel3, toolStripStatusLabel4, toolStripStatusLabel5 });
-            statusStrip1.Location = new Point(156, 484);
+            statusStrip1.Location = new Point(0, 621);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(1112, 22);
+            statusStrip1.Size = new Size(1268, 22);
             statusStrip1.TabIndex = 5;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -321,10 +335,10 @@
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem });
-            menuStrip1.Location = new Point(156, 0);
+            menuStrip1.Items.AddRange(new ToolStripItem[] { optionsToolStripMenuItem, consoleModeToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(1112, 24);
+            menuStrip1.Size = new Size(1268, 24);
             menuStrip1.TabIndex = 6;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -364,9 +378,68 @@
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 
+            // consoleModeToolStripMenuItem
+            // 
+            consoleModeToolStripMenuItem.Name = "consoleModeToolStripMenuItem";
+            consoleModeToolStripMenuItem.Size = new Size(96, 20);
+            consoleModeToolStripMenuItem.Text = "Console Mode";
+            consoleModeToolStripMenuItem.Click += consoleModeToolStripMenuItem_Click;
+            // 
+            // tabControl1
+            // 
+            tabControl1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.ContextMenuStrip = contextMenuStrip4;
+            tabControl1.Location = new Point(0, 473);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(1268, 148);
+            tabControl1.TabIndex = 8;
+            tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
+            tabControl1.MouseDown += tabControl1_MouseDownResize;
+            tabControl1.MouseWheel += tabControl1_MouseWheelResize;
+            // 
+            // contextMenuStrip4
+            // 
+            contextMenuStrip4.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem });
+            contextMenuStrip4.Name = "contextMenuStrip4";
+            contextMenuStrip4.Size = new Size(117, 26);
+            // 
+            // newTabToolStripMenuItem
+            // 
+            newTabToolStripMenuItem.Name = "newTabToolStripMenuItem";
+            newTabToolStripMenuItem.Size = new Size(116, 22);
+            newTabToolStripMenuItem.Text = "new tab";
+            newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
+            // 
+            // tabControl2
+            // 
+            tabControl2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl2.ContextMenuStrip = contextMenuStrip5;
+            tabControl2.Location = new Point(174, 27);
+            tabControl2.Name = "tabControl2";
+            tabControl2.SelectedIndex = 0;
+            tabControl2.Size = new Size(1094, 440);
+            tabControl2.TabIndex = 9;
+            tabControl2.SelectedIndexChanged += tabControl2_SelectedIndexChanged;
+            tabControl2.MouseDown += treeView1_MouseDown;
+            tabControl2.MouseWheel += treeView1_MouseWheel;
+            // 
+            // contextMenuStrip5
+            // 
+            contextMenuStrip5.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem1 });
+            contextMenuStrip5.Name = "contextMenuStrip5";
+            contextMenuStrip5.Size = new Size(120, 26);
+            // 
+            // newTabToolStripMenuItem1
+            // 
+            newTabToolStripMenuItem1.Name = "newTabToolStripMenuItem1";
+            newTabToolStripMenuItem1.Size = new Size(119, 22);
+            newTabToolStripMenuItem1.Text = "New Tab";
+            newTabToolStripMenuItem1.Click += newTabToolStripMenuItem1_Click;
+            // 
             // pictureBox1
             // 
-            pictureBox1.Location = new Point(813, 47);
+            pictureBox1.Location = new Point(12, 34);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(420, 420);
             pictureBox1.TabIndex = 7;
@@ -378,17 +451,30 @@
             pictureBox1.MouseUp += PictureBox_MouseUp;
             pictureBox1.MouseWheel += PictureBox1_MouseWheel;
             // 
+            // contextMenuStrip6
+            // 
+            contextMenuStrip6.Items.AddRange(new ToolStripItem[] { metadataToolStripMenuItem1 });
+            contextMenuStrip6.Name = "contextMenuStrip6";
+            contextMenuStrip6.Size = new Size(125, 26);
+            // 
+            // metadataToolStripMenuItem1
+            // 
+            metadataToolStripMenuItem1.Name = "metadataToolStripMenuItem1";
+            metadataToolStripMenuItem1.Size = new Size(124, 22);
+            metadataToolStripMenuItem1.Text = "Metadata";
+            metadataToolStripMenuItem1.Click += metadataToolStripMenuItem1_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
             Controls.Add(pictureBox1);
+            Controls.Add(tabControl1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
-            Controls.Add(listView1);
             Controls.Add(treeView1);
-            Controls.Add(richTextBox1);
+            Controls.Add(tabControl2);
             MainMenuStrip = menuStrip1;
             Name = "Form1";
             Text = "Bonkers";
@@ -399,18 +485,18 @@
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            contextMenuStrip4.ResumeLayout(false);
+            contextMenuStrip5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            contextMenuStrip6.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
 
-
         #endregion
 
         private ImageList imageList1;
-        private RichTextBox richTextBox1;
         private TreeView treeView1;
-        private ListView listView1;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem generateTxtFilesToolStripMenuItem;
         private ContextMenuStrip contextMenuStrip2;
@@ -437,7 +523,6 @@
         private ToolStripMenuItem openConfigToolStripMenuItem1;
         private ToolStripMenuItem reloadConfigToolStripMenuItem;
         private ToolStripMenuItem reloadConfigToolStripMenuItem1;
-        private PictureBox pictureBox1;
         private ToolStripMenuItem cogVLMToolStripMenuItem;
         private ContextMenuStrip contextMenuStrip3;
         private ToolStripMenuItem clearToolStripMenuItem;
@@ -446,5 +531,19 @@
         private ToolStripMenuItem cutToolStripMenuItem;
         private ToolStripMenuItem selectAllToolStripMenuItem;
         private ToolStripMenuItem ollamaAPIToolStripMenuItem;
+        private TabControl tabControl1;
+        private ContextMenuStrip contextMenuStrip4;
+        private ToolStripMenuItem newTabToolStripMenuItem;
+        private ToolStripMenuItem testToolStripMenuItem;
+        private ToolStripMenuItem consoleModeToolStripMenuItem;
+        private TabControl tabControl2;
+        private PictureBox pictureBox1;
+        private ContextMenuStrip contextMenuStrip5;
+        private ToolStripMenuItem newTabToolStripMenuItem1;
+        private ToolStripMenuItem addBookmarkToolStripMenuItem;
+        private ToolStripMenuItem metadataToolStripMenuItem;
+        private ContextMenuStrip contextMenuStrip6;
+        private ToolStripMenuItem metadataToolStripMenuItem1;
+        private ToolStripMenuItem appendAllFrontToolStripMenuItem;
     }
 }
