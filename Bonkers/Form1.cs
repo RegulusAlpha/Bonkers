@@ -72,6 +72,8 @@ namespace Bonkers
         private string ollamaSystem;
         private string OllamaPrompt;
         private string ollamaAddress = "localhost";
+        private bool ollamaSave = false;
+
         //private string apiURL;
         private int tabTag = 1;
         private int currentTextboxTag = 1;
@@ -144,7 +146,14 @@ namespace Bonkers
    \  \:\/:/     \  \:\/:/       |__|::/      |  |:|       \  \:\_\/      |  |:|\/     \  \:\/:/  
     \__\::/       \  \::/        /__/:/       |__|:|        \  \:\        |__|:|~       \  \::/   
         ~~         \__\/         \__\/         \__\|         \__\/         \__\|         \__\/    
-
+v0.1.5
+B: Bitmap
+O: Organizer &
+N: Notation
+K: Knowledge-based
+E: Editor 4
+R: Recognizing &
+S: Sorting
 ";
 
             string[] lines = asciiArt.Split('\n');
@@ -212,6 +221,7 @@ namespace Bonkers
             public string ollamaSystem { get; set; }
             public string ollamaPrompt { get; set; }
             public string ollamaAddress { get; set; }
+            public bool ollamaSave { get; set; }
             public int tabControlExpand { get; set; }
             public string[] Bookmarks { get; set; }
         }
@@ -244,6 +254,7 @@ namespace Bonkers
                     ollamaPrompt = "Whats in this photo",
                     ollamaSystem = "The user will send an image, make short descriptive image tags",
                     ollamaAddress = "localhost",
+                    ollamaSave = false,
                     tabControlExpand = 200,
                     Bookmarks = new string[] { }
                 };
@@ -275,6 +286,7 @@ namespace Bonkers
             ollamaModel = config.ollamaModel;
             OllamaPrompt = config.ollamaPrompt;
             ollamaAddress = config.ollamaAddress;
+            ollamaSave = config.ollamaSave;
             string[] bookmarks = config.Bookmarks;
 
             // Use localAPI, externalAPI, bookmarks, etc. as needed
@@ -2470,7 +2482,12 @@ namespace Bonkers
 
                         // Update the selected RichTextBox with the response text
                         selectedRichTextBox.Text = responseText;
-                        //SaveRichTextBoxContent();
+
+                        if(ollamaSave == true)
+                        {
+                            SaveRichTextBoxContent();
+                        }
+                        
                     }
                     else
                     {
