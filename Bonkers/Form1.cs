@@ -2308,7 +2308,81 @@ namespace Bonkers
                 selectedRichTextBox.SelectAll();
             }
         }
+        private async void ollamaAPIBulkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var listView = FindListViewByTag(currentImageBoxTag);
 
+            // Initialize the cancellation token source
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
+
+            // Make the progress bar visible
+            toolStripProgressBar1.Visible = true;
+            toolStripProgressBar1.Maximum = listView.Items.Count;
+            toolStripProgressBar1.Value = 0;
+
+            try
+            {
+                for (int i = 0; i < listView.Items.Count; i++)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        // Handle the cancellation request
+                        LogToConsole("Task was cancelled.");
+                        break;
+                    }
+
+                    ListViewItem item = listView.Items[i];
+
+                    // Select the item
+                    item.Selected = true;
+
+                    // Manually trigger the ItemSelectionChanged event
+                    ListViewItemSelectionChangedEventArgs eventArgs =
+                        new ListViewItemSelectionChangedEventArgs(item, i, true);
+                    ListView_ItemSelectionChanged(listView, eventArgs);
+
+                    // Perform your API request here
+                    if (File.Exists(toolStripStatusLabel1.Text))
+                    {
+                        // Get the file path
+                        string filePath = toolStripStatusLabel1.Text;
+
+                        // Load the image from the file path
+                        using (Image image = Image.FromFile(filePath))
+                        {
+                            // Convert the image to a base64 string (PNG format)
+                            string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                            // Send the API request
+                            await OllamaApiCall(base64String);
+                        }
+                    }
+                    else
+                    {
+                        // Update toolStripStatusLabel5 with an error message
+                        toolStripStatusLabel5.Text = "Invalid file path";
+                    }
+
+                    // Deselect the item after processing
+                    item.Selected = false;
+
+                    // Update the progress bar
+                    toolStripProgressBar1.Value = i + 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                // Make the progress bar invisible
+                toolStripProgressBar1.Visible = false;
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+            }
+        }
         private async void ollamaAPIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Clear toolStripStatusLabel5 text
@@ -2396,6 +2470,7 @@ namespace Bonkers
 
                         // Update the selected RichTextBox with the response text
                         selectedRichTextBox.Text = responseText;
+                        //SaveRichTextBoxContent();
                     }
                     else
                     {
@@ -3326,5 +3401,7 @@ namespace Bonkers
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
+
     }
 }
