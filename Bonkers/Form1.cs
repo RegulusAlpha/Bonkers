@@ -72,6 +72,8 @@ namespace Bonkers
         private string ollamaSystem;
         private string OllamaPrompt;
         private string ollamaAddress = "localhost";
+        private bool ollamaSave = false;
+
         //private string apiURL;
         private int tabTag = 1;
         private int currentTextboxTag = 1;
@@ -144,7 +146,14 @@ namespace Bonkers
    \  \:\/:/     \  \:\/:/       |__|::/      |  |:|       \  \:\_\/      |  |:|\/     \  \:\/:/  
     \__\::/       \  \::/        /__/:/       |__|:|        \  \:\        |__|:|~       \  \::/   
         ~~         \__\/         \__\/         \__\|         \__\/         \__\|         \__\/    
-
+v0.1.5
+B: Bitmap
+O: Organizer &
+N: Notation
+K: Knowledge-based
+E: Editor 4
+R: Recognizing &
+S: Sorting
 ";
 
             string[] lines = asciiArt.Split('\n');
@@ -212,6 +221,7 @@ namespace Bonkers
             public string ollamaSystem { get; set; }
             public string ollamaPrompt { get; set; }
             public string ollamaAddress { get; set; }
+            public bool ollamaSave { get; set; }
             public int tabControlExpand { get; set; }
             public string[] Bookmarks { get; set; }
         }
@@ -244,6 +254,7 @@ namespace Bonkers
                     ollamaPrompt = "Whats in this photo",
                     ollamaSystem = "The user will send an image, make short descriptive image tags",
                     ollamaAddress = "localhost",
+                    ollamaSave = false,
                     tabControlExpand = 200,
                     Bookmarks = new string[] { }
                 };
@@ -275,6 +286,7 @@ namespace Bonkers
             ollamaModel = config.ollamaModel;
             OllamaPrompt = config.ollamaPrompt;
             ollamaAddress = config.ollamaAddress;
+            ollamaSave = config.ollamaSave;
             string[] bookmarks = config.Bookmarks;
 
             // Use localAPI, externalAPI, bookmarks, etc. as needed
@@ -1906,7 +1918,7 @@ namespace Bonkers
         }
 
         // Define a method for saving the config
-
+//fsdgfhfsg
         private void SaveConfig(Config config)
         {
             string configPath = "Bonkers.cfg";
@@ -1955,8 +1967,9 @@ namespace Bonkers
         private void listView_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
-
-            if (!string.IsNullOrEmpty(imagePath))
+            OpenImageInNewForm();
+            int lock101 = 0;
+            if (!string.IsNullOrEmpty(imagePath) & lock101 == 1)
             {
                 try
                 {
@@ -2031,6 +2044,68 @@ namespace Bonkers
                 LogToConsole("Image file path is empty.");
             }
         }
+
+        private void OpenImageInNewForm()
+        {
+            // Get the image path from the ToolStripStatusLabel
+            string imagePath = toolStripStatusLabel1.Text;
+
+            // Check if the file exists
+            if (!System.IO.File.Exists(imagePath))
+            {
+                MessageBox.Show("Image file not found.");
+                return;
+            }
+
+            // Get the directory and all image files in the directory
+            string directory = System.IO.Path.GetDirectoryName(imagePath);
+            string[] imageFiles = System.IO.Directory.GetFiles(directory, "*.jpg")
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.png"))
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.bmp"))
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.gif"))
+                                    .OrderBy(f => f).ToArray();
+
+            // Find the index of the current image
+            int currentIndex = Array.IndexOf(imageFiles, imagePath);
+
+            // Create a new Form
+            Form imageForm = new Form();
+            imageForm.Text = "Image Viewer";
+            imageForm.Size = new System.Drawing.Size(800, 600);
+
+            // Create a PictureBox
+            PictureBox pictureBox = new PictureBox();
+            pictureBox.Image = Image.FromFile(imageFiles[currentIndex]);
+            pictureBox.Dock = DockStyle.Fill;
+            pictureBox.SizeMode = PictureBoxSizeMode.Zoom; // Auto size image to form
+
+            // Add the PictureBox to the form
+            imageForm.Controls.Add(pictureBox);
+
+            // Enable the form to be resized and keep the pictureBox autosized
+            imageForm.FormBorderStyle = FormBorderStyle.Sizable;
+
+            // Event handler for the mouse wheel scroll event
+            imageForm.MouseWheel += (sender, e) =>
+            {
+                // Scroll up (next image) or down (previous image)
+                if (e.Delta > 0) // Mouse scroll up
+                {
+                    currentIndex = (currentIndex + 1) % imageFiles.Length;
+                }
+                else if (e.Delta < 0) // Mouse scroll down
+                {
+                    currentIndex = (currentIndex - 1 + imageFiles.Length) % imageFiles.Length;
+                }
+
+                // Update the image in the PictureBox
+                pictureBox.Image = Image.FromFile(imageFiles[currentIndex]);
+            };
+
+            // Show the new form
+            imageForm.Show();
+        }
+
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -2308,7 +2383,81 @@ namespace Bonkers
                 selectedRichTextBox.SelectAll();
             }
         }
+        private async void ollamaAPIBulkToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var listView = FindListViewByTag(currentImageBoxTag);
 
+            // Initialize the cancellation token source
+            cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
+
+            // Make the progress bar visible
+            toolStripProgressBar1.Visible = true;
+            toolStripProgressBar1.Maximum = listView.Items.Count;
+            toolStripProgressBar1.Value = 0;
+
+            try
+            {
+                for (int i = 0; i < listView.Items.Count; i++)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        // Handle the cancellation request
+                        LogToConsole("Task was cancelled.");
+                        break;
+                    }
+
+                    ListViewItem item = listView.Items[i];
+
+                    // Select the item
+                    item.Selected = true;
+
+                    // Manually trigger the ItemSelectionChanged event
+                    ListViewItemSelectionChangedEventArgs eventArgs =
+                        new ListViewItemSelectionChangedEventArgs(item, i, true);
+                    ListView_ItemSelectionChanged(listView, eventArgs);
+
+                    // Perform your API request here
+                    if (File.Exists(toolStripStatusLabel1.Text))
+                    {
+                        // Get the file path
+                        string filePath = toolStripStatusLabel1.Text;
+
+                        // Load the image from the file path
+                        using (Image image = Image.FromFile(filePath))
+                        {
+                            // Convert the image to a base64 string (PNG format)
+                            string base64String = ImageToBase64(image, System.Drawing.Imaging.ImageFormat.Png);
+
+                            // Send the API request
+                            await OllamaApiCall(base64String);
+                        }
+                    }
+                    else
+                    {
+                        // Update toolStripStatusLabel5 with an error message
+                        toolStripStatusLabel5.Text = "Invalid file path";
+                    }
+
+                    // Deselect the item after processing
+                    item.Selected = false;
+
+                    // Update the progress bar
+                    toolStripProgressBar1.Value = i + 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogToConsole($"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                // Make the progress bar invisible
+                toolStripProgressBar1.Visible = false;
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+            }
+        }
         private async void ollamaAPIToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Clear toolStripStatusLabel5 text
@@ -2396,6 +2545,12 @@ namespace Bonkers
 
                         // Update the selected RichTextBox with the response text
                         selectedRichTextBox.Text = responseText;
+
+                        if (ollamaSave == true)
+                        {
+                            SaveRichTextBoxContent();
+                        }
+
                     }
                     else
                     {
@@ -3324,6 +3479,22 @@ namespace Bonkers
 
                 // Show a success message box
                 MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void closeTabToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.TabPages.Count > 1)
+            {
+                tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
+            }
+        }
+
+        private void closeTabToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (tabControl2.TabPages.Count > 1)
+            {
+                tabControl2.TabPages.RemoveAt(tabControl2.SelectedIndex);
             }
         }
     }
