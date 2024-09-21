@@ -74,12 +74,14 @@
             tabControl1 = new TabControl();
             contextMenuStrip4 = new ContextMenuStrip(components);
             newTabToolStripMenuItem = new ToolStripMenuItem();
+            closeTabToolStripMenuItem = new ToolStripMenuItem();
             tabControl2 = new TabControl();
             contextMenuStrip5 = new ContextMenuStrip(components);
             newTabToolStripMenuItem1 = new ToolStripMenuItem();
             pictureBox1 = new PictureBox();
             contextMenuStrip6 = new ContextMenuStrip(components);
             metadataToolStripMenuItem1 = new ToolStripMenuItem();
+            closeTabToolStripMenuItem1 = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -408,16 +410,23 @@
             // 
             // contextMenuStrip4
             // 
-            contextMenuStrip4.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem });
+            contextMenuStrip4.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem, closeTabToolStripMenuItem });
             contextMenuStrip4.Name = "contextMenuStrip4";
-            contextMenuStrip4.Size = new Size(117, 26);
+            contextMenuStrip4.Size = new Size(125, 48);
             // 
             // newTabToolStripMenuItem
             // 
             newTabToolStripMenuItem.Name = "newTabToolStripMenuItem";
-            newTabToolStripMenuItem.Size = new Size(116, 22);
+            newTabToolStripMenuItem.Size = new Size(124, 22);
             newTabToolStripMenuItem.Text = "new tab";
             newTabToolStripMenuItem.Click += newTabToolStripMenuItem_Click;
+            // 
+            // closeTabToolStripMenuItem
+            // 
+            closeTabToolStripMenuItem.Name = "closeTabToolStripMenuItem";
+            closeTabToolStripMenuItem.Size = new Size(124, 22);
+            closeTabToolStripMenuItem.Text = "Close Tab";
+            closeTabToolStripMenuItem.Click += closeTabToolStripMenuItem_Click;
             // 
             // tabControl2
             // 
@@ -434,14 +443,14 @@
             // 
             // contextMenuStrip5
             // 
-            contextMenuStrip5.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem1 });
+            contextMenuStrip5.Items.AddRange(new ToolStripItem[] { newTabToolStripMenuItem1, closeTabToolStripMenuItem1 });
             contextMenuStrip5.Name = "contextMenuStrip5";
-            contextMenuStrip5.Size = new Size(120, 26);
+            contextMenuStrip5.Size = new Size(181, 70);
             // 
             // newTabToolStripMenuItem1
             // 
             newTabToolStripMenuItem1.Name = "newTabToolStripMenuItem1";
-            newTabToolStripMenuItem1.Size = new Size(119, 22);
+            newTabToolStripMenuItem1.Size = new Size(180, 22);
             newTabToolStripMenuItem1.Text = "New Tab";
             newTabToolStripMenuItem1.Click += newTabToolStripMenuItem1_Click;
             // 
@@ -471,6 +480,13 @@
             metadataToolStripMenuItem1.Size = new Size(124, 22);
             metadataToolStripMenuItem1.Text = "Metadata";
             metadataToolStripMenuItem1.Click += metadataToolStripMenuItem1_Click;
+            // 
+            // closeTabToolStripMenuItem1
+            // 
+            closeTabToolStripMenuItem1.Name = "closeTabToolStripMenuItem1";
+            closeTabToolStripMenuItem1.Size = new Size(180, 22);
+            closeTabToolStripMenuItem1.Text = "Close Tab";
+            closeTabToolStripMenuItem1.Click += closeTabToolStripMenuItem1_Click;
             // 
             // Form1
             // 
@@ -554,5 +570,7 @@
         private ToolStripMenuItem metadataToolStripMenuItem1;
         private ToolStripMenuItem appendAllFrontToolStripMenuItem;
         private ToolStripMenuItem ollamaAPIBulkToolStripMenuItem;
+        private ToolStripMenuItem closeTabToolStripMenuItem;
+        private ToolStripMenuItem closeTabToolStripMenuItem1;
     }
 }

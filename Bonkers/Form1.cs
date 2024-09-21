@@ -1918,7 +1918,7 @@ S: Sorting
         }
 
         // Define a method for saving the config
-
+//fsdgfhfsg
         private void SaveConfig(Config config)
         {
             string configPath = "Bonkers.cfg";
@@ -1967,8 +1967,9 @@ S: Sorting
         private void listView_DoubleClick(object sender, EventArgs e)
         {
             string imagePath = toolStripStatusLabel1.Text; // Assuming toolStripStatusLabel1 contains the image file path
-
-            if (!string.IsNullOrEmpty(imagePath))
+            OpenImageInNewForm();
+            int lock101 = 0;
+            if (!string.IsNullOrEmpty(imagePath) & lock101 == 1)
             {
                 try
                 {
@@ -2043,6 +2044,68 @@ S: Sorting
                 LogToConsole("Image file path is empty.");
             }
         }
+
+        private void OpenImageInNewForm()
+        {
+            // Get the image path from the ToolStripStatusLabel
+            string imagePath = toolStripStatusLabel1.Text;
+
+            // Check if the file exists
+            if (!System.IO.File.Exists(imagePath))
+            {
+                MessageBox.Show("Image file not found.");
+                return;
+            }
+
+            // Get the directory and all image files in the directory
+            string directory = System.IO.Path.GetDirectoryName(imagePath);
+            string[] imageFiles = System.IO.Directory.GetFiles(directory, "*.jpg")
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.png"))
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.bmp"))
+                                    .Concat(System.IO.Directory.GetFiles(directory, "*.gif"))
+                                    .OrderBy(f => f).ToArray();
+
+            // Find the index of the current image
+            int currentIndex = Array.IndexOf(imageFiles, imagePath);
+
+            // Create a new Form
+            Form imageForm = new Form();
+            imageForm.Text = "Image Viewer";
+            imageForm.Size = new System.Drawing.Size(800, 600);
+
+            // Create a PictureBox
+            PictureBox pictureBox = new PictureBox();
+            pictureBox.Image = Image.FromFile(imageFiles[currentIndex]);
+            pictureBox.Dock = DockStyle.Fill;
+            pictureBox.SizeMode = PictureBoxSizeMode.Zoom; // Auto size image to form
+
+            // Add the PictureBox to the form
+            imageForm.Controls.Add(pictureBox);
+
+            // Enable the form to be resized and keep the pictureBox autosized
+            imageForm.FormBorderStyle = FormBorderStyle.Sizable;
+
+            // Event handler for the mouse wheel scroll event
+            imageForm.MouseWheel += (sender, e) =>
+            {
+                // Scroll up (next image) or down (previous image)
+                if (e.Delta > 0) // Mouse scroll up
+                {
+                    currentIndex = (currentIndex + 1) % imageFiles.Length;
+                }
+                else if (e.Delta < 0) // Mouse scroll down
+                {
+                    currentIndex = (currentIndex - 1 + imageFiles.Length) % imageFiles.Length;
+                }
+
+                // Update the image in the PictureBox
+                pictureBox.Image = Image.FromFile(imageFiles[currentIndex]);
+            };
+
+            // Show the new form
+            imageForm.Show();
+        }
+
         private void PictureBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -2483,11 +2546,11 @@ S: Sorting
                         // Update the selected RichTextBox with the response text
                         selectedRichTextBox.Text = responseText;
 
-                        if(ollamaSave == true)
+                        if (ollamaSave == true)
                         {
                             SaveRichTextBoxContent();
                         }
-                        
+
                     }
                     else
                     {
@@ -3419,6 +3482,20 @@ S: Sorting
             }
         }
 
+        private void closeTabToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tabControl1.TabPages.Count > 1)
+            {
+                tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
+            }
+        }
 
+        private void closeTabToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (tabControl2.TabPages.Count > 1)
+            {
+                tabControl2.TabPages.RemoveAt(tabControl2.SelectedIndex);
+            }
+        }
     }
 }
