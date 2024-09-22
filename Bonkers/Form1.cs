@@ -146,7 +146,7 @@ namespace Bonkers
    \  \:\/:/     \  \:\/:/       |__|::/      |  |:|       \  \:\_\/      |  |:|\/     \  \:\/:/  
     \__\::/       \  \::/        /__/:/       |__|:|        \  \:\        |__|:|~       \  \::/   
         ~~         \__\/         \__\/         \__\|         \__\/         \__\|         \__\/    
-v0.1.5
+v0.1.6
 B: Bitmap
 O: Organizer &
 N: Notation
@@ -596,7 +596,7 @@ S: Sorting
             catch (OperationCanceledException)
             {
                 // Display a message if the task was canceled
-                MessageBox.Show("Task canceled.");
+               LogToConsole("Task canceled.");
             }
             finally
             {
@@ -789,7 +789,7 @@ S: Sorting
                 catch (OperationCanceledException)
                 {
                     // Display a message if the task was canceled
-                    MessageBox.Show("Task canceled.");
+                    LogToConsole("Task canceled.");
                 }
                 finally
                 {
@@ -1014,7 +1014,7 @@ S: Sorting
                 selectedRichTextBox.ScrollToCaret();
 
                 // Display a message box to inform the user that the text files have been saved successfully
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Text files saved successfully!");
             }
         }
 
@@ -1034,7 +1034,7 @@ S: Sorting
             }
 
             // Display a message box to inform the user that the text files have been cleared successfully
-            MessageBox.Show("Text files cleared successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LogToConsole("Text files cleared successfully!");
         }
 
         private void richTextBox_MouseDown(object sender, MouseEventArgs e)
@@ -1166,7 +1166,7 @@ S: Sorting
                     }
                     else
                     {
-                        MessageBox.Show("RichTextBox not found or text file does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        LogToConsole("RichTextBox not found or text file does not exist.");
                     }
                 }
             }
@@ -1233,12 +1233,12 @@ S: Sorting
                     }
                     else
                     {
-                        MessageBox.Show("No RichTextBox found with the specified tag.");
+                        LogToConsole("No RichTextBox found with the specified tag.");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("No tab selected in tabControl1.");
+                   LogToConsole("No tab selected in tabControl1.");
                 }
             }
         }
@@ -1357,7 +1357,7 @@ S: Sorting
                 selectedRichTextBox.ScrollToCaret();
 
                 // Show a success message box
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Text files saved successfully!");
             }
         }
 
@@ -1398,7 +1398,7 @@ S: Sorting
                     DeleteNonPngFiles(destDir);
 
                     // Show a message box indicating successful copy and conversion
-                    MessageBox.Show("Copy and conversion completed.");
+                    LogToConsole("Copy and conversion completed.");
                 }
             }
         }
@@ -1865,12 +1865,12 @@ S: Sorting
                 else
                 {
                     // Display an error message if the config file is not found
-                    MessageBox.Show("Config file not found!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    LogToConsole("Config file not found!");
                 }
             }
             else
             {
-                MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+               LogToConsole("No RichTextBox found for the current tab!");
             }
         }
         // save bookmarks 
@@ -1894,7 +1894,7 @@ S: Sorting
             }
             else
             {
-                MessageBox.Show("Bookmark already exists!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Bookmark already exists!");
             }
         }
 
@@ -1914,11 +1914,11 @@ S: Sorting
             string json = JsonSerializer.Serialize(config, options);
             File.WriteAllText(configPath, json);
 
-            MessageBox.Show("Bookmarks saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LogToConsole("Bookmarks saved successfully!");
         }
 
         // Define a method for saving the config
-//fsdgfhfsg
+        //fsdgfhfsg
         private void SaveConfig(Config config)
         {
             string configPath = "Bonkers.cfg";
@@ -1926,7 +1926,7 @@ S: Sorting
             string json = JsonSerializer.Serialize(config, options);
             File.WriteAllText(configPath, json);
 
-            MessageBox.Show("Config file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            LogToConsole("Config file saved successfully!");
         }
 
 
@@ -1947,11 +1947,11 @@ S: Sorting
                 File.WriteAllText(configPath, textContent);
 
                 // Optionally display a message to indicate successful save
-                MessageBox.Show("Config file saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Config file saved successfully!");
             }
             else
             {
-                MessageBox.Show("No RichTextBox found for the current tab!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogToConsole("No RichTextBox found for the current tab!");
             }
         }
 
@@ -2053,7 +2053,7 @@ S: Sorting
             // Check if the file exists
             if (!System.IO.File.Exists(imagePath))
             {
-                MessageBox.Show("Image file not found.");
+                LogToConsole("Image file not found.");
                 return;
             }
 
@@ -3478,7 +3478,7 @@ S: Sorting
                 selectedRichTextBox.ScrollToCaret();
 
                 // Show a success message box
-                MessageBox.Show("Text files saved successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                LogToConsole("Text files saved successfully!");
             }
         }
 
@@ -3495,6 +3495,59 @@ S: Sorting
             if (tabControl2.TabPages.Count > 1)
             {
                 tabControl2.TabPages.RemoveAt(tabControl2.SelectedIndex);
+            }
+        }
+
+        private void undoAppendToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Get the selected path from the TreeView's selected node
+            string selectedPath = treeView1.SelectedNode.Tag.ToString();
+
+            // Get all text files in the selected directory
+            string[] textFiles = SysDirectory.GetFiles(selectedPath, "*.txt");
+
+            // Find the RichTextBox with the corresponding tag
+            RichTextBox selectedRichTextBox = FindRichTextBoxByTag(currentTextboxTag);
+
+            if (selectedRichTextBox != null)
+            {
+                // Get the text that was appended from the RichTextBox
+                string appendedText = selectedRichTextBox.Text;
+
+                // Iterate through each text file
+                foreach (string txtFile in textFiles)
+                {
+                    // Read the existing text content from the text file
+                    string textContent = File.ReadAllText(txtFile);
+
+                    // Check if the text from the RichTextBox exists at the end of the file
+                    if (textContent.EndsWith(appendedText))
+                    {
+                        // Remove the appended text from the end of the text content
+                        textContent = textContent.Substring(0, textContent.Length - appendedText.Length);
+
+                        // Write the updated text content back to the text file
+                        File.WriteAllText(txtFile, textContent);
+                    }
+                }
+
+                // Select all text in the selected RichTextBox
+                selectedRichTextBox.SelectAll();
+
+                // Set the selection color to red in the selected RichTextBox to indicate undo
+                selectedRichTextBox.SelectionColor = Color.Red;
+
+                // Deselect all text in the selected RichTextBox
+                selectedRichTextBox.DeselectAll();
+
+                // Set the selection start to the end of the text in the selected RichTextBox
+                selectedRichTextBox.SelectionStart = selectedRichTextBox.Text.Length;
+
+                // Scroll to the caret position (end of text) in the selected RichTextBox
+                selectedRichTextBox.ScrollToCaret();
+
+                // Show a success message box
+                LogToConsole("Undo operation completed successfully!");
             }
         }
     }
