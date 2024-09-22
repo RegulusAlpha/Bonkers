@@ -3337,13 +3337,17 @@ S: Sorting
 
         private void treeView1_MouseWheel(object sender, MouseEventArgs e)
         {
+            // Define the maximum allowable width for treeView1 (50% of the form width)
+            int maxTreeViewWidth = this.ClientSize.Width / 2;
+
             if (Control.ModifierKeys == Keys.Control)
             {
                 if (e.Delta > 0) // Scrolled up
                 {
-                    // Increase widths and adjust positions
-                    if (tabControl2.Width >= maxTabControlWidth || tabControl2.Width >= 168)
+                    // Check if increasing treeView1's width would exceed 50% of the form width
+                    if (treeView1.Width + 10 <= maxTreeViewWidth && tabControl2.Width >= 168)
                     {
+                        // Increase treeView1 width and decrease tabControl2 width
                         treeView1.Width += 10;
                         tabControl2.Width -= 10;
 
@@ -3356,9 +3360,10 @@ S: Sorting
                 }
                 else if (e.Delta < 0) // Scrolled down
                 {
-                    // Decrease widths and adjust positions
+                    // Check if decreasing treeView1's width does not go below its minimum allowed width
                     if (treeView1.Width > minTreeViewWidth)
                     {
+                        // Decrease treeView1 width and increase tabControl2 width
                         treeView1.Width -= 10;
                         tabControl2.Width += 10;
 

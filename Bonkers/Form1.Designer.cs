@@ -57,6 +57,7 @@
             testToolStripMenuItem = new ToolStripMenuItem();
             metadataToolStripMenuItem = new ToolStripMenuItem();
             ollamaAPIBulkToolStripMenuItem = new ToolStripMenuItem();
+            undoAppendToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1 = new StatusStrip();
             toolStripProgressBar1 = new ToolStripProgressBar();
             toolStripStatusLabel1 = new ToolStripStatusLabel();
@@ -82,7 +83,6 @@
             pictureBox1 = new PictureBox();
             contextMenuStrip6 = new ContextMenuStrip(components);
             metadataToolStripMenuItem1 = new ToolStripMenuItem();
-            undoAppendToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip3.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             contextMenuStrip2.SuspendLayout();
@@ -194,12 +194,12 @@
             // 
             contextMenuStrip2.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, saveToolStripMenuItem, appendAllToolStripMenuItem, appendAllFrontToolStripMenuItem, saveAllToolStripMenuItem, editAllToolStripMenuItem, deepboruToolStripMenuItem, blipToolStripMenuItem, deselectToolStripMenuItem, cogVLMToolStripMenuItem, ollamaAPIToolStripMenuItem, testToolStripMenuItem, metadataToolStripMenuItem, ollamaAPIBulkToolStripMenuItem, undoAppendToolStripMenuItem });
             contextMenuStrip2.Name = "contextMenuStrip2";
-            contextMenuStrip2.Size = new Size(181, 356);
+            contextMenuStrip2.Size = new Size(176, 334);
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(175, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.ToolTipText = "will open the text file of the currently selected image";
             openToolStripMenuItem.Visible = false;
@@ -208,7 +208,7 @@
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(175, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.ToolTipText = "will save the current text file only";
             saveToolStripMenuItem.Visible = false;
@@ -217,7 +217,7 @@
             // appendAllToolStripMenuItem
             // 
             appendAllToolStripMenuItem.Name = "appendAllToolStripMenuItem";
-            appendAllToolStripMenuItem.Size = new Size(180, 22);
+            appendAllToolStripMenuItem.Size = new Size(175, 22);
             appendAllToolStripMenuItem.Text = "Append All";
             appendAllToolStripMenuItem.ToolTipText = "will append the current text in the editor to all the text files in the directory";
             appendAllToolStripMenuItem.Click += appendAllToolStripMenuItem_Click;
@@ -225,14 +225,14 @@
             // appendAllFrontToolStripMenuItem
             // 
             appendAllFrontToolStripMenuItem.Name = "appendAllFrontToolStripMenuItem";
-            appendAllFrontToolStripMenuItem.Size = new Size(180, 22);
+            appendAllFrontToolStripMenuItem.Size = new Size(175, 22);
             appendAllFrontToolStripMenuItem.Text = "Append All - Front";
             appendAllFrontToolStripMenuItem.Click += appendAllFrontToolStripMenuItem_Click;
             // 
             // saveAllToolStripMenuItem
             // 
             saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
-            saveAllToolStripMenuItem.Size = new Size(180, 22);
+            saveAllToolStripMenuItem.Size = new Size(175, 22);
             saveAllToolStripMenuItem.Text = "Overwrite All";
             saveAllToolStripMenuItem.ToolTipText = "will overwrite all textfiles in the directory with the current text in the editor";
             saveAllToolStripMenuItem.Click += saveAllToolStripMenuItem_Click;
@@ -240,7 +240,7 @@
             // editAllToolStripMenuItem
             // 
             editAllToolStripMenuItem.Name = "editAllToolStripMenuItem";
-            editAllToolStripMenuItem.Size = new Size(180, 22);
+            editAllToolStripMenuItem.Size = new Size(175, 22);
             editAllToolStripMenuItem.Text = "Clear All";
             editAllToolStripMenuItem.ToolTipText = "will clear the contents from all the text files in the directory";
             editAllToolStripMenuItem.Click += editAllToolStripMenuItem_Click;
@@ -248,58 +248,65 @@
             // deepboruToolStripMenuItem
             // 
             deepboruToolStripMenuItem.Name = "deepboruToolStripMenuItem";
-            deepboruToolStripMenuItem.Size = new Size(180, 22);
+            deepboruToolStripMenuItem.Size = new Size(175, 22);
             deepboruToolStripMenuItem.Text = "Deepboru  - API";
             deepboruToolStripMenuItem.Click += deepboruToolStripMenuItem_Click;
             // 
             // blipToolStripMenuItem
             // 
             blipToolStripMenuItem.Name = "blipToolStripMenuItem";
-            blipToolStripMenuItem.Size = new Size(180, 22);
+            blipToolStripMenuItem.Size = new Size(175, 22);
             blipToolStripMenuItem.Text = "Blip - API";
             blipToolStripMenuItem.Click += blipToolStripMenuItem_Click;
             // 
             // deselectToolStripMenuItem
             // 
             deselectToolStripMenuItem.Name = "deselectToolStripMenuItem";
-            deselectToolStripMenuItem.Size = new Size(180, 22);
+            deselectToolStripMenuItem.Size = new Size(175, 22);
             deselectToolStripMenuItem.Text = "Deselect";
             deselectToolStripMenuItem.Click += deselectToolStripMenuItem_Click;
             // 
             // cogVLMToolStripMenuItem
             // 
             cogVLMToolStripMenuItem.Name = "cogVLMToolStripMenuItem";
-            cogVLMToolStripMenuItem.Size = new Size(180, 22);
+            cogVLMToolStripMenuItem.Size = new Size(175, 22);
             cogVLMToolStripMenuItem.Text = "CogVLM - API";
             cogVLMToolStripMenuItem.Click += cogVLMToolStripMenuItem_Click;
             // 
             // ollamaAPIToolStripMenuItem
             // 
             ollamaAPIToolStripMenuItem.Name = "ollamaAPIToolStripMenuItem";
-            ollamaAPIToolStripMenuItem.Size = new Size(180, 22);
+            ollamaAPIToolStripMenuItem.Size = new Size(175, 22);
             ollamaAPIToolStripMenuItem.Text = "Ollama - API";
             ollamaAPIToolStripMenuItem.Click += ollamaAPIToolStripMenuItem_Click;
             // 
             // testToolStripMenuItem
             // 
             testToolStripMenuItem.Name = "testToolStripMenuItem";
-            testToolStripMenuItem.Size = new Size(180, 22);
+            testToolStripMenuItem.Size = new Size(175, 22);
             testToolStripMenuItem.Text = "test";
             testToolStripMenuItem.Click += testToolStripMenuItem_Click;
             // 
             // metadataToolStripMenuItem
             // 
             metadataToolStripMenuItem.Name = "metadataToolStripMenuItem";
-            metadataToolStripMenuItem.Size = new Size(180, 22);
+            metadataToolStripMenuItem.Size = new Size(175, 22);
             metadataToolStripMenuItem.Text = "Metadata";
             metadataToolStripMenuItem.Click += metadataToolStripMenuItem_Click;
             // 
             // ollamaAPIBulkToolStripMenuItem
             // 
             ollamaAPIBulkToolStripMenuItem.Name = "ollamaAPIBulkToolStripMenuItem";
-            ollamaAPIBulkToolStripMenuItem.Size = new Size(180, 22);
+            ollamaAPIBulkToolStripMenuItem.Size = new Size(175, 22);
             ollamaAPIBulkToolStripMenuItem.Text = "Ollama - API - Bulk";
             ollamaAPIBulkToolStripMenuItem.Click += ollamaAPIBulkToolStripMenuItem_Click;
+            // 
+            // undoAppendToolStripMenuItem
+            // 
+            undoAppendToolStripMenuItem.Name = "undoAppendToolStripMenuItem";
+            undoAppendToolStripMenuItem.Size = new Size(175, 22);
+            undoAppendToolStripMenuItem.Text = "Undo Append";
+            undoAppendToolStripMenuItem.Click += undoAppendToolStripMenuItem_Click;
             // 
             // statusStrip1
             // 
@@ -370,14 +377,14 @@
             // openConfigToolStripMenuItem1
             // 
             openConfigToolStripMenuItem1.Name = "openConfigToolStripMenuItem1";
-            openConfigToolStripMenuItem1.Size = new Size(180, 22);
+            openConfigToolStripMenuItem1.Size = new Size(149, 22);
             openConfigToolStripMenuItem1.Text = "Open Config";
             openConfigToolStripMenuItem1.Click += openConfigToolStripMenuItem1_Click;
             // 
             // reloadConfigToolStripMenuItem
             // 
             reloadConfigToolStripMenuItem.Name = "reloadConfigToolStripMenuItem";
-            reloadConfigToolStripMenuItem.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem.Text = "Save Config";
             reloadConfigToolStripMenuItem.Visible = false;
             reloadConfigToolStripMenuItem.Click += reloadConfigToolStripMenuItem_Click;
@@ -385,7 +392,7 @@
             // reloadConfigToolStripMenuItem1
             // 
             reloadConfigToolStripMenuItem1.Name = "reloadConfigToolStripMenuItem1";
-            reloadConfigToolStripMenuItem1.Size = new Size(180, 22);
+            reloadConfigToolStripMenuItem1.Size = new Size(149, 22);
             reloadConfigToolStripMenuItem1.Text = "Reload Config";
             reloadConfigToolStripMenuItem1.Click += reloadConfigToolStripMenuItem1_Click;
             // 
@@ -489,21 +496,14 @@
             metadataToolStripMenuItem1.Text = "Metadata";
             metadataToolStripMenuItem1.Click += metadataToolStripMenuItem1_Click;
             // 
-            // undoAppendToolStripMenuItem
-            // 
-            undoAppendToolStripMenuItem.Name = "undoAppendToolStripMenuItem";
-            undoAppendToolStripMenuItem.Size = new Size(180, 22);
-            undoAppendToolStripMenuItem.Text = "Undo Append";
-            undoAppendToolStripMenuItem.Click += undoAppendToolStripMenuItem_Click;
-            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1268, 643);
+            Controls.Add(statusStrip1);
             Controls.Add(pictureBox1);
             Controls.Add(tabControl1);
-            Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
             Controls.Add(treeView1);
             Controls.Add(tabControl2);
