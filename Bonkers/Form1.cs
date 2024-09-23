@@ -25,6 +25,7 @@ using MetadataExtractor.Formats.Xmp;
 using MetadataExtractor.Formats.Jpeg;
 using SysDirectory = System.IO.Directory;
 using MetaDirectory = MetadataExtractor.Directory;
+using SkiaSharp;
 
 #pragma warning disable CS8618
 #pragma warning disable CS8600
@@ -1371,35 +1372,55 @@ S: Sorting
             // Check if a node is selected
             if (selectedNode != null)
             {
-                // Define the root directory
-                string rootDir = @"C:\Your\Root\Directory"; // Update this with your actual root directory
+                // Split the FullPath by the tree view's path separator (usually a backslash \)
+                // and remove the first part (like "Bookmarks")
+                string[] pathParts = selectedNode.FullPath.Split(treeView1.PathSeparator.ToCharArray());
 
-                // Combine the selected node's full path with the root directory to get the selected folder path
-                string selectedFolderPath = selectedNode.FullPath;//Path.Combine(rootDir, selectedNode.FullPath);
+                // Recombine the path, excluding the first node (e.g., "Bookmarks")
+                string selectedFolderPath = string.Join(Path.DirectorySeparatorChar.ToString(), pathParts.Skip(1));
 
                 // Check if the selected folder exists
                 if (SysDirectory.Exists(selectedFolderPath))
                 {
-                    // Create a new directory for converted files
-                    string destDir = Path.Combine(Path.GetDirectoryName(selectedFolderPath),
-                        Path.GetFileNameWithoutExtension(selectedFolderPath) + "-conv");
-                    SysDirectory.CreateDirectory(destDir);
-
-                    // Copy files from the selected folder to the destination directory
-                    foreach (string file in SysDirectory.GetFiles(selectedFolderPath))
+                    try
                     {
-                        File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
+                        // Create a new directory for converted files
+                        string destDir = Path.Combine(Path.GetDirectoryName(selectedFolderPath),
+                            Path.GetFileNameWithoutExtension(selectedFolderPath) + "-conv");
+                        SysDirectory.CreateDirectory(destDir);
+
+                        // Copy files from the selected folder to the destination directory
+                        foreach (string file in SysDirectory.GetFiles(selectedFolderPath))
+                        {
+                            string destFilePath = Path.Combine(destDir, Path.GetFileName(file));
+                            File.Copy(file, destFilePath, true);  // 'true' to overwrite existing files
+                        }
+
+                        // Convert images to PNG format
+                        ConvertImagesToPngNew(selectedFolderPath, destDir);
+
+                        // Delete non-PNG files from the destination directory
+                        DeleteNonPngFiles(destDir);
+
+                        // Log success message
+                        LogToConsole("Copy and conversion completed.");
                     }
-
-                    // Convert images to PNG format
-                    ConvertImagesToPng(selectedFolderPath, destDir);
-
-                    // Delete non-PNG files from the destination directory
-                    DeleteNonPngFiles(destDir);
-
-                    // Show a message box indicating successful copy and conversion
-                    LogToConsole("Copy and conversion completed.");
+                    catch (Exception ex)
+                    {
+                        // Log any errors encountered
+                        LogToConsole($"Error during copy/convert: {ex.Message}");
+                    }
                 }
+                else
+                {
+                    // Log if the selected folder does not exist
+                    LogToConsole("Selected folder does not exist.");
+                }
+            }
+            else
+            {
+                // Log if no node is selected
+                LogToConsole("No folder selected.");
             }
         }
 
@@ -1430,7 +1451,47 @@ S: Sorting
                 }
             }
         }
+        private void ConvertImagesToPngNew(string sourceDir, string destDir)
+        {
+            // Get all files (including subdirectories) from the source directory
+            string[] imageFiles = SysDirectory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories);
 
+            // Iterate through each image file
+            foreach (string imageFile in imageFiles)
+            {
+                // Get the file extension and convert to lowercase
+                string ext = Path.GetExtension(imageFile).ToLower();
+
+                // Check if the file is an image file (JPEG, GIF, BMP, WebP, etc.)
+                if (ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".bmp" || ext == ".webp")
+                {
+                    try
+                    {
+                        // Load the image using SkiaSharp (supports WebP natively)
+                        using (var input = File.OpenRead(imageFile))
+                        {
+                            using (var bitmap = SKBitmap.Decode(input))
+                            {
+                                // Define the destination file path with a PNG extension
+                                string destFile = Path.Combine(destDir, Path.GetFileNameWithoutExtension(imageFile) + ".png");
+
+                                // Convert the image to PNG and save it
+                                using (var output = File.OpenWrite(destFile))
+                                {
+                                    var image = SKImage.FromBitmap(bitmap);
+                                    image.Encode(SKEncodedImageFormat.Png, 100).SaveTo(output);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle any exceptions (e.g., unsupported formats, file access issues)
+                        Console.WriteLine($"Error processing {imageFile}: {ex.Message}");
+                    }
+                }
+            }
+        }
 
         // Define a method to delete non-PNG files from a specified folder
         private void DeleteNonPngFiles(string folderPath)
